@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>见缝插针</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
+  <script src="/js/TweenMax.min.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx2.js"></script>
+  <script src="/js/preloadjs.min.js"></script>
+  <script src="/js/soundjs.min.js"></script>
+</head>
+<style>
+  /* 防止长按保存 */
+  img {
+    pointer-events: none;
+  }
+
+  * {
+    /*禁止长按选中*/
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /*阻止ios下点击区域变暗*/
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  #box {
+    position: absolute;
+    left: 25vw;
+    top: 40vw;
+    width: 50vw;
+    height: 50vw;
+    line-height: 50vw;
+    border-radius: 50%;
+  }
+
+  #boxCover {
+    position: absolute;
+    left: 25vw;
+    top: 40vw;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    z-index: 3;
+  }
+
+  #back {
+    position: absolute;
+    left: 23vw;
+    top: 40.2vw;
+    width: 54vw;
+    height: 53.8vw;
+    border-radius: 50%;
+  }
+
+  #box .newElementContainer {
+    position: absolute;
+    width: 7vw;
+    height: 30vw;
+    background: pink;
+    top: 21%;
+    left: 43%;
+  }
+
+  #box .newElementContainer .newElement {
+    position: absolute;
+    top: 85%;
+    width: 100%;
+    height: 100%;
+  }
+
+  #station {
+    position: absolute;
+    top: calc(100vh - 30vw);
+    width: 7vw;
+    left: 46vw;
+    height: 30vw;
+  }
+
+  .fullImg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  #scoreContainer {
+    width: 40%;
+    position: fixed;
+    top: 2vw;
+    left: 5%;
+    z-index: 11;
+    display: none;
+  }
+
+  #timeContainer {
+    width: 40%;
+    position: fixed;
+    top: 2vw;
+    left: 55%;
+    z-index: 11;
+    display: none;
+  }
+
+  #scoreContainer>div,
+  #timeContainer>div {
+    font-weight: bold;
+    position: absolute;
+    top: -0.5vw;
+    left: 38%;
+    width: 62%;
+    line-height: 9vw;
+    font-size: 4vw;
+    text-align: center;
+    color: #fff;
+  }
+
+  .star {
+    opacity: 0;
+  }
+
+  .coupon {
+    opacity: 0;
+    width: 60%;
+    position: absolute;
+    top: 30%;
+    left: 20%;
+  }
+
+  .button {
+    width: 30vw;
+    height: 13vw;
+    position: absolute;
+    bottom: 8%;
+    opacity: 0;
+  }
+
+  .addScore {
+    position: fixed;
+    font-size: 8vw;
+    color: #444;
+    left: 20vw;
+    font-weight: bold;
+    animation: addScore 1.5s;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes addScore {
+    from {
+      top: 50vw;
+      opacity: 1;
+    }
+
+    to {
+      top: 0;
+      opacity: 0;
+    }
+  }
+
+  #start {
+    position: absolute;
+    width: 24%;
+    height: 24vw;
+    bottom: 10vw;
+    left: 38%;
+    opacity: 0;
+    animation: start 0.9s infinite;
+    animation-timing-function: linear;
+  }
+
+  @keyframes start {
+    from {
+      transform: scale(1)
+    }
+
+    50% {
+      transform: scale(1.2)
+    }
+
+    to {
+      transform: scale(1)
+    }
+  }
+
+  #title-orange {
+    position: absolute;
+    width: 22%;
+    top: 30vw;
+    left: 70%;
+    animation: title-orange 3s infinite;
+    animation-timing-function: linear;
+  }
+
+  @keyframes title-orange {
+    from {
+      transform: rotate(0)
+    }
+
+    to {
+      transform: rotate(360deg)
+    }
+  }
+</style>
+
+<body>
+  <div id="app" @click="doShoot">
+
+    <div v-if="loading" class="basicLoading">
+      <img src="/img/loading.gif">
+    </div>
+
+    <div style="width:100%;height:100%;position:fixed;z-index:10;overflow:hidden;">
+      <img id="title-bg" src="/img/throwing/title-bg.png" style="position:absolute;width:100%;height:100%;left:0;">
+      <img id="title" src="/img/throwing/title.png" style="position:absolute;width:90%;top:30vw;left:5%;">
+      <img id="title-orange" src="/img/throwing/title-orange.png">
+      <div id="runContainer" style="position:absolute;width:70%;top:86vw;right:70%;height:15vw;">
+        <img src="/img/throwing/plane.png" style="width:15vw;position:absolute;left:3vw;">
+        <img src="/img/throwing/run.png" style="width:15vw;position:absolute;right:15vw;">
+      </div>
+      <img id="speak" src="/img/throwing/speak.png" style="position:absolute;width:33%;top:60vw;left:35%;opacity:0;">
+      <div id="start">
+        <img src="/img/throwing/start.png" style="width:100%;height:100%;">
+      </div>
+    </div>
+
+
+
+    <div id="gameContainer" style="position:fixed;width:100%;height:100%;top:0;opacity: 0;">
+      <img class="fullImg" src="/img/throwing/background.png">
+
+
+      <img id="back" src='/img/throwing/back.png'>
+      <img :src='gifUrl' :style="gifUrl=='/img/throwing/juice.gif'?'opacity:1':'opacity:0'"
+        style="width:50%;position:fixed;z-index:99;top:80vw;left:25%;">
+
+      <div id="box"></div>
+      <div id="boxCover"><img class="fullImg" src='/img/throwing/orange.png'></div>
+
+      <div id="station">
+        <img src="/img/throwing/arrow.png" class="fullImg">
+      </div>
+    </div>
+
+    <div id="scoreContainer">
+      <img src="/img/throwing/score-container.png" style="width:100%;">
+      <div>0</div>
+    </div>
+    <div id="timeContainer">
+      <img src="/img/throwing/time-container.png" style="width:100%;">
+      <div>{{timeCount}}</div>
+    </div>
+
+
+    <div v-for="item in score" class="addScore">
+      +100
+    </div>
+
+
+
+    <div v-if="showOver" style="position:fixed;width:100%;height:100%;background:rgba(0,0,0,0.3);top:0;z-index:99;">
+      <div id="showOver"
+        style="position:absolute;width:80vw;height:102vw;top:50vh;left:10vw;transform:translateY(-50%);">
+        <img src="/img/throwing/over.png" class="fullImg">
+
+        <div class="button" v-on:click.stop="goList()" style="right:11%;">
+          <img src="/img/throwing/goList0.png" class="fullImg">
+        </div>
+
+        <div class="button" v-on:click.stop="restart()" style="left:11%;">
+          <img src="/img/throwing/restart.png" class="fullImg">
+        </div>
+
+        <img v-if="!noTicket&&scoreLevel==1" class="coupon" src="/img/throwing/p10.png">
+        <img v-if="!noTicket&&scoreLevel==2" class="coupon" src="/img/throwing/p50.png">
+        <img v-if="!noTicket&&scoreLevel==3" class="coupon" src="/img/throwing/p80.png">
+        </template>
+
+
+        <img src="/img/throwing/overtext.png" style="position:absolute;width:66%;left:17%;"
+          :style="{top:noTicket?'50%':'60%'}">
+
+        <img src="/img/throwing/nostar.png"
+          style="width:13%;position:absolute;top:9vw;left:26%;transform: rotate(-12deg)">
+        <img src="/img/throwing/nostar.png" style="width:13%;position:absolute;top:7.5vw;left:43%;">
+        <img src="/img/throwing/nostar.png"
+          style="width:13%;position:absolute;top:9vw;left:60%;transform: rotate(12deg)">
+
+
+        <img class="star" src="/img/throwing/star.png"
+          style="width:13%;position:absolute;top:9vw;left:26%;transform: rotate(-12deg)">
+        <img v-if="scoreLevel==2||scoreLevel==3" class="star" src="/img/throwing/star.png"
+          style="width:13%;position:absolute;top:7.5vw;left:43%;">
+        <img v-if="scoreLevel==3" class="star" src="/img/throwing/star.png"
+          style="width:13%;position:absolute;top:9vw;left:60%;transform: rotate(12deg)">
+
+      </div>
+    </div>
+
+  </div>
+
+
+</body>
+
+<script>
+  //阻止微信下拉刷新
+  document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault()
+  }, { passive: false })
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      timeCount: 20,
+      showOver: false,
+      shoot: {},
+      loading: true,
+      actionId: '',
+      openId: '',
+      securityKey: '',//b6525ce7f5aa4ea0a0236f48a0962e12 常驻体验设备
+      score: 0,
+      scoreLevel: 1,
+      gifUrl: '/img/throwing/nothing.png',
+      noTicket: false,
+      permitClick: false,
+      rotateDeg: 0,
+      rotateSpeed: 0,
+      degList: [],
+      safeDistance: 0,
+      timer: undefined,
+      needInit: true,
+      boxRotate: undefined,
+      SnsUserInfoId: null
+
+    },
+    methods: {
+      restart: function () {
+        // var u = navigator.userAgent, app = navigator.appVersion;
+        // var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //g
+        // var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        // if (isAndroid) {
+        //   window.location.href = location.href;
+        // }
+        // if (isIOS) {
+        //   window.location.reload()
+        // }
+        this.needInit = false;
+        this.showOver = false;
+        this.timeCount = 20;
+        this.score = 0;
+        TweenMax.set(["#box", "#boxCover"], {
+          rotation: 0
+        });
+        $("#box")[0].innerHTML = "";
+        TweenMax.set("#station", {
+          rotation: 0
+        })
+        $("#station").css({ top: 'calc(100vh - 30vw)' });
+        $("#station").css({ top: $("#station").position().top + 'px' });
+        var _this = this;
+        $.post('https://activity.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: this.securityKey,
+          SnsType: "WeChat",
+          FromType: 'mobile',
+          SnsUserInfoId: this.SnsUserInfoId
+        }, function (result) {
+          if (result.success) {
+            console.log(result.result.actionId);
+            _this.actionId = result.result.actionId;
+          }
+        })
+        main(this);
+      },
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goList: function () {
+        window.location.href = 'https://m.sensingstore.com/plane-ranking.html?actionId=' + this.actionId;
+      },
+      doShoot() {
+        var _this = this;
+        console.log("click")
+        if (!_this.permitClick) {
+          console.log("return")
+          return
+        }
+        this.permitClick = false;
+        this.shoot = TweenMax.to("#station", 0.3, {
+          top: '80vw',
+          // paused: false,
+          ease: Power0.easeNone, onComplete: function () {
+            shootComplete(_this.boxRotate.progress() * _this.rotateDeg % 360);
+          }
+        });
+      }
+    },
+    mounted: function () {
+      main(this);
+    }
+  })
+
+  var _this = app;
+
+  function main(_this) {
+    _this.safeDistance = 16;
+    _this.degList = [];
+    _this.rotateDeg = 1200;
+    _this.rotateSpeed = 120;
+
+    if (_this.needInit) {
+      _this.noTicket = _this.kindId("noTicket");
+      var queue = new createjs.LoadQueue();
+      queue.installPlugin(createjs.Sound);
+      queue.on("complete", handleComplete, _this);
+      queue.loadManifest([
+        { id: "boom", src: "/img/throwing/boom.mp3" },
+        { id: "over", src: "/img/throwing/over.mp3" },
+      ]);
+    } else {
+      toBind();
+    }
+  }
+
+
+
+
+  function handleComplete() {
+    _this.actionId = _this.$options.methods.kindId.bind(_this)('actionId');
+    $.post('https://activity.api.troncell.com/api/UserAction/ActionDataById', {
+      actionId: _this.actionId
+    }, function (result) {
+      if (result.success) {
+        // setWX(result)
+        if (_this.noTicket) {
+          setWX(result, ['hideOptionMenu'])
+        } else {
+          setWX(result);
+        }
+        _this.loading = false;
+        _this.openId = result.result.snsUserInfo.openid;
+        _this.securityKey = result.result.deviceActivityGame.securityKey;
+        _this.SnsUserInfoId = result.result.snsUserInfoId.id;
+        gameReady()
+      }
+    })
+  }
+
+  function gameReady() {
+
+    TweenMax.fromTo("#runContainer", 0.8, { right: '70%' }, {
+      right: '50%', ease: Power0.easeNone, onComplete: function () {
+        TweenMax.to("#speak", 0.9, {
+          opacity: '1', ease: Power0.easeNone, onComplete: function () {
+            TweenMax.to("#runContainer", 0.4, {
+              width: '45%', ease: Power0.easeNone, onComplete: function () {
+                clickReady()
+                TweenMax.to("#runContainer", 0.8, { rotation: '90', ease: Power0.easeNone });
+                TweenMax.to("#start", 0.1, { opacity: '1', ease: Power0.easeNone });
+                TweenMax.to("#gameContainer", 0.1, { opacity: '1', ease: Power0.easeNone });
+              }
+            });
+          }
+        })
+
+      }
+    });
+  }
+
+  function clickReady() {
+    $('#start').one('click', toBind)
+  }
+
+  function toBind() {
+    setTimeout(() => {
+      _this.permitClick = true;
+    })
+    $('#title,#title-orange,#runContainer,#speak,#start,#title-bg').fadeOut()
+    $('#timeContainer,#scoreContainer').fadeIn();
+    console.log("toBind")
+    _this.boxRotate = TweenMax.to(["#box", "#boxCover"], _this.rotateDeg / _this.rotateSpeed, {
+      rotation: _this.rotateDeg, ease: Power0.easeNone, onComplete: function () {
+        _this.boxRotate.reverse()
+      }
+    });
+
+    var timeTween = TweenMax.to("#time", _this.timeCount, {
+      width: '10%', ease: Power0.easeNone
+    });
+
+    _this.timer = setInterval(function () {
+      _this.timeCount = _this.timeCount - 1
+      if (_this.timeCount <= 0) {
+        gameOver(true);
+      }
+    }, 1000)
+
+  }
+
+
+
+  function shootComplete(deg) {
+    playAudio('boom')
+    var shock = TweenMax.to(["#box", "#boxCover", "#back"], 0.1, {
+      top: '38.3vw', ease: Power0.easeNone, onComplete: function () {
+        shock.reverse()
+      }
+    });
+
+    if (checkSafe(deg)) {
+      _this.permitClick = true;
+      _this.degList.push(deg);
+      _this.shoot.pause(0);
+      _this.score = _this.score + 1;
+
+      setTimeout(function () {
+        $('#scoreContainer div').text(_this.score * 100)
+      }, 300)
+
+
+      _this.gifUrl = '/img/throwing/juice.gif'
+      setTimeout(function () {
+        _this.gifUrl = '/img/throwing/nothing.png'
+      }, 400)
+
+      var newElement = "<div class='newElementContainer' style='transform: rotate(" + (-deg) + "deg);'><div class='newElement'><img src='/img/throwing/arrow.png' class='fullImg'></div></div>";
+      $("#box").append(newElement);
+    } else {
+      gameOver();
+    }
+
+  }
+
+  function checkSafe(deg) {
+    var safeFlag = true;
+    for (var i = 0; i < _this.degList.length; i++) {
+      if (Math.abs(_this.degList[i] - deg) < _this.safeDistance) {
+        console.log(Math.abs(_this.degList[i]));
+        safeFlag = false;
+      }
+    }
+    return safeFlag
+  }
+
+  function gameOver(drop) {
+    _this.permitClick = false;
+    playAudio("over");
+    clearInterval(_this.timer);
+
+    if (!drop) {
+      TweenMax.to("#station", 1, {
+        top: '100vh', rotation: 480, ease: Power0.easeNone, onComplete: function () {
+          TweenMax.killAll();
+          overAnimate();
+        }
+      })
+    } else {
+      TweenMax.killAll();
+      overAnimate();
+    }
+  }
+
+  function playAudio(audioId) {
+    createjs.Sound.play(audioId)
+  }
+
+
+  function overAnimate() {
+    _this.showOver = true;
+    setTimeout(function () {
+      TweenMax.fromTo(["#showOver"], 0.8, { scale: 0.2 }, {
+        scale: 1, onComplete: function () {
+          var count = 0;
+          if (_this.score <= 4) {
+            _this.scoreLevel = 1;
+          } else if (_this.score <= 8) {
+            _this.scoreLevel = 2;
+          } else {
+            _this.scoreLevel = 3;
+          }
+          setTimeout(function () {
+            $('.star').css('opacity', 1)
+            TweenMax.staggerFrom(".star", 0.3, {
+              top: '-100vw', rotation: -480, onComplete: function () {
+                count++
+                if (count == _this.scoreLevel) {
+                  $('.coupon').css('opacity', 1)
+                  TweenMax.fromTo(".coupon", 0.5, { scale: 0.1 }, {
+                    scale: 1.2, onComplete: function () {
+                      TweenMax.to(".coupon", 0.3, {
+                        scale: 1, onComplete: function () {
+                          TweenMax.to(".button", 0.5, { opacity: 1, ease: Power0.easeNone })
+                        }
+                      })
+                    }
+                  })
+
+                }
+              }
+            }, 0.2);
+          })
+
+
+        }
+      });
+
+      if (_this.actionId) {
+        PostDataByUser();
+      }
+    })
+  }
+
+
+  function PostDataByUser() {
+    $.post('https://activity.api.troncell.com/api/UserAction/PostDataByUser', {
+      OpenId: _this.openId,
+      actionId: _this.actionId,
+      QrType: 'AfterGame',
+      SnsType: 'WeChat',
+      Score: _this.score * 100,
+      SecurityKey: _this.securityKey
+    }, function (result) {
+      console.log(result)
+    })
+
+  }
+
+</script>
+
+</html>

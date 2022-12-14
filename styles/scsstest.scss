@@ -1,0 +1,11 @@
+$height:10px;
+@mixin firefox-message($selector, $before, $height) {
+  body.firefox #{$selector}#{before} {
+    height: $height;
+  }
+}
+
+@include firefox-message(".header", ":before", 20px);
+img{
+  width:120px;
+}

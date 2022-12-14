@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>清除数据</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+</head>
+<style>
+  body {
+    font-size: 16px;
+  }
+
+  button {
+    display: block;
+    margin-top: 20px;
+    width: 100px;
+  }
+
+  .container {
+    border-bottom: 1px solid #000;
+    padding: 2%;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: bold;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <ul>
+      <h3>参数 :</h3>
+      <li>openId</li>
+      <li>snsType:Taobao/WeChat</li>
+      <li>securityKey</li>
+    </ul>
+    <br>
+    <span>
+      例:https://m.sensingstore.com/clearUser.html?openId=o4JqmwPn7Nad23cd4r5VJsAbra-o&snsType=WeChat&securityKey=5c07e10a87744896a915aaf161396291
+    </span>
+    <button>清除数据</button>
+  </div>
+  <div class="container">
+    <h3>当前浏览器 :</h3>
+    <div class="edition"></div>
+    <div class="window"></div>
+    <div class="document"></div>
+  </div>
+</body>
+<script>
+
+  //清除用户记录
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+  function ClearActionAndAwardsByUser() {
+    $.ajax({
+      type: "POST",
+      url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/ClearActionAndAwardsByUser",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        openId: kindId("openId"),
+        snsType: kindId("snsType"),
+        securityKey: kindId("securityKey"),
+      }),
+      success: function (message) {
+        console.log(message)
+        if (message.success) {
+          $('button').text('数据清除成功');
+          setTimeout(function(){
+            window.location.reload()
+          },2000)
+        }
+      },
+      error: function (message) {
+
+      }
+    })
+  }
+  $('button').one('click', ClearActionAndAwardsByUser)
+
+  //查看浏览器版本
+  function getBrowserInfo() {
+    var agent = navigator.userAgent.toLowerCase();
+    var regStr_ie = /msie [\d.]+;/gi;
+    var regStr_ff = /firefox\/[\d.]+/gi
+    var regStr_chrome = /chrome\/[\d.]+/gi;
+    var regStr_saf = /safari\/[\d.]+/gi;
+    if (agent.indexOf("msie") > 0) return agent.match(regStr_ie);
+    if (agent.indexOf("firefox") > 0) return agent.match(regStr_ff);
+    if (agent.indexOf("chrome") > 0) return agent.match(regStr_chrome);
+    if (agent.indexOf("safari") > 0 && agent.indexOf("chrome") < 0) return agent.match(regStr_saf);
+  }
+  $('.edition').text('版本: ' + getBrowserInfo());
+  $('.window').text('窗口: ' + $(window).width() + ' * ' + $(window).height());
+  $('.document').text('文档: ' + $(document).width() + ' * ' + $(document).height());
+</script>
+
+
+</html>

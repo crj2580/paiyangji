@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>创思感知</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="./styles/template.css?v=20190614">
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+  <script src="/js/TweenMax.min.js"></script>
+  <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+</head>
+<style>
+  .noBorder {
+    opacity: 0;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <img v-if="Flows.activityCenter" src="./img/home.png" v-on:click="goCenter()"
+      style="position:fixed;width:10vw;bottom:19vw;right:3vw;z-index:9;">
+
+    <img src="./img/bg.png" style="position:fixed;width:100%;height:100%;">
+    <div v-if="screenType=='height'" id="height">
+      <img src="./img/toLike.png" class="like" v-on:click="like()" v-if="!liked">
+      <img src="./img/like.png" class="like" v-if="liked">
+      <img v-bind:src="avatar" v-if="avatar" class="avatar">
+      <div class="gameTitle">{{gameTitle}}</div>
+      <div class="largeContainer">
+        <div style="position:relative;display:inline-block;">
+          <img src="./img/border.png" v-bind:class="{ noBorder: noBorder}" class="imageBorder">
+          <img v-bind:src="gameImage" v-if="gameImage" class="gameImage">
+          <img v-bind:src="gameImage" v-if="gameImage" class="gameImage"
+            style="z-index:10;opacity:0;transform:scale(1.2);">
+          <div class="statistic">
+            <img src="./img/heart.png">
+            <span>{{likeCount}}</span>
+            <img src="./img/share.png">
+            <span>{{shareCount}}</span>
+            <img src="./img/eye.png" style="position:relative;top:-0.5vw;">
+            <span>{{viewCount}}</span>
+          </div>
+          <img src="./img/touch.png" class="touch">
+        </div>
+      </div>
+      <!-- <img v-if="showGameCenter" @click="goGameCenter" src="./img/goGameCenter.png" class="goGameCenter"> -->
+      <img v-if="showGameCenter" @click="goGameCenter" src="./img/ticketCenter.png" class="goGameCenter">
+
+    </div>
+    <div v-if="screenType=='width'" id="width">
+      <img src="./img/toLike.png" class="like" v-on:click="like()" v-if="!liked">
+      <img src="./img/like.png" class="like" v-if="liked">
+      <img v-bind:src="avatar" v-if="avatar" class="avatar">
+      <div class="gameTitle">{{gameTitle}}</div>
+      <div class="largeContainer">
+        <img src="./img/border-w.png" v-bind:class="{ noBorder: noBorder}" class="imageBorder">
+        <img v-bind:src="gameImage" v-if="gameImage" class="gameImage">
+        <img v-bind:src="gameImage" v-if="gameImage" class="gameImage"
+          style="z-index:10;opacity:0;transform:scale(1.2);">
+        <div class="statistic">
+          <img src="./img/heart.png">
+          <span>{{likeCount}}</span>
+          <img src="./img/share.png">
+          <span>{{shareCount}}</span>
+          <img src="./img/eye.png" style="position:relative;top:-0.5vw;">
+          <span>{{viewCount}}</span>
+        </div>
+        <img src="./img/touch-w.png" class="touch">
+      </div>
+      <img src="./img/bottom-w.png" class="bottom">
+
+      <!-- <img v-if="showGameCenter" @click="goGameCenter" src="./img/goGameCenter.png" class="goGameCenter"> -->
+      <img v-if="showGameCenter&&!fromShared" @click="goGameCenter" src="./img/ticketCenter.png" class="goGameCenter">
+
+    </div>
+  </div>
+
+</body>
+
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      screenType: false,
+      gameImage: '',
+      gameTitle: '',
+      avatar: '',
+      securityKey: '',
+      actionId: '',
+      likeCount: '',
+      shareCount: '',
+      viewCount: '',
+      liked: false,
+      actionShare: {},
+      Flows: {},
+      noBorder: true,
+      showGameCenter: false,
+      tenantId: null,
+      fromShared:false
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      like: function () {
+        this.liked = true;
+        $.post('https://g.api.troncell.com/api/UserAction/LikeAction?actionId=267&openId=o4JqmwPn7Nad23cd4r5VJsAbra-o&snsType=WeChat', {
+          actionId: this.actionId,
+          openId: this.openId,
+          snsType: 'WeChat'
+        }, function (result) {
+          app.likeCount = app.likeCount + 1
+        })
+      },
+      goCenter: function () {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId
+      },
+      goGameCenter: function () {
+        // window.location.href = "https://m.sensingstore.com/transfer-action.html?securityKey=a6362b10931046a2985698c2881b52be";
+        window.location.href = "http://weishop.sensingstore.com/#/activityTicket?actionId=" + app.actionId + '&tenantId=' + app.tenantId;
+      }
+    },
+    mounted: function () {
+      this.screenType = this.$options.methods.kindId('screenType');
+      this.noBorder = this.$options.methods.kindId('noBorder');
+      this.actionId = this.$options.methods.kindId('actionId');
+      this.showGameCenter = this.$options.methods.kindId('showGameCenter');
+      this.openId = this.$options.methods.kindId('openid');
+      this.fromShared = this.kindId("fromShared");
+      var actionId = this.actionId;
+      var openID = this.$options.methods.kindId('openid');
+
+      //获取游戏信息
+      // function getDataByActionId(resolve, reject) {
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': actionId
+      }, function (result, status) {
+        if (result.success) {
+          console.log(result.result)
+          app.Flows = setFlow(result)
+
+
+          app.gameTitle = result.result.deviceActivityGame.name;
+          app.avatar = result.result.snsUserInfo.headimgurl;
+          app.gameImage = result.result.gameImage;
+          app.shareCount = result.result.shareCount;
+          app.likeCount = result.result.likeCount;
+          app.viewCount = result.result.viewCount;
+          app.tenantId = result.result.deviceActivityGame.tenantId;
+          // app.transferActionUrl = result.result.transferActionUrl + '&isShared=True';
+
+          app.actionShare = result.result.deviceActivityGame.actionShare;
+
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+
+          // setWX(result, undefined, {
+          //   link: `?actionId=${app.actionId}&screenType=${app.screenType}&showGameCenter=${app.showGameCenter}`,
+          //   imgUrl: app.gameImage
+          // })
+
+          
+          setWX(result, undefined, {
+            sameLink: true,
+            extraLink:"&fromShared=true",
+            imgUrl: app.gameImage
+          })
+
+
+
+          $.get('https://o.api.troncell.com/api/services/app/SensingTicket/GetTakedTicketByActionId', {
+            'actionId': app.actionId
+          }, function (result, status) {
+            console.log(result.result)
+            if (!result.result.ticketId) {
+              console.log("还没有领券");
+              $('.goGameCenter').fadeIn();
+              TweenMax.to(".goGameCenter", 0.4, {
+                scale: 0.8, yoyo: true, repeat: -1, ease: Power0.easeNone
+              });
+            } else {
+              console.log("已经领券");
+            }
+          })
+
+
+        }
+      })
+
+
+    }
+  })
+
+</script>
+
+</html>

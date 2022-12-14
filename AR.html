@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>WebAR</title>
+</head>
+<style>
+video,canvas{
+  display: inline-block;
+}
+</style>
+<body>
+  <select id="videoDeviceElement" onchange="changeSelect()"></select>
+  <video id="videoElement"></video>
+  <canvas id="canvasElement" width="500" height="500"></canvas>
+</body>
+
+<script type="text/javascript">
+  function changeSelect() {
+    nowDeviceId = videoDeviceElement.value;
+    console.log(nowDeviceId);
+    getUserMedia();
+  }
+  var videoDeviceElement = document.getElementById("videoDeviceElement");
+  var videoElement = document.getElementById("videoElement");
+  var canvasElement = document.getElementById("canvasElement");
+  var nowDeviceId;
+
+  navigator.mediaDevices.enumerateDevices()
+    .then((devices) => {
+      devices.forEach((device) => {
+        if (device.kind === 'videoinput') {
+          console.log("create option")
+          const option = document.createElement('option');
+          option.text = device.label || 'camera ' + (videoDeviceElement.length + 1).toString();
+          option.value = device.deviceId;
+
+          // 将摄像头id存储在select元素中，方便切换前、后置摄像头
+          videoDeviceElement.appendChild(option);
+          nowDeviceId = device.deviceId;
+        }
+      });
+      if (videoDeviceElement.length === 0) {
+        alert('没有摄像头');
+      } else {
+        videoDeviceElement.value = nowDeviceId;
+        getUserMedia();
+      }
+    })
+    .catch((err) => {
+      console.log("catchErr1", err);
+    });
+
+  // // 摄像头参数
+  // // 更多参数请查看 https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamConstraints
+  // // deviceId是select元素中储存的摄像头id
+  function getUserMedia() {
+    const constraints = {
+      audio: false,
+      video: { deviceId: { exact: nowDeviceId } }
+    };
+    console.log("constraints", constraints)
+
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then((stream) => {
+        console.log("stream", stream)
+        // videoElement为video元素，将摄像头视频流绑定到video上实时预览
+        videoElement.srcObject = stream;
+        // videoElement.style.display = 'block';
+        videoElement.play();
+      })
+      .catch((err) => {
+        console.log("catchErr2", err)
+      });
+  }
+
+
+
+
+	// // canvasElement为canvas元素
+	// // canvasContext为canvas的context 2d对象
+
+	function startDraw(width,height) {
+		setTimeout(() => {
+      console.log(width,height);
+			var canvasContext=canvasElement.getContext("2d");
+			canvasContext.drawImage(videoElement, 0, 0, width, height);
+			// canvasContext.drawImage(videoElement, 0, 0);
+			const image = canvasElement.toDataURL('image/jpeg', 0.5).split('base64,')[1];
+		}, 1000)
+
+	}
+
+	videoElement.addEventListener('canplay', function () {
+		// startDraw(this.videoWidth,this.videoHeight);
+		startDraw(videoElement.offsetWidth,videoElement.offsetHeight);
+	});
+
+</script>
+
+</html>

@@ -1,0 +1,40 @@
+#pagefour{
+  width: 100vw;
+  height: 100vh;
+  .time-wrapper,.qr-wrapper{
+    z-index: 2;
+    position: absolute;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .time-wrapper{
+    font-size: 36px;
+    color: #ffffff;
+    font-family: '思源黑体';
+    left: 43.15vw;
+    top: 32.76vh;
+    width: 14.35vw;
+    height: 7.34vh;
+    background-image: url(../../static/pg4/pg4-interval-border.png);
+  };
+  .qr-code{
+    width: 28.9vw;
+    height: 16.25vh;
+  }
+  .qr-wrapper{
+    left: 31.67vw;
+    top: 41.72vh;
+    width: 37.22vw;
+    height: 20.16vh;
+    background-image: url(../../static/pg4/pg4-border.png);
+  };
+  .qr-text{
+    left: 33.42vw;
+    top: 64.11vh;
+    width: 33.8vw;
+    height: 8.39vh;
+  }
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>幸运大转盘</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx.js"></script>
+  <script src="/js/signalr.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <div id="app">
+    <img src="./img/bg.png" style="position:fixed;width:100%;height:100%;">
+    <div v-if="status==1" style="position:fixed;width:90vw;left:50vw;top:50vh;transform:translate(-50%,-50%);">
+      <img src="./img/toSignIn.png" style="width:100%;height:100%;">
+      <div @click="signIn" style="position:absolute;width:100%;height:50%;top:0;"></div>
+    </div>
+    <div v-if="status==2" style="position:fixed;width:90vw;left:50vw;top:50vh;transform:translate(-50%,-50%);">
+      <img src="./img/signIn.png" style="width:100%;height:100%;">
+    </div>
+    <div v-if="status==3" style="position:fixed;width:90vw;left:50vw;top:50vh;transform:translate(-50%,-50%);">
+      <img src="./img/signIned.png" style="width:100%;height:100%;">
+    </div>
+    <div v-if="status==4" style="position:fixed;width:90vw;left:50vw;top:50vh;transform:translate(-50%,-50%);">
+      <img src="./img/gift.png" style="width:100%;height:100%;">
+      <img :src="prizeImage" style="width:80%;max-height:50%;top:15%;left:10%;position:absolute;">
+      <div @click="goDetail" style="position:absolute;width:100%;height:50%;top:50%;"></div>
+    </div>
+    <div v-if="loading" class="basicLoading">
+      <img src="/img/loading.gif">
+    </div>
+  </div>
+
+
+</body>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      openId: '',
+      headimgurl: '',
+      securityKey: '',//77fd9bf68e094a3c9dd5d54760f4ccb5
+      nickName: '',
+      dispatchedSoftwareId: '',
+      deviceId: '',
+      organizationUnitId: '',
+      loading: false,
+      status: 0,//0未注册 1未签到 2已签到 3已抽奖 4领奖
+      prizeType: 0,
+      prizeImage: ''//'./img/7.png'
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      actionDataById: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        _this.loading = true;
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': _this.actionId
+        }, function (result, status) {
+          if (result.success) {
+            console.log(result.result);
+            console.log('organizationUnitId :', result.result.device.storeOuterId, 'deviceId :', result.result.device.id, 'dispatchedSoftwareId :', result.result.deviceActivityGame.dispatchedSoftwareId);
+            setWX(result, ['hideOptionMenu'])
+            _this.openId = result.result.snsUserInfo.openid;
+            _this.nickName = result.result.snsUserInfo.nickname;
+            _this.headimgurl = result.result.snsUserInfo.headimgurl;
+            _this.deviceId = result.result.device.id;
+            _this.dispatchedSoftwareId = result.result.deviceActivityGame.dispatchedSoftwareId;
+            _this.organizationUnitId = result.result.device.storeOuterId;
+            _this.getUserData();
+          }
+        })
+      },
+      signIn: function () {
+        var _this = this;
+        _this.loading = true;
+        // $.get('https://api.dajiazww.com/luckyWheel/checkIn', {
+        $.get('https://api.japan-beauty-gateway.com/luckyWheel/checkIn', {
+          'openId': _this.openId,
+          'storeNo': _this.organizationUnitId,
+          'softNo': _this.dispatchedSoftwareId,
+          'deviceNo': _this.deviceId
+        }, function (result, status) {
+          _this.loading = false;
+          _this.getUserData();
+        })
+      },
+      getUserData: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        _this.loading = true;
+        // $.get('https://api.dajiazww.com/luckyWheel/user', {
+        $.get('https://api.japan-beauty-gateway.com/luckyWheel/user', {
+          'openId': _this.openId
+        }, function (result, status) {
+          _this.loading = false;
+          console.log(result.data)
+          if (result.data.isBind) {//已注册
+            if (result.data.isChinkIn) {//已签到
+              if (result.data.count == 1) {//告知大屏开始抽奖
+                _this.enterRoom();
+                _this.status = 2
+              } else {//请明天再来
+                _this.status = 3
+              }
+            } else {//去签到
+              _this.status = 1
+            }
+          } else {//前往注册 
+            // window.location.href = `https://www.dajiazww.com/?storeId=${_this.organizationUnitId}&source=200&redirect=${encodeURIComponent(window.location.href)}#/bindPhone`;
+            window.location.href = `https://japan-beauty-gateway.com/?storeId=${_this.organizationUnitId}&source=200&redirect=${encodeURIComponent(window.location.href)}#/bindPhone`;
+          }
+        })
+      },
+      goDetail() {
+        if (this.prizeType == 1) {
+          window.location.href = "https://japan-beauty-gateway.com/#/user";
+        } else if (this.prizeType == 2) {//优惠券
+          window.location.href = "https://japan-beauty-gateway.com/#/user/userCoupon";
+        }
+      },
+      enterRoom: function () {
+        var _this = this;
+        var connection = new signalR.HubConnectionBuilder().withUrl("https://g.api.troncell.com/game").build();
+        this.connection = connection;
+        connection.start().then(function () {//false 表示是玩家 若true则是观战者
+          connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName, "HeadImgUrl": _this.headimgurl }).then(function (d) {
+            if (d.code == 0) {
+              connection.invoke("Ready");
+              connection.on("OnAllReady", (msg) => {
+                // alert('OnAllReady')
+              });
+            }
+            else {
+              alert(JSON.stringify(d.msg));
+            }
+          });
+        })
+
+        connection.onclose(function () {
+          reConnection();
+          function reConnection() {
+            connection.start().then(function () {
+              connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName }).then(function (d) {
+                if (d.code == 0) { }
+                else {
+                  alert(JSON.stringify(d.msg));
+                }
+              });
+            }).catch(function () {
+              setTimeout(function () { reConnection() }, 1000);
+            })
+          }
+        });
+
+        connection.on("OnGameOver", (msg) => {//游戏结束 取图
+          _this.status = 4;
+          var prize = msg[0];
+          _this.prizeType = prize.prizeType;
+          _this.prizeImage = prize.prizeImage;
+          console.log(_this.prizeType)
+        });
+
+      }
+    },
+    mounted: function () {
+      this.actionDataById();
+    }
+  })
+
+</script>
+
+</html>

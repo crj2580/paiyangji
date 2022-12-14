@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title></title>
+</head>
+
+<body>
+  <script>
+    var ua = navigator.userAgent.toLowerCase(), from = "&from=";
+
+    if (/MicroMessenger/i.test(ua)) {
+      console.log('微信客户端');
+      from += "weixin";
+    } else if (/AlipayClient/i.test(ua)) {
+      console.log('支付宝客户端');
+      from += "alipay";
+    } else if (/WeiBo/i.test(ua)) {
+      console.log('微博客户端');
+      from += "weibo";
+    } else if (/aweme/i.test(ua)) {
+      console.log('抖音客户端');
+      from += "douyin";
+    } else {
+      console.log('其他浏览器');
+      this.from = "other";
+      alert("不支持的浏览器");
+    }
+
+
+    // alert("https://g.api.troncell.com/transfer/action" + window.location.search + from);
+
+
+    var search = window.location.search;
+    search = search
+      .replace("?from=timeline&isappinstalled=0", "")
+      .replace("?from=groupmessage&isappinstalled=0", "")
+      .replace("?from=singlemessage&isappinstalled=0", "")
+      .replace("?from=timeline", "")
+      .replace("?from=groupmessage", "")
+      .replace("?from=singlemessage", "");
+    window.location.replace("https://g.api.troncell.com/transfer/action" + search + from);
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>中奖结果</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <!-- <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script> -->
+</head>
+<style>
+  .mine {
+    width: 100%;
+    margin: 15px 0 5px;
+    position: relative;
+    display: flex;
+    text-align: center;
+    color: #2156A2;
+  }
+
+  .list {
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0.14px 3.998px 21px 0px rgba(209, 209, 255, 0.79);
+    margin-left: 7.5%;
+    width: 85%;
+    padding-top: 4vw;
+    color: #2156A2;
+    min-height: 60vh;
+    position: relative;
+  }
+
+  .item {
+    display: flex;
+    font-size: 4vw;
+    font-weight: bold;
+    padding: 10px 0;
+    text-align: left;
+    border-bottom: 1px solid #E2E2E2;
+    margin: 0 5%;
+  }
+
+  .relTop {
+    position: relative;
+    top: 3.5vw;
+  }
+
+  .relTop2 {
+    position: relative;
+    top: 2vw;
+  }
+</style>
+
+<body style="background: url(./img/plane/ranking/bg.png);background-size: 100%;">
+  <div id="app">
+    <img src="./img/mine.png" style="position:fixed;width:10vw;bottom:8vw;right:3vw;">
+    <div class="mine">
+      <div style="width:10%;"></div>
+      <div style="width:25%;padding-top:5vw;font-size:4.5vw;">
+        <b>6</b>
+        <br>
+        <b>我的排行</b>
+      </div>
+      <div style="width:35%;">
+        <div style="border:1vw solid #2156A2;width:15vw;height:15vw;border-radius:50%;overflow:hidden;margin:0 auto;">
+        </div>
+        <div style="color:#FFA200;font-size:3.5vw;"><b>本次游戏奖品</b></div>
+        <div style="color:#E93C2D;font-size:4.2vw;"><b>京东购物卡500元</b></div>
+      </div>
+
+      <div style="width:30%;padding-top:6.5vw;">
+        <b style="font-size:4vw;">小明</b>
+        <div style="font-size:3.5vw;">
+          <b>历史最高</b>
+          <b>2000分</b>
+        </div>
+      </div>
+
+    </div>
+    <div class="list">
+      <img src="./img/plane/ranking/title-award.png" style="width:84%;margin-left:8%;">
+      <div class="item">
+        <div class="relTop" style="width:10%;font-size:5vw;color:#FFA200;">1</div>
+        <div style="width:22%">
+          <img src="./img/plane/ranking/con-1.png" style="width:13vw;">
+        </div>
+        <div class="relTop" style="width:35%">
+          <div>xiaoming</div>
+          <div style="color:#FFA200;font-size:3.6vw;">2800分</div>
+        </div>
+        <div class="relTop" style="width:30%;color:#E93C2D;">京东购物卡500元</div>
+      </div>
+
+      <div class="item">
+        <div class="relTop" style="width:10%;font-size:5vw;color:#BDC1C5;">2</div>
+        <div style="width:22%">
+          <img src="./img/plane/ranking/con-2.png" style="width:13vw;">
+        </div>
+        <div class="relTop" style="width:35%">
+          <div>xiaoming</div>
+          <div style="color:#FFA200;font-size:3.6vw;">2800分</div>
+        </div>
+        <div class="relTop" style="width:30%;color:#E93C2D;">京东购物卡200元</div>
+
+      </div>
+
+      <div class="item">
+        <div class="relTop2" style="width:10%;font-size:5vw;">4</div>
+        <div style="width:22%">
+          <div style="border:3px solid #2156A2;border-radius: 50%;width:12vw;height:12vw;"></div>
+        </div>
+        <div class="relTop2" style="width:35%">
+          <div>xiaoming</div>
+          <div style="color:#FFA200;font-size:3.6vw;">2800分</div>
+        </div>
+        <div class="relTop2" style="width:30%;color:#E93C2D;">京东购物卡50元</div>
+
+      </div>
+    </div>
+
+
+
+
+    <!-- <img src="./img/loading.gif" v-if="!gameImage" style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;"> -->
+
+
+
+
+
+  </div>
+</body>
+
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      gameImage: '',
+      securityKey: '',
+      actionId: '',
+      openId: '',
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      }
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      this.openId = this.$options.methods.kindId('openid');
+      this.isShared = this.$options.methods.kindId('isShared');
+      var actionId = this.actionId
+      var openID = this.$options.methods.kindId('openid');
+
+
+      //获取游戏信息
+      function getDataByActionId(resolve, reject) {
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': actionId
+        }, function (result, status) {
+          if (result.success) {
+            // app.avatar = result.result.snsUserInfo.headimgurl;
+            // app.nickName = result.result.snsUserInfo.nickname;
+            app.gameImage = result.result.gameImage;
+            app.transferActionUrl = result.result.transferActionUrl + '&isShared=True';
+            app.securityKey = result.result.deviceActivityGame.securityKey;
+            // $.post('https://g.api.troncell.com/api/UserAction/PostDataByUser', {
+            //   OpenId: app.openId,
+            //   actionId: app.actionId,
+            //   QrType: 'AfterGame',
+            //   SnsType: 'WeChat',
+            //   SecurityKey: app.securityKey,
+            //   AvatarUrl: app.avatar
+            // }, function (result) { })
+            // resolve({
+            //   tenantId: result.result.deviceActivityGame.tenantId,
+            //   openId: app.openId,
+            //   appid: result.result.deviceActivityGame.activity.weChatAppID,
+            //   url: encodeURI(location.href.split('#')[0])
+            // })
+
+          } else {
+            // Tida.toast("网络故障,请重试.");
+          }
+        })
+      }
+
+      // new Promise(getDataByActionId).then(function (param) {
+      // $.get('https://g.api.troncell.com/WeixinJSSDK/GetWeChatJsViewModel', param, function (result, status) {
+      //   if (result.success) {
+      //     wx.config({
+      //       debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+      //       appId: result.result.appId, // 必填，公众号的唯一标识
+      //       timestamp: result.result.timestamp, // 必填，生成签名的时间戳
+      //       nonceStr: result.result.nonceStr, // 必填，生成签名的随机串
+      //       signature: result.result.signature,// 必填，签名
+      //       jsApiList: [
+      //         'onMenuShareTimeline',
+      //         'onMenuShareAppMessage',
+      //         'onMenuShareQQ',
+      //         'onMenuShareWeibo'
+      //       ] // 必填，需要使用的JS接口列表
+      //     });
+      //     wx.ready(function () {
+      //       wx.onMenuShareAppMessage({
+      //         title: '爱上未“莱”的你', // 分享标题
+      //         desc: '', // 分享描述
+      //         link: app.transferActionUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+      //         imgUrl: app.gameImage, // 分享图标
+      //         success: function () {
+      //           // 用户点击了分享后执行的回调函数
+      //         }
+      //       });
+      //       wx.onMenuShareAppMessage({
+      //         title: '爱上未“莱”的你', // 分享标题
+      //         desc: '', // 分享描述
+      //         link: app.transferActionUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+      //         imgUrl: app.gameImage, // 分享图标
+      //         success: function () {
+      //           // 用户点击了分享后执行的回调函数
+      //         }
+      //       });
+      //       wx.onMenuShareQQ({
+      //         title: '爱上未“莱”的你', // 分享标题
+      //         desc: '', // 分享描述
+      //         link: app.transferActionUrl, // 分享链接
+      //         imgUrl: app.gameImage,  // 分享图标
+      //         success: function () {
+      //           // 用户确认分享后执行的回调函数
+      //         },
+      //         cancel: function () {
+      //           // 用户取消分享后执行的回调函数
+      //         }
+      //       });
+      //     });
+      //   } else {
+      //     // Tida.toast("网络故障,请重试.");
+      //   }
+      // })
+
+
+      // });
+
+    }
+  })
+
+</script>
+
+
+
+</html>

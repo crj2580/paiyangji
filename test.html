@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta http-equiv='Expires' content='0'> -->
+  <!-- <meta http-equiv='Pragma' content='no-cache'> -->
+  <meta http-equiv='Cache-Control' content='no-cache'>
+  <!-- <meta http-equiv='Cache-Control' content='max-age=500000'> -->
+
+  <title>Document</title>
+  <link rel="stylesheet" href="./styles/reset.css">
+  <script src="./js/vue.min.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    helloworld2
+  </div>
+</body>
+<script>
+
+
+
+  // var el = document.getElementById("app");
+  // el.textContent = "666"
+  // console.log(el.textContent)
+
+  // 箭头函数 this指向函数定义时的上下文中的this(class中,static内上下文为class自身 其他上下文为实例)
+  // 非箭头函数,有调用者则指向调用者,没有调用者则指向函数定义位置的全局对象(平时为windows,严格模式下指向undefined)
+  // * 函数如果被赋值给另一个值,由于其为指针,调用时依然考虑函数定义所处位置而非赋值时位置
+  // * ()不影响直接调用者,如a.b()和(a.b)()直接调用者都是b
+  // var o = {a:this} window
+  function f1() {
+    console.log(this)
+  }
+  function f2() {
+    (function () {
+      console.log(this)
+    })()
+  }
+  function f3() {
+    var fn = function () {
+      console.log(this)
+    }
+    fn();
+  }
+
+  console.log("function-------")
+  f1()
+  f2()
+  f3()
+
+
+  var obj = {
+    f1: function () {
+      console.log(this)
+    },
+    f2() {
+      console.log(this)
+    },
+    f3: () => {
+      console.log(this)
+    }
+  }
+
+  console.log("obj-------")
+  obj.f1()
+  obj.f2()
+  obj.f3()
+
+  function Fn() {
+    this.f1 = function () {
+      console.log(this)
+    }
+    this.f2 = () => {
+      console.log(this)
+    }
+  }
+  Fn.f3 = function () {
+    console.log(this)
+  }
+  Fn.f4 = () => {
+    console.log(this)
+  }
+
+  console.log("new Funtcion-------")
+  new Fn().f1()
+  new Fn().f2()
+  Fn.f3()
+  Fn.f4()
+
+  class C {
+    static f3 = function () {
+      console.log(this)
+    }
+    static f4 = () => {
+      console.log(this)
+    }
+    f1() {
+      console.log(this)
+    }
+    f2 = () => {
+      console.log(this)
+    }
+  }
+
+  console.log("new Class-------")
+  new C().f1()
+  new C().f2()
+  C.f3()
+  C.f4();
+  (C.f3)();
+
+  var obj3 = C.f3;
+  obj3();
+  window.obj3();
+
+  var obj4 = C.f4;
+  obj4();
+
+  ;
+
+
+</script>
+
+</html>

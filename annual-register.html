@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>欢迎参加创思感知年会</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+	<script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+	<script>eruda.init();</script>
+</head>
+<style>
+  .circle {
+    width: 12%;
+    position: absolute;
+    top: 16vh;
+    line-height: 12vw;
+    text-align: center;
+  }
+
+  .circle img {
+    width: 100%;
+  }
+
+  .circle span {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    left: 0;
+    font-size: 4vw;
+  }
+
+  .headTip {
+    color: rgb(148, 92, 255);
+    position: absolute;
+    top: 33vh;
+    text-align: center;
+    width: 100%;
+    font-size: 4.5vw;
+  }
+
+  .headContainer {
+    width: 28vw;
+    height: 28vw;
+    position: absolute;
+    top: 14vh;
+    left: 36%;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .form{
+    width:70%;
+    position: absolute;
+    left:15%;
+    top:38vh;
+  }
+  .form .form-group{
+    display: flex;
+    padding: 0 2vw;
+    border-radius: 10vh;
+    background:#3F1980;
+    overflow: hidden;
+    margin:5vh 0;
+  }
+  .form .form-group img{
+    height: 3vh;
+  }
+  .form .form-group .line{
+    width:2px;
+    background: #C7A9FF;
+    height:2vh;
+    margin:2.5vh 0;
+  }
+  .form .form-group input{
+    flex-grow: 1;
+    margin-left:3vw;
+    background: transparent;
+    border:none;
+    outline:none;
+    font-size:4vw;
+    color:#C2A3FA;
+
+  }
+
+  ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:#6D42BB;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div v-if="status==0">
+      <img src="./img/annual/register/bg0.png" style="width:100%;height:100%;position: absolute;">
+      <img src="./img/annual/register/high.png" style="width:90%;position: absolute;left:5%;top:10%;">
+      <img v-if="!loading&&!isRegistered" v-on:click="status=1;" src="./img/annual/register/register.png" style="width:50%;position: absolute;left:25%;bottom:2.5%;">
+      <img v-if="!loading&&isRegistered" v-on:click="status=1;" src="./img/annual/register/reRegister.png" style="width:38%;position: absolute;right:8%;bottom:5%;">
+      <img v-if="!loading&&isRegistered" v-on:click="goCenter()" src="./img/annual/register/goCenter.png" style="width:38%;position: absolute;left:8%;bottom:5%;">
+      <!-- <img v-if="!loading&&isRegistered" v-on:click="goCenter()" src="./img/annual/register/goCenter.png" style="width:50%;position: absolute;left:25%;bottom:2.5%;"> -->
+    </div>
+
+
+    <div v-if="status!=0">
+      <img src="./img/annual/register/bg.png" style="width:100%;height:100%;position: absolute;">
+
+      <img src="./img/annual/register/title.png" style="width:70%;position:absolute;left:15%;top:5%;">
+
+
+      <div style="position:relative;width:100%;height:100vh;">
+        <div v-if="status==1" class="circle" style="left: 4%;" v-on:click="type=0;">
+          <img v-if="type==1" src="./img/annual/register/greyCircle.png">
+          <img v-if="type==0" src="./img/annual/register/yellowCircle.png">
+          <span :style="{color:type==1?'#fff':'#892C00'}">员工</span>
+        </div>
+        <div v-if="status==1" class="circle" style="right: 4%;" v-on:click="type=1;">
+          <img v-if="type==0" src="./img/annual/register/greyCircle.png">
+          <img v-if="type==1" src="./img/annual/register/yellowCircle.png">
+          <span :style="{color:type==0?'#fff':'#892C00'}">家属</span>
+        </div>
+
+
+
+        <div class="headContainer" v-on:click="chooseHead()">
+          <div style="width:80%;height:80%;margin:10%;position: absolute;border-radius: 50vw;overflow:hidden;">
+            <img v-if="headLocalId" :src="headLocalId" style="border-radius:28vw;min-height:100%;min-width:100%;max-height:180%;max-width:180%;position: absolute;top:50%;left:50%;transform: translate(-50%,-50%);">
+            <!-- <img v-if="headLocalId" :src="headLocalId" style="width:100%;position: absolute;top:0;"> -->
+          </div>
+          <img v-if="status==1||status==2" src="./img/annual/register/default.png" style="height:100%;width:100%;">
+          <img v-if="status==3" src="./img/annual/register/child.png" style="height:100%;width:100%;">
+        </div>
+
+        <div class="headTip">
+          <span v-if="status==1">上传您的头像</span>
+          <span v-if="status==2">头像上传成功</span>
+          <span v-if="status==3">上传小朋友的头像</span>
+        </div>
+
+        <div v-if="status==1||status==3" class="form">
+          <div class="form-group">
+            <img src="./img/annual/register/name.png" style="margin:2vh 2.4vh;">
+            <div class="line"></div>
+            <input type="text" :placeholder="status==1?'请输入您的姓名':'请输入小朋友的姓名'" v-model="info.name">
+          </div>
+          <div v-if="status==3" class="form-group">
+            <img src="./img/annual/register/relation.png" style="margin:2vh 2.4vh;">
+            <div class="line"></div>
+            <input type="text" placeholder="请输入关系,例如:父子" v-model="info.type">
+          </div>
+          <div v-if="status==1" class="form-group">
+            <img src="./img/annual/register/no.png" style="margin:2vh 2vh;">
+            <div class="line"></div>
+            <input type="text" :placeholder="type==0?'请输入您的工号':'请输入亲属的工号'" v-model="info.identityID">
+          </div>
+          <div v-if="status==1" class="form-group">
+            <img src="./img/annual/register/phone.png" style="margin:2vh 2.7vh;">
+            <div class="line"></div>
+            <input type="text" placeholder="请输入您的手机号" v-model="info.phone">
+          </div>
+        </div>
+      </div>
+
+
+      <img v-if="status==1||status==3" v-on:click="doRegister()" src="./img/annual/register/register.png" style="width:40%;position:absolute;left:30%;bottom:12%;">
+      <img v-if="status==1||status==3" v-on:click="goBack()" src="./img/annual/register/return.png" style="width:7vw;position:absolute;left:10%;bottom:12%;">
+
+      <!-- 注册成功 -->
+      <img v-if="status==2" src="./img/annual/register/success.png" style="width:60%;position:absolute;left:20%;top:52%;">
+      <img v-if="status==2&&type==0" v-on:click="goCenter()" src="./img/annual/register/goCenter.png" style="width:34%;position:absolute;left:9%;top:70%;">
+      <img v-if="status==2&&type==0" v-on:click="goChild();" src="./img/annual/register/goChild.png" style="width:38%;position:absolute;right:9%;top:70%;">
+      <img v-if="status==2&&type==1" v-on:click="goCenter()" src="./img/annual/register/goCenter.png" style="width:40%;position:absolute;left:30%;top:70%;">
+
+    </div>
+
+    <div v-if="loading" style="position:absolute;width:100%;height:100%;top:0;">
+      <img src="./img/loading.gif" style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+    </div>
+
+    <div v-if="showTip" style="position:absolute;width:100%;height:100%;top:0;">
+      <div style="max-width:65vw;position:absolute;z-index:999;padding:5vw;background:#000;top:50%;left:50%;color:#fff;transform:translateX(-50%);border-radius: 2vw;">
+        {{showTip}}
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      status: 0,//0海报,1员工/家属注册,2注册成功,3儿童注册
+      type: 0,//0员工,1家属
+      info: {},
+      snsUserInfoId: '',
+      securityKey: '',//bd2512c67b9345159886cab4499cdbfd
+      headLocalId: '',
+      // headLocalId: './img/skin/face-1.png',
+      actionShare: {},
+      loading: true,
+      actionId: '',
+      openId: '',
+      serverId: '',
+      showTip: false,
+      isRegistered: false,
+      Flows: {}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goCenter: function () {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId
+      },
+      goBack: function () {
+        if (this.status == 1) {
+          this.status = 0;
+        } else if (this.status == 3) {
+          this.status = 2;
+        }
+      },
+      goChild: function () {//前往儿童注册页面并消除已有信息
+        this.status = 3;
+        this.headLocalId = '';
+        this.serverId = '';
+        this.info.name = '';
+      },
+      doRegister: function () {
+
+        if (this.status == 1) {//员工/家属注册
+          if (!(this.info.identityID && this.info.phone && this.info.name && this.serverId)) {
+            this.showTip = '请将注册信息填写完整';
+            setTimeout(() => {
+              this.showTip = false;
+            }, 1500)
+            return
+          }
+
+          if (!this.info.phone.match(/^\d{11}$/)) {
+            this.showTip = '请输入正确的手机号格式';
+            setTimeout(() => {
+              this.showTip = false;
+            }, 1500)
+            return
+          }
+
+          this.loading = true;
+
+          alert(JSON.stringify({
+            faceImageWeChatMediaId: this.serverId,
+            openId: this.openId,
+            snsType: "WeChat",
+            securityKey: this.securityKey
+          }))
+
+          $.ajax({
+            type: "POST",
+            url: "https://f.api.troncell.com/api/Face/RegisterFace4Wechat",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              faceImageWeChatMediaId: this.serverId,
+              openId: this.openId,
+              snsType: "WeChat",
+              securityKey: this.securityKey
+            }),
+            success: function (message) {
+              if (message.success) {
+                $.ajax({
+                  type: "POST",
+                  url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/AddOrUpdateMyPersonData",
+                  contentType: "application/json; charset=utf-8",
+                  data: JSON.stringify({
+                    openId: app.openId,
+                    snsType: "WeChat",
+                    securityKey: app.securityKey,
+                    name: app.info.name,
+                    phone: app.info.phone,
+                    identityID: app.info.identityID
+                  }),
+                  success: function (message) {
+                    app.loading = false;
+                    if (message.success) {
+                      app.status = 2;
+                    }
+                  }
+                })
+
+              }
+            },
+            error: function (a, b, c) {
+              alert(a)
+              alert(b)
+              alert(c)
+              app.showTip = '请选择一张仅含有您本人大头贴的照片';
+              app.loading = false;
+              setTimeout(() => {
+                app.showTip = false;
+              }, 2000)
+            }
+          })
+
+        } else if (this.type == 0 && this.status == 3) {//小孩注册
+          if (!(this.info.name && this.serverId)) {
+            this.showTip = '请将注册信息填写完整';
+            setTimeout(() => {
+              this.showTip = false;
+            }, 1500)
+            return
+          }
+
+          app.loading = true;
+
+          $.ajax({
+            type: "POST",
+            url: "https://f.api.troncell.com/api/Face/RegisterRelativeFace4Wechat",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              faceImageWeChatMediaId: app.serverId,
+              openId: app.openId,
+              snsType: "WeChat",
+              securityKey: app.securityKey,
+              name: app.info.name,
+              type: app.info.type
+            }),
+            success: function (message) {
+              app.loading = false;
+              if (message.success) {
+                console.log('注册成功')
+                app.type = 1;//为小朋友注册后,转向家属成功界面
+                app.status = 2;
+              }
+            },
+            error: function (a, b, c) {
+              app.showTip = '请选择一张仅含有您亲属大头贴的照片';
+              app.loading = false;
+              setTimeout(() => {
+                app.showTip = false;
+              }, 2000)
+            }
+          })
+
+
+
+        }
+      },
+      chooseHead: function () {
+        if (this.status == 1 || this.status == 3) {
+          wx.chooseImage({
+            count: 1, // 默认9
+            sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+            sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+            success: function (res) {
+              var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+              if (localIds.length == 1) {
+                app.headLocalId = localIds[0];
+                wx.uploadImage({
+                  localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
+                  isShowProgressTips: 1, // 默认为1，显示进度提示
+                  success: function (res) {
+                    app.serverId = res.serverId; // 返回图片的服务器端ID
+                  }
+                });
+              }
+            }
+          });
+        }
+
+      }
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      if (this.$options.methods.kindId('securityKey')) {
+        this.securityKey = this.$options.methods.kindId('securityKey');
+      }
+
+      if (!this.actionId) {
+        $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: this.securityKey,//new创思show
+          SnsType: "WeChat",
+          FromType:'mobile'
+
+        }, function (result) {
+          if (result.success) {
+            window.location.href = result.result.qrCodeUrl;
+          }
+        })
+        return
+      }
+
+
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': this.actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.Flows = setFlow(result);
+          setWX(result, ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'uploadImage'])
+          // setWX(result, ['onMenuShareTimeline', 'onMenuShareAppMessage', 'chooseImage', 'uploadImage'], {
+          //   link: '?securityKey=' + app.securityKey
+          // })
+          console.log(result.result);
+          app.actionShare = result.result.deviceActivityGame.actionShare;
+          app.openId = result.result.snsUserInfo.openid;
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyPersonDataInActivity', {
+            OpenId: app.openId,
+            SecurityKey: app.securityKey,
+            SnsType: 'WeChat',
+          }, function (result) {
+            if (result.success) {
+              app.loading = false;
+              if (result.result && result.result.isRegistered) {//注册过了
+                app.isRegistered = true;
+              }
+
+            }
+          })
+
+
+
+        }
+      })
+
+    }
+  })
+
+</script>
+
+</html>

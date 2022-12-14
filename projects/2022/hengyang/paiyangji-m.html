@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>答题</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx2.js"></script>
+  <script src="/js/TweenMax.min.js"></script>
+
+  <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+</head>
+<style>
+@font-face {
+  font-family: 'youran';
+  src: url(./fonts/youran.ttf);
+}
+
+  body {
+    background-color: #2e30c5;
+  }
+
+  #app {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    background-image: url(./img/bg.png);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  .container {
+    position: absolute;
+    width: 100vw;
+    height: 97.66vh;
+    top: 2.44vh;
+    background-image: url(./img/wrapper.png);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  .tigan {
+    color: #251475;
+    text-align: center;
+    position: relative;
+    top: 27.2%;
+    font-weight: 700;
+    font-size: 4.5vw;
+  }
+
+  .questiontitle {
+    box-sizing: border-box;
+    position: absolute;
+    background-image: url('./img/question-title-wrapper.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 36.4vw;
+    height: 5.1vh;
+    left: 31.8vw;
+    top: 17.4vh;
+    text-align: center;
+    font-family: 'youran';
+    font-size: 5.2vw;
+    padding-bottom: 50px;
+    color: #214d9a;
+    z-index: 2;
+  }
+
+  .questionwrapper {
+    box-sizing: border-box;
+    padding: 2vh 4vw 2vh 4vw;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    background-image: url('./img/question-wrapper.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    left: 17.5vw;
+    top: 19.9vh;
+    width: 65.46vw;
+    height: 17.5vh;
+    font-family: 'youran';
+    line-height: 5vw;
+    font-size: 5.2vw;
+    color: #214d9a;
+    z-index: 1;
+  }
+
+</style>
+
+<body>
+  <div id="app">
+    <div class="basicLoading" v-show="loading">
+      <img src="/img/loading.gif">
+    </div>
+    <div v-show="showMsg" class="basicMsg">
+      <div style="padding:6vw;font-size:3.5vw;">
+        {{showMsg}}
+      </div>
+    </div>
+    <img src="./img/bg-above2.png"
+    style="position:absolute;width: 120%;height:97.45vh;top: 2.55vh;z-index: 1;pointer-events: none;">
+    <div class="container">
+      <template v-if="realQuestionList.length">
+        <div class="questiontitle">
+          第{{questionTitle}}题
+        </div>
+        <div class="questionwrapper">
+          {{realQuestionList[realQuestionIndex].title}}
+        </div>
+
+        <div style="position: absolute;width: 80%;
+        left: 10%;
+        top: 39%; color: #fff;">
+          <div v-for="(answer,answerIndex) of realQuestionList[realQuestionIndex].questionItems"
+            @click="selectAnswer(answer)"
+            style="width:88%;margin-left:6%;margin-bottom:2vh;height:12vw;line-height: 12vw;position: relative;">
+            <img src="./img/answer_white.png" style="width:100%;height:100%;">
+            <img v-show="answer.hasSelected&&!answer.isAnswer"
+              :src="!(answer.hasSelected&&!answer.isAnswer)||'./img/wrong_red.gif'"
+              style="width:20%;position: absolute;right:0%;top:0%;">
+            <img v-show="realQuestionIndex!=4&&realQuestionList[realQuestionIndex].hasSelected&&answer.isAnswer"
+              :src="!(realQuestionList[realQuestionIndex].hasSelected&&answer.isAnswer)||'./img/right_red.gif'"
+              style="width:20%;position: absolute;right:0%;top:0%;">
+            <img v-show="realQuestionIndex==4&&answer.hasSelected" src="./img/right_red.gif"
+              style="width:20%;position: absolute;right:0%;top:0%;">
+            <div
+              style="font-family: 'youran';color: #fff;position: absolute;width:100%;height:100%;text-align: center;left:5%;bottom: 2px;font-size: 5.4vw">
+              {{answer.content}}
+            </div>
+            <div style="font-family: 'youran';color: #fff;position: absolute;left:5%;bottom: 3px;font-size: 5.4vw;width:9%;text-align: center;">
+              <span v-show="answerIndex==0">A</span>
+              <span v-show="answerIndex==1">B</span>
+              <span v-show="answerIndex==2">C</span>
+              <span v-show="answerIndex==3">D</span>
+              <span v-show="answerIndex==4">E</span>
+            </div>
+          </div>
+        </div>
+      </template>
+
+    </div>
+
+    <div style="z-index: 111;position: fixed;bottom:2%;width:100%;display: flex;justify-content: space-evenly;">
+      <div
+        v-show="realQuestionList.length&&(realQuestionList[realQuestionIndex].hasSelected&&(!chooseRight&&realQuestionIndex!=4||errorAnswer>=2&&realQuestionIndex==4))"
+        class="btn" @click="restart" style="width:25%;">
+        <img src="./img/restart.png" style="width:100%;">
+
+      </div>
+      <div
+        v-show="realQuestionList.length&&realQuestionList[realQuestionIndex].hasSelected&&!chooseRight&&realQuestionIndex!=4"
+        class="btn" @click="continuer" style="width:25%;">
+        <img src="./img/continue.png" style="width:100%;">
+      </div>
+    </div>
+
+  </div>
+
+</body>
+<script>
+
+  // var subkey = kindId('subkey') || 'fffe14d7ec86496abd13a17092a8b3b5';
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      loading: false,
+      showMsg: "",
+      realQuestionList: [],
+      realQuestionIndex: 0,
+      questionNeedLength: 4,
+      openId: "",
+      actionId: "",
+      securityKey: "",
+      MaxWordLength: 12,
+      subKey: '',
+      errorAnswer: 0
+    },
+    computed: {
+      chooseRight: function () {
+        if (this.realQuestionList[this.realQuestionIndex]) {
+          return this.realQuestionList[this.realQuestionIndex].questionItems.find(function (item) {
+            return item.isAnswer
+          }).hasSelected
+        }
+
+      },
+      questionTitle: function () {
+        switch (this.realQuestionIndex) {
+          case 0:
+            return '一';
+          case 1:
+            return '二';
+          case 2:
+            return '三';
+          case 3:
+            return '四';
+          case 4:
+            return '五';
+          case 5:
+            return '六';
+          case 6:
+            return '七';
+          case 7:
+            return '八';
+          default:
+            break;
+        }
+      }
+    },
+    mounted: function () {
+      var _this = this;
+      // _this.subKey = subkey;
+      _this.actionId = kindId('actionId');
+      _this.ActionDataById();
+
+    },
+    methods: {
+      continuer: function () {
+        const realQuestionIndex = this.realQuestionIndex;
+        const questionNeedLength = this.questionNeedLength;
+        // if(realQuestionIndex === questionNeedLength - 1){
+        //   // this.showMsg = `你已经答完了${questionNeedLength}道题啦，请点击重新答题！`;
+        //   alert('你已经答完题啦，请点击重新答题！')
+        //   return;
+        // } 
+        this.realQuestionIndex++;
+      },
+      restart: function () {
+        this.loading = false;
+        this.showMsg = '';
+        this.realQuestionList = [];
+        this.realQuestionIndex = 0;
+        this.errorAnswer = 0
+        this.ActionDataById();
+        // this.GetPapersByTags();
+      },
+      ActionDataById: function () {
+        var _this = this;
+        $.post('https://activity.api.troncell.com/api/UserAction/ActionDataById', {
+          actionId: _this.actionId
+        }, function (result) {
+          _this.openId = result.result.snsUserInfo.openid;
+          _this.securityKey = result.result.deviceActivityGame.securityKey;
+          // setWX(result, ['hideOptionMenu'])
+          _this.subKey = result.result.device.subKey;
+          _this.GetPapersByTags();
+        })
+      },
+      GetPapersByTags: function () {
+        var _this = this;
+        _this.loading = true;
+        $.get('https://activity.api.troncell.com/api/services/app/SengsingDevice/GetPapersByTags', {
+          Tags: "派样机",
+          Subkey: _this.subKey
+        }, (result) => {
+          _this.loading = false;
+          console.log(result);
+          _this.realQuestionList = result.result.items[0].questions.filter(function (question) {
+            return question.questionItems.every(function (answer) {
+              return answer.content.length <= _this.MaxWordLength
+            })
+          }).sort(function () {
+            return Math.random() - 0.5;
+          }).slice(0, _this.questionNeedLength).map(function (item) {
+            return {
+              id: item.id,
+              title: item.title,
+              hasSelected: false,
+              questionItems: item.questionItems.map(function (answer) {
+                return {
+                  content: answer.content,
+                  isAnswer: answer.isAnswer,
+                  hasSelected: false
+                }
+              })
+            }
+          });;
+
+          _this.realQuestionList.push({
+            id: 99,
+            title: '您对海通证券的评价？',
+            hasSelected: false,
+            questionItems: [
+              { content: '非常满意', isAnswer: true, hasSelected: false },
+              { content: '满意', isAnswer: true, hasSelected: false },
+              { content: '基本满意', isAnswer: true, hasSelected: false },
+              { content: '不满意', isAnswer: true, hasSelected: false },
+            ]
+          })
+
+        })
+
+
+      },
+      GetAwardsByUserAndAction: function () {
+        var _this = this;
+        _this.loading = true;
+        $.get('https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction', {
+          OpenId: _this.openId,
+          actionId: _this.actionId,
+          QrType: 'BeforeGame',
+          // SnsType: SnsType,
+          SecurityKey: _this.securityKey
+        }, function (result) {
+          _this.loading = false;
+
+          if (result.result.canNextAward) {
+            _this.DoLotteryAwardByAction();
+          } else {
+            _this.showMsg = "每天仅可参与一次，请把机会留给其他人";
+          }
+        })
+      },
+      DoLotteryAwardByAction: function () {
+        var _this = this;
+        _this.loading = true;
+        $.ajax({
+          type: "POST",
+          url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            "isNeedSendNotify": false,
+            "score": 0,
+            "actionId": _this.actionId,
+            "securityKey": _this.securityKey,
+          }),
+          success: function (message) {
+            _this.ConfirmUserAwardById(message.result.id);
+            var ticketId = message.result.award.couponUrl.split("ticketId=")[1];
+            console.log(ticketId);
+            $.ajax({
+              type: "POST",
+              url: "https://order.api.troncell.com/api/services/app/SensingTicket/TakeTicketForActivity",
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify({
+                "ticket": ticketId,
+                "actionId": _this.actionId,
+                "securityKey": _this.securityKey,
+                "sendMessage": false
+              }),
+              success: function (message) {
+                _this.loading = false;
+                _this.showMsg = "请至大屏输入取货码: " + message.result.ticketNo + " 领取礼品";
+              }
+            })
+
+          }
+        })
+      },
+      ConfirmUserAwardById: function (userAwardId) {
+        var _this = this;
+        $.ajax({
+          type: "POST",
+          url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            userAwardId: userAwardId,
+            SecurityKey: _this.securityKey
+          }),
+          success: function (message) { }
+        })
+      },
+      selectAnswer: function (answer) {
+        var _this = this;
+        if (_this.realQuestionList[_this.realQuestionIndex].hasSelected) {
+          return
+        }
+        _this.realQuestionList[_this.realQuestionIndex].hasSelected = true;
+        answer.hasSelected = true;
+        console.log(answer);
+        if (answer.isAnswer) {
+          if (_this.realQuestionIndex < 4) {
+            setTimeout(function () {
+              _this.realQuestionIndex++;
+            }, 1000)
+          } else {
+            if (_this.errorAnswer < 2) {
+              setTimeout(function () {
+                _this.GetAwardsByUserAndAction();
+              }, 1000)
+            }
+          }
+        } else {
+          console.log("答错了")
+          _this.errorAnswer++
+
+          if (_this.realQuestionIndex == 4) {
+            if (_this.errorAnswer >= 2) {
+              return
+            } else {
+              setTimeout(function () {
+                _this.GetAwardsByUserAndAction();
+              }, 1000)
+            }
+          } else {
+            if (_this.errorAnswer >= 2) {
+              _this.showMsg = "您已经答错" + _this.errorAnswer + "道题了，继续答题将不会获得奖品，是否继续?";
+              setTimeout(function () {
+                _this.showMsg = "";
+              }, 2000)
+            } else {
+              return
+            }
+          }
+
+          // _this.showMsg = "回答错误，请重新扫码参与答题";
+        }
+      },
+    }
+  });
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    console.log("window.location",window.location);
+    var r = window.location.search.substr(1).match(reg);
+    console.log(name, r);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+</script>
+
+</html>

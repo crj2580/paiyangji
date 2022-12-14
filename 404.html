@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>404</title>
+</head>
+<style>
+  .container404 {
+    position: relative;
+    width: 100%;
+    height: 7.2rem;
+    text-align: center;
+    top:calc(50vh - 7.2rem);
+  }
+
+  .content404 {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    font-size: 6rem;
+    font-weight: 700;
+    margin: 0;
+    animation: shake .6s ease-in-out infinite alternate;
+    user-select: none;
+  }
+
+  .content404:before {
+    content: attr(data-t);
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, .34em);
+    height: .1em;
+    line-height: .5em;
+    width: 100%;
+    animation: scan .5s ease-in-out 527ms infinite alternate, glitch-anim .3s ease-in-out infinite alternate;
+    overflow: hidden;
+    opacity: .7;
+  }
+
+  .content404:after {
+    content: "4""0""4";
+    position: absolute;
+    top: -23px;
+    left: 50%;
+    transform: translate(-50%, .34em);
+    height: .5em;
+    line-height: .1em;
+    width: 100%;
+    animation: scan 665ms ease-in-out 323ms infinite alternate, glitch-anim .3s ease-in-out infinite alternate;
+    overflow: hidden;
+    opacity: .8;
+  }
+
+  @keyframes shake {
+
+    0%,
+    to {
+      transform: translate(-1px);
+    }
+
+    10% {
+      transform: translate(2px, 1px);
+    }
+
+    30% {
+      transform: translate(-3px, 2px);
+    }
+
+    35% {
+      transform: translate(2px, -3px);
+      filter: blur(4px);
+    }
+
+    45% {
+      transform: translate(2px, 2px) skewY(-8deg) scaleX(0.96);
+      filter: blur(0);
+    }
+
+    50% {
+      transform: translate(-3px, 1px);
+    }
+  }
+
+  @keyframes scan {
+
+    0%,
+    20%,
+    to {
+      height: 0;
+      transform: translate(-50%, 0.44em);
+    }
+
+    10%,
+    15% {
+      height: 1em;
+      line-height: 0.2em;
+      transform: translate(-55%, 0.15em);
+    }
+  }
+
+  .clip {
+    width: 200px;
+    height: 200px;
+    background: red;
+    /* clip: rect(0px, 160px, 200px, 0px); */
+    /* position: absolute; */
+    /* clip-path: circle(40%); */
+    /* clip-path: circle(30% at 150px 120px); */
+    clip-path: polygon(evenodd,50% 0,100% 50%,0 100%);   
+  }
+</style>
+
+<body>
+  <div class="container404">
+    <div class="content404" data-t="页面不见了">
+      页面不见了
+    </div>
+  </div>
+
+  <!-- <div class="clip"></div> -->
+</body>
+
+</html>

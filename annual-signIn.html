@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>签到</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+
+</head>
+
+<style>
+  body {
+    color: #fff;
+    font-size: 4.5vw;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <img src="./img/annual/signIn/bg.png" style="width:100%;height:100%;position:fixed;">
+
+    <div style="width:60%;position:absolute;top:22%;left:20%;">
+      <img v-if="extensionData.playerImage" :src="extensionData.playerImage" style="position:absolute;left:15%;top:11%;width:72%;height:73%;border-radius:50%;">
+      <img v-else :src="snsUserInfo.headimgurl" style="position:absolute;left:15%;top:11%;width:72%;height:73%;border-radius:50%;">
+      <img src="./img/annual/signIn/headContainer.png" style="width:100%;">
+    </div>
+
+
+    <div style="width:25%;position:absolute;top:4%;left:5%;" v-if="extensionData.score">
+      <img src="./img/annual/signIn/yellow.png" style="width:100%;">
+      <div style="position: absolute;top:23%;width:100%;text-align: center;">颜值</div>
+      <div style="position: absolute;top:47%;width:100%;text-align: center;">
+        <span style="font-size:5.2vw;">{{extensionData.score}}分</span>
+      </div>
+    </div>
+
+    <div style="width:22%;position:absolute;top:11%;right:5%;" v-if="extensionData.adj">
+      <img src="./img/annual/signIn/red.png" style="width:100%;">
+      <div style="position: absolute;top:32%;width:100%;text-align: center;">{{extensionData.adj}}</div>
+    </div>
+
+    <div style="width:22%;position:absolute;top:50%;left:5%;" v-if="extensionData.non">
+      <img src="./img/annual/signIn/blue.png" style="width:100%;">
+      <div style="position: absolute;top:32%;width:100%;text-align: center;">{{extensionData.non}}</div>
+    </div>
+
+
+    <div style="width:100%;text-align:center;font-size:6.5vw;position:absolute;top:60%;text-shadow: 5px 5px 5px #4C189F;font-weight:bold;">
+      <div style="margin:3vw 0;">{{snsUserInfo.nickname}}
+        <span v-if="extensionData.gender==0">先生</span>
+        <span v-if="extensionData.gender==1">女士</span>
+      </div>
+      <div v-if="isSigned">恭喜您签到成功啦!</div>
+    </div>
+
+    <img v-if="isNeedValidate&&!isSigned&&!loading" v-on:click="goRegister()" src="./img/annual/register/reRegister.png"
+      style="width:50%;position:fixed;bottom:3%;left:25%;z-index:9999;">
+    <img v-if="isSigned" v-on:click="goCenter()" src="./img/annual/signIn/goCenter.png" style="width:50%;position:fixed;bottom:3%;left:25%;">
+
+    <div v-if="loading" style="position:fixed;width:100%;height:100%;top:0;">
+      <img src="./img/loading.gif" style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+    </div>
+
+    <div v-if="showTip" style="position:fixed;width:100%;height:100%;top:0;">
+      <div style="max-width:65vw;position:fixed;z-index:999;padding:5vw;background:#000;top:50%;left:50%;color:#fff;transform:translateX(-50%);border-radius: 2vw;">
+        {{showTip}}
+      </div>
+    </div>
+
+  </div>
+
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      extensionData: {},
+      snsUserInfo: {},
+      securityKey: '',
+      openId: '',
+      isSigned: false,
+      showTip: false,
+      loading: true,
+      isNeedValidate: false,
+      Flows: {}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goCenter: function () {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId
+      },
+      goRegister: function () {
+        // console.log(app.Flows.register)
+        // window.location.href = "./annual-register.html";
+        window.location.href = app.Flows.register;
+      }
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': this.actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.Flows = setFlow(result)
+
+          setWX(result)
+
+          console.log(result.result)
+          app.snsUserInfo = result.result.snsUserInfo;
+          if (result.result.extensionData) {//存在extensionData,来自于大屏端,有人脸特征且已签到
+            app.isSigned = true;
+            app.loading = false;
+
+            app.extensionData = JSON.parse(result.result.extensionData);
+          } else {//由扫码进入
+
+            app.securityKey = result.result.deviceActivityGame.securityKey;
+            app.openId = result.result.snsUserInfo.openid;
+
+            app.isNeedValidate = result.result.deviceActivityGame.activity.isNeedValidate;
+
+
+            $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyPersonDataInActivity', {
+              OpenId: app.openId,
+              SecurityKey: app.securityKey,
+              SnsType: 'WeChat',
+            }, function (result) {
+              if (result.success) {
+                if (!result.result || !result.result.isRegistered) {//还没注册过
+                  window.location.href = app.Flows.register + '?actionId=' + app.actionId;
+                }
+                else if (result.result.isSigned) {//已签到
+                  app.isSigned = true;
+                  app.loading = false;
+                }
+                //没签到
+                else if (app.isNeedValidate && !result.result.isValidated) {//需要认证,但还没认证
+                  app.showTip = '您尚未通过认证,请联系工作人员';
+                  app.loading = false;
+                }
+
+                else {//不需要认证,或已经认证
+                  $.ajax({
+                    type: "POST",
+                    url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/MySignInActivity",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                      securityKey: app.securityKey,
+                      openId: app.openId,
+                      snsType: "WeChat",
+                      // actionId:app.actionId
+                    }),
+                    success: function (message) {
+                      if (message.success) {
+                        console.log(message.result)
+                        app.isSigned = true;
+                        app.loading = false;
+                      }
+                    }
+                  })
+
+                }
+              }
+            })
+
+          }
+
+
+
+
+
+        }
+      })
+
+
+
+
+
+    }
+  })
+
+</script>
+
+</html>

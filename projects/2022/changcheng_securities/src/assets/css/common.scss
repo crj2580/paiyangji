@@ -1,0 +1,60 @@
+@font-face {
+  font-family: 'youran';
+  src: url('../fonts/youran.ttf');
+};
+@font-face {
+  font-family: 'yingxiong';
+  src: url('../fonts/yingxiong.ttf');
+}
+
+*{
+  padding: 0;
+  margin: 0;
+}
+
+html,body,#root{
+  width: 1080px;
+  height: 1920px;
+}
+
+#pageone{
+  background-image: url('../../static/pg1/pg1-background.png');
+}
+
+#pagetwo,#pagethree,#pagefour{
+  background-image: url('../../static/background.png');
+  img{
+    position: absolute;
+    z-index: 2;
+  }
+  .section{
+    z-index: 1;
+    left: .74vw;
+    top: 7.7vh;
+  }
+  .logo{
+    left: 6.76vw;
+    top: 3.23vh;
+  };
+  .bottom-text{
+    left: 6.67vw;
+    bottom: 2.19vh;
+  };
+  .home-btn{
+    top: 16.4vh;
+  }
+}
+
+.logo{
+  position: absolute;
+  z-index: 2;
+  left: 10.28vw;
+  top: 4.635vh;
+};
+
+.bottom-text{
+  position: absolute;
+  z-index: 2;
+  left: 6.76vw;
+  bottom: 3.33vh;
+};

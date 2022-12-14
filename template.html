@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+  <meta http-equiv='Expires' content='0'>
+  <meta http-equiv='Pragma' content='no-cache'>
+  <meta http-equiv='Cache-Control' content='no-cache'>
+
+  
+  <title>创思感知</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <!-- <link rel="stylesheet" href="./styles/template.css"> -->
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+</head>
+<style>
+  #height {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+  }
+
+  #height .like {
+    height: 2.8vh;
+    position: absolute;
+    top: 3.5%;
+    right: 5%;
+  }
+
+  #height .avatar {
+    width: 7vh;
+    height: 7vh;
+    border-radius: 50%;
+    position: absolute;
+    top: 6%;
+    left: 5%;
+  }
+
+  #height .gameTitle {
+    color: #fff;
+    position: absolute;
+    top: 6%;
+    left: 8%;
+    margin-left: 7vh;
+    font-size: 7vw;
+    line-height: 7vh;
+    width: 60%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #height .largeContainer {
+    position: absolute;
+    top: 16vh !important;
+    text-align: center;
+    width: 100vw;
+  }
+
+  #height .largeContainer .imageBorder {
+    position: relative;
+    height: 65vh !important;
+  }
+
+  #height .largeContainer .gameImage {
+    position: absolute;
+    width: 90%;
+    height: 95%;
+    left: 5%;
+    top: 2.5%;
+  }
+
+  #height .largeContainer .statistic {
+    position: absolute;
+    bottom: -6%;
+    left: 0;
+    font-size: 4vw;
+    line-height: 5vw;
+  }
+
+  #height .largeContainer .statistic span {
+    position: relative;
+    top: -2px;
+  }
+
+  #height .largeContainer .statistic img {
+    width: 4vw;
+    margin-left: 5px;
+  }
+
+  #height .largeContainer .touch {
+    position: absolute;
+    right: -12%;
+    bottom: -2%;
+    width: 25vw;
+  }
+
+  #height .buttonContainer {
+    position: absolute;
+    top: 88vh;
+    width: 100%;
+    text-align: center;
+  }
+
+  #height .buttonContainer .button {
+    width: 70%;
+  }
+
+  #width {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+  }
+
+  #width .like {
+    height: 2.5vh;
+    position: absolute;
+    top: 5%;
+    right: 5%;
+  }
+
+  #width .avatar {
+    width: 8vh;
+    height: 8vh;
+    border-radius: 50%;
+    position: absolute;
+    top: 10%;
+    left: 5%;
+  }
+
+  #width .gameTitle {
+    color: #fff;
+    position: absolute;
+    top: 10%;
+    left: 8%;
+    margin-left: 7vh;
+    font-size: 7vw;
+    line-height: 7vh;
+    width: 60%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #width .largeContainer {
+    position: absolute;
+    top: 22vh !important;
+    text-align: center;
+    width: 100vw;
+  }
+
+  #width .largeContainer .imageBorder {
+    position: relative;
+    width: 100%;
+    z-index: 2;
+  }
+
+  #width .largeContainer .gameImage {
+    width: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* border-radius: 20vw; */
+  }
+
+  #width .largeContainer .statistic {
+    position: absolute;
+    bottom: -10%;
+    left: 5vw;
+    font-size: 4vw;
+    line-height: 5vw;
+  }
+
+  #width .largeContainer .statistic span {
+    position: relative;
+    top: -2px;
+  }
+
+  #width .largeContainer .statistic img {
+    width: 4vw;
+    margin-left: 5px;
+  }
+
+  #width .largeContainer .touch {
+    position: absolute;
+    right: 0%;
+    bottom: -9%;
+    width: 16vw;
+    z-index: 5;
+  }
+
+  #width .buttonContainer {
+    position: absolute;
+    top: 88vh;
+    width: 100%;
+    text-align: center;
+  }
+
+  #width .buttonContainer .button {
+    width: 70%;
+  }
+
+  #width .bottom {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+  }
+
+  #simple .largeContainer {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  #simple .gameImage {
+    width: 80%;
+  }
+
+  #simple .touch {
+    position: absolute;
+    right: -3%;
+    bottom: -2vw;
+    width: 20%;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <img v-if="Flows.activityCenter&&!isShared" src="./img/home.png" v-on:click="goCenter()" style="position:fixed;width:10vw;bottom:19vw;right:3vw;z-index:9;">
+
+    <div class="basicLoading" v-show="loading">
+      <img src="/img/loading.gif">
+    </div>
+
+    <img :src="params.background" style="position:fixed;width:100%;height:100%;">
+    <div v-if="params.screenType=='height'" id="height">
+      <!-- <img src="./img/toLike.png" class="like" v-on:click="like()" v-if="!liked"> -->
+      <!-- <img src="./img/like.png" class="like" v-if="liked"> -->
+      <img v-bind:src="avatar" v-if="avatar" class="avatar">
+      <div class="gameTitle">{{gameTitle}}</div>
+      <div class="largeContainer">
+        <div style="position:relative;display:inline-block;">
+          <img src="./img/border.png" class="imageBorder">
+          <img v-bind:src="gameImage" v-if="gameImage" class="gameImage">
+          <div v-if="params.showStatistic" class="statistic">
+            <img src="./img/heart.png">
+            <span>{{likeCount}}</span>
+            <img src="./img/share.png">
+            <span>{{shareCount}}</span>
+            <img src="./img/eye.png" style="position:relative;top:-0.5vw;">
+            <span>{{viewCount}}</span>
+          </div>
+          <img src="./img/touch.png" class="touch" v-if="params.saveTip">
+        </div>
+      </div>
+
+    </div>
+    <div v-if="params.screenType=='width'" id="width">
+      <!-- <img src="./img/toLike.png" class="like" v-on:click="like()" v-if="!liked"> -->
+      <!-- <img src="./img/like.png" class="like" v-if="liked"> -->
+      <img v-bind:src="avatar" v-if="avatar" class="avatar">
+      <div class="gameTitle" :style="{color:params.fontColor}">{{gameTitle}}</div>
+      <div class="largeContainer">
+        <img :src="params.border" class="imageBorder">
+        <img v-bind:src="gameImage" :style="params.imageStyle" v-if="gameImage" class="gameImage">
+        <div v-if="score" style="font-size:3.8vw;position:absolute;left:30%;bottom:16.2%;z-index:3;transform: translateX(-50%);"
+          :style="{color:params.fontColor}">{{score}}</div>
+        <div v-if="params.showStatistic" class="statistic" :style="{color:params.fontColor}">
+          <img src="./img/heart.png">
+          <span>{{likeCount}}</span>
+          <img src="./img/share.png">
+          <span>{{shareCount}}</span>
+          <img src="./img/eye.png" style="position:relative;top:-0.5vw;">
+          <span>{{viewCount}}</span>
+        </div>
+        <img src="./img/save.png" class="touch" v-if="params.saveTip">
+      </div>
+    </div>
+
+    <div v-if="params.screenType=='simple'" id="simple">
+      <!-- <img v-bind:src="avatar" v-if="avatar" class="avatar"> -->
+      <div class="largeContainer">
+        <div style="position:relative;display:inline-block;">
+          <img v-bind:src="gameImage" :style="params.imageStyle" v-if="gameImage" class="gameImage">
+          <img src="./img/touch.png" class="touch" v-if="params.saveTip">
+        </div>
+      </div>
+
+    </div>
+
+    <img :src="params.bottom" style="position:fixed;bottom:0;width:100%;">
+    <img v-on:click="goTroncell()" src="./img/troncell.png" style="position:fixed;bottom:0;width:100%;z-index:5;">
+  </div>
+
+
+</body>
+
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      gameImage: '',
+      gameTitle: '',
+      avatar: '',
+      securityKey: '',
+      actionId: '',
+      likeCount: '',
+      shareCount: '',
+      viewCount: '',
+      liked: false,
+      Flows: {},
+      loading: true,
+      score: '',
+      defaultParams: {
+        "background": "./img/template/bg.png",
+        "fontColor": "#fff",
+        "screenType": "simple",
+        // "imageStyle": { "margin-top": "20vw", "width": "90%" },
+        "showStatistic": false
+      },
+      params:{}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      like: function () {
+        this.liked = true;
+        $.post('https://g.api.troncell.com/api/UserAction/LikeAction?actionId=267&openId=o4JqmwPn7Nad23cd4r5VJsAbra-o&snsType=WeChat', {
+          actionId: this.actionId,
+          openId: this.openId,
+          snsType: 'WeChat'
+        }, function (result) {
+          app.likeCount = app.likeCount + 1
+        })
+      },
+      goCenter: function () {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId
+      },
+      goTroncell: function () {
+        window.location.href = "http://www.troncell.com";
+      }
+    },
+    mounted: function () {
+
+      this.actionId = this.$options.methods.kindId('actionId');
+      this.openId = this.$options.methods.kindId('openid');
+      this.isShared = this.$options.methods.kindId('isShared');
+      var actionId = this.actionId
+      var openID = this.$options.methods.kindId('openid');
+
+      //获取游戏信息
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.loading = false;
+          console.log(result.result)
+          app.score = result.result.score;
+          app.gameTitle = result.result.deviceActivityGame.name;
+          // app.gameImage = '/img/other/man.png';
+          app.gameImage = result.result.gameImage;
+          app.shareCount = result.result.shareCount;
+          app.likeCount = result.result.likeCount;
+          app.viewCount = result.result.viewCount;
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+          if (result.result.deviceActivityGame.extensionData) {
+            console.log(result.result.deviceActivityGame.extensionData)
+            app.params = Object.assign(app.defaultParams,JSON.parse(result.result.deviceActivityGame.extensionData));
+          }
+
+          if (result.result.snsUserInfo) {
+            app.Flows = setFlow(result)
+            setWX(result, undefined, {
+              link: '?isShared=true&actionId=' + app.actionId
+            })
+            app.avatar = result.result.snsUserInfo.headimgurl;
+          }
+
+
+        }
+      })
+
+    }
+  })
+
+</script>
+
+</html>

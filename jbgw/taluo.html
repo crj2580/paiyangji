@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>塔罗牌</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx.js"></script>
+  <script src="/js/TweenMax.min.js" type="text/javascript"></script>
+  <script src="/js/preloadjs.min.js"></script>
+  <script src="/js/soundjs.min.js"></script>
+  <script src="/js/signalr.min.js" type="text/javascript"></script>
+</head>
+<style>
+  #cardContainer {
+    top: 20vh;
+    height: 80vh;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+  }
+
+  #cardContainer .card {
+    width: 20vw;
+    position: absolute;
+    left: 40%;
+    bottom: -50vw;
+  }
+
+  #cardContainer2 {
+    top: 0;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    overflow: hidden;
+  }
+
+  #cardContainer2 .card2 {
+    width: 20vw;
+    position: absolute;
+  }
+
+  #cardContainer3 {
+    top: 8vh;
+    width: 100%;
+    height: 25vw;
+    overflow: hidden;
+    position: absolute;
+  }
+
+  #cardContainer3 .card3 {
+    width: 15vw;
+    position: absolute;
+    left: 100vw;
+  }
+
+  .headContainer {
+    position: absolute;
+    border: 1px solid #fff;
+    color: #fff;
+    border-top-right-radius: 5vw;
+    border-bottom-right-radius: 5vw;
+    font-size: 5vw;
+    left: 11vw;
+    top: 2.5vw;
+    padding: 1.5vw 6vw;
+    white-space: nowrap;
+    display: flex;
+  }
+
+  .redTitle {
+    color: #CB0826;
+    font-size: 5vw;
+    line-height: 10vw;
+    position: relative;
+    left: -2vw;
+  }
+
+  .upsideDown {
+    transform: rotate(180deg);
+  }
+
+  .status2-enter-active,
+  .status3-enter-active {
+    opacity: 1;
+    transition: opacity 5s;
+  }
+
+  .status4-enter-active {
+    transition: opacity 2.5s;
+  }
+
+  .status2-enter,
+  .status3-enter,
+  .status4-enter {
+    opacity: 0;
+  }
+
+  .status2-leave-active {
+    opacity: 0;
+    transition: opacity 5s;
+  }
+
+  #cardContainer4 {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    text-shadow: 0.1vw 0.1vw 3vw rgb(255, 0, 0);
+    font-size: 2.4vh;
+    color: rgb(225, 225, 225);
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+  }
+</style>
+
+<body>
+  <div id="app">
+    <audio id="bgAudio" style="position:absolute;opacity: 0;" src="https://troncell.oss-cn-shanghai.aliyuncs.com/Uploads/Tenants/1018/Common/bg_2019041609101989372503.mp3"
+      loop @loadstart="needWXPreload=false;" @canplay="playBg()"></audio>
+    <audio id="hualaAudio" style="position:absolute;opacity: 0;" src="./img/huala.mp3"></audio>
+
+
+    <img v-if="status!=3" src="./img/taluo-bg.png" style="position:fixed;width:100%;height:100%;">
+    <img v-else src="./img/detail-bg.png" style="position:fixed;width:100%;height:100%;">
+    <img id="zoom" src="./img/light0.png" style="position:fixed;width:100%;height:100%;opacity: 0;">
+
+    <img v-if="showBiu" src="./img/biu.gif" style="position:fixed;width:100%;top:21%;height:55%;">
+    <img v-if="status==1" src="./img/main.gif" style="position:fixed;width:100%;height:100%;z-index:999;">
+
+
+    <div v-if="loading" class="basicLoading">
+      <img src="/img/loading.gif">
+      <div>{{progress}}</div>
+    </div>
+
+    <div v-if="status==0" id="cardContainer">
+      <img v-for="item of 16" class="card" src="./img/card.png">
+    </div>
+
+    <img v-if="status==0" id="copy" src="./img/copy.png" style="width:50%;left:25%;position:absolute;top:55vh;display: none;">
+    <div id="btn" v-if="status==0" @click="clickBtn" style="width:36%;left:32%;position:absolute;top:75vh;display: none;">
+      <img src="./img/btn.png" style="width:100%;">
+      <img v-if="showBtnGif" src="./img/btn.gif" style="width:100%;position: absolute;top:-55%;width:130%;left:-10%;height:205%;">
+    </div>
+
+
+    <transition name="status2">
+      <div v-show="status==2" id="cardContainer2" transiton="status2">
+        <img @click.once="chooseCard(0)" class="card2" src="./img/card-light.png" style="left:15vw;top:50vh;margin-top:-35vw;">
+        <img @click.once="chooseCard(1)" class="card2" src="./img/card-light.png" style="left:15vw;top:50vh;margin-top:-5vw;">
+
+        <img @click.once="chooseCard(2)" class="card2" src="./img/card-light.png" style="left:40vw;top:47vh;margin-top:-46vw;">
+        <img @click.once="chooseCard(3)" class="card2" src="./img/card-light.png" style="left:40vw;top:50vh;margin-top: -20vw;">
+        <img @click.once="chooseCard(4)" class="card2" src="./img/card-light.png" style="left:40vw;top:53vh;margin-top:6vw;">
+
+        <img @click.once="chooseCard(5)" class="card2" src="./img/card-light.png" style="left:65vw;top:50vh;margin-top:-35vw;">
+        <img @click.once="chooseCard(6)" class="card2" src="./img/card-light.png" style="left:65vw;top:50vh;margin-top:-5vw;">
+
+        <div id="cardName" style="position:absolute;bottom:calc( 25vh - 25vw);width:100%;text-align:center;display: none;">
+          <img src="./img/cardName.png" style="width:50%;left:25%;">
+          <b style="position:absolute;width:44%;left:28%;line-height: 9.5vw;font-size:3.4vw;">{{cardName}}</b>
+        </div>
+      </div>
+    </transition>
+
+    <img v-show="status==2" id="copy2" src="./img/copy2.png" style="width:50%;left:25%;position:absolute;bottom:3vh;">
+    <div v-show="status==2" id="cardContainer3">
+      <img v-for="item of 8" class="card3" src="./img/card.png">
+    </div>
+
+    <transition name="status3">
+      <div v-if="status==3" transiton="status3" style="position:relative;padding:12vh 6vw 6vw;min-height:88vh;">
+        <img src="./img/title.png" style="width:20%;position: absolute;left:40%;top:5vw;">
+        <div style="position: relative;">
+          <div class="headContainer">
+            <div style="max-width:40vw;white-space: nowrap;text-overflow:ellipsis;overflow:hidden;">
+              {{nickName}}
+            </div>
+            <span>的占卜结果</span>
+          </div>
+          <img :src="headimgurl" style="border-radius:50%;width:16vw;height:16vw;position: relative;">
+          <img src="./img/gold-circle.png" style="position:absolute;width:16vw;left:0;top:0;">
+        </div>
+
+
+        <div style="color:#fff;margin-top:5vw;">
+          <div style="float:right;width:40%;margin-left:5vw;margin-bottom:1.5vw;">
+            <img :src="meta.picUrl" style="width:100%;height:54vw" :class="{upsideDown:metaDetail.direction!='正立'}"><br>
+            <span style="font-size:1.2vw;float:right;">占卜结果由占卜师Muina小姐提供</span>
+          </div>
+          <b class="redTitle">【塔罗牌解读】</b><br>
+          <span style="text-shadow: 0px 0 2vw #F00;font-size:3.3vw;" v-html="metaDetail.career">
+          </span>
+          <br><br>
+          <b class="redTitle">【美丽开运建议】</b><br>
+          <span style="text-shadow: 0px 0 2vw #F00;font-size:3.3vw;" v-html="metaDetail.love">
+          </span>
+          <br><br>
+          <b class="redTitle">【开运单品】</b><br>
+          <div style="display:flex;">
+
+            <div style="width:30vw;height:30vw;position: relative;background:#fff;text-align: center;margin-right:3vw;">
+              <img src="./img/gold-rect.png" style="width:100%;height:100%;position: absolute;left:0;top:0;">
+              <img :src="recommendDetail.picUrl" style="height:30vw;">
+            </div>
+            <div style="width:60vw;">
+              <b style="text-shadow: 0px 0 2vw #F00;font-size:5vw;">{{recommendDetail.title}}{{recommendDetail.skus[0].title}}</b><br>
+              <span style="text-shadow: 0px 0 2vw #F00;font-size:3.3vw;" v-html="recommend.reason"></span><br>
+              <span @click.once="goShop" style="width:40vw;margin-top:3vw;display: inline-block;">
+                <img src="./img/know.png" style="width:100%">
+              </span>
+            </div>
+          </div>
+
+        </div>
+        <div style="text-align:center;margin:8vw 0 5vw;">
+          <img src="./img/newMember.png" style="width:40%;">
+        </div>
+      </div>
+    </transition>
+
+
+
+    <transition name="status4">
+      <div v-show="status==4" id="cardContainer4" transiton="status4">
+        <div style="margin-top:14vh;">来到这里的你</div>
+        <div>心中大概有一些问题或困惑吧</div>
+
+        <div style="margin-top:8vh;"><b style="font-size:6.5vw;">78</b>张神秘的塔罗牌</div>
+        <div>带你一起探寻</div>
+        <div>与生活的联系</div>
+        <div>开启美丽开运秘籍</div>
+
+        <div style="margin-top:8vh;">如同命运的指引般</div>
+        <div>或许</div>
+        <div>在这里可以找到答案</div>
+
+
+        <div style="text-align:right;position: absolute;right:19vh;top:82vh;">
+          长按扫码 >>> <br> 免费获取你的塔罗牌
+        </div>
+        <img :src="qrCodeImage" style="position: absolute;width:15vh;bottom:2.5vh;right:2.5vh;">
+      </div>
+    </transition>
+
+  </div>
+
+</body>
+
+<script>
+  // $.ajaxSetup({
+  //   timeout: 10000,
+  //   error: function (jqXHR, textStatus, errorThrown) {
+  //     switch (jqXHR.status) {
+  //       case (500):
+  //         console.log("服务器系统内部错误");
+  //         break;
+  //       case (401):
+  //         console.log("未登录");
+  //         break;
+  //       case (403):
+  //         console.log("无权限执行此操作");
+  //         break;
+  //       case (408):
+  //         console.log("请求超时");
+  //         break;
+  //       case (0):
+  //         console.log("跨域");
+  //         break;
+  //       default:
+  //         console.log("未知错误", 'jqXHR', jqXHR, 'textStatus', textStatus, 'errorThrown', errorThrown);
+  //     }
+  //     window.location.href = "/error.html";
+  //   },
+  //   success: function (data) {
+  //     console.log("操作成功");
+  //   }
+  // });
+
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      status: -1,//-1无 0等待切牌 1六芒星gif 2选牌 3详情 4海报
+      actionId: '',
+      openId: '',
+      headimgurl: '',
+      securityKey: '',//da177a74e2024d4189895af37ea696bc
+      nickName: '',
+      dispatchedSoftwareId: '',
+      deviceId: '',
+      storeOuterId: '',
+      loading: true,
+      showBiu: false,
+      showBtnGif: false,
+      progress: '',
+      subKey: '',
+      meta: {},
+      metaDetail: {},
+      recommend: {},
+      recommendDetail: {},
+      cardId: false,
+      cardName: '',
+      preloadReady: false,
+      dataReady: false,
+      fromId: '',
+      qrCodeImage: '',
+      actionDataResult: {},
+      needWXPreload: true
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      actionDataById: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': _this.actionId
+        }, function (result, status) {
+          if (result.success) {
+            console.log(result.result);
+            // var fromId = _this.kindId('fromId') ? _this.kindId('fromId') : _this.actionId;
+            _this.actionDataResult = result;
+            setWX(_this.actionDataResult, undefined, {
+              autoLink: true,
+              link: '&wxType=Web&fromId=' + _this.actionId,
+            })
+
+            _this.openId = result.result.snsUserInfo.openid;
+            _this.nickName = result.result.snsUserInfo.nickname;
+            _this.headimgurl = result.result.snsUserInfo.headimgurl;
+            _this.deviceId = result.result.device.id;
+            _this.dispatchedSoftwareId = result.result.deviceActivityGame.dispatchedSoftwareId;
+            _this.subKey = result.result.device.subKey;
+            _this.storeOuterId = result.result.device.storeOuterId;
+            _this.securityKey = result.result.deviceActivityGame.securityKey;
+            var extensionData = result.result.extensionData;
+            if (extensionData) {//来自大屏扫码
+              _this.cardId = JSON.parse(extensionData).cardId;
+              $.get('https://api.japan-beauty-gateway.com/luckyWheel/user', {
+                'openId': _this.openId
+              }, function (result, status) {
+                if (result.data.isBind) {//已注册
+                  _this.enterRoom()
+                } else {//前往注册 
+                  window.location.href = `https://japan-beauty-gateway.com/?storeId=${_this.storeOuterId}&source=201&redirect=${encodeURIComponent(window.location.href)}#/bindPhone`;
+                }
+              })
+
+            } else if (_this.fromId) {//来自转发分享
+              _this.preLoad(true)
+
+            } else {//分享关注后推送进入
+              _this.preLoad(true)
+
+            }
+
+          }
+        })
+      },
+
+      enterRoom: function () {
+        var _this = this;
+        var connection = new signalR.HubConnectionBuilder().withUrl("https://g.api.troncell.com/game").build();
+        this.connection = connection;
+        connection.start().then(function () {
+          connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName, "HeadImgUrl": _this.headimgurl }).then(function (d) {
+            if (d.code == 0) {
+              connection.invoke("Ready");
+              connection.on("OnAllReady", (msg) => {
+                // alert('OnAllReady')
+                _this.preLoad(false)
+              });
+            }
+            else {
+              // alert(JSON.stringify(d.msg));
+              _this.preLoad(false)
+            }
+          });
+        })
+
+        connection.onclose(function () {
+          reConnection();
+          function reConnection() {
+            connection.start().then(function () {
+              connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName }).then(function (d) {
+                if (d.code == 0) { }
+                else {
+                  alert(JSON.stringify(d.msg));
+                }
+              });
+            }).catch(function () {
+              setTimeout(function () { reConnection() }, 1000);
+            })
+          }
+        });
+
+        connection.on("OnGameOver", (msg) => {//游戏结束 取图
+
+        });
+      },
+      goShop: function () {
+        console.log('goShop')
+        window.location.href = this.recommendDetail.onlineStoreInfos[0].qrcode;
+      },
+      clickBtn: function () {
+        var _this = this;
+        this.showBtnGif = true;
+        setTimeout(() => {
+          this.showBtnGif = false;
+        }, 800)
+        TweenMax.to("#btn", 0.5, {
+          scale: 0.85, repeat: 1, yoyo: true, ease: Power0.easeNone, onComplete: function () {
+            $('#cardContainer,#copy,#btn').fadeOut()
+            _this.status = 1;
+
+            setTimeout(() => {
+              if (_this.fromId) {
+                _this.status = 4;
+              } else {
+                _this.status = 2;
+                createjs.Sound.play("gulaMp3");
+                TweenMax.staggerTo(".card3", 0.4, {
+                  delay: 0.15,
+                  cycle: {// backgroundColor: ["red", "white", "#00f"],left:[0],
+                    left: function (index, target) {
+                      return 70 + index * 1.5 + 'vw'
+                    },
+                  }
+                }, 0.15)
+              }
+            }, 2200)
+          }
+        })
+      },
+      chooseCard: function (cardIndex) {
+        if (this.fromId) return;
+        var _this = this;
+        createjs.Sound.play("chooseMp3");
+        var trans3DBoxes = $("#cardContainer2 .card2");
+
+        TweenMax.to(trans3DBoxes.eq(cardIndex), 0.4, {
+          ease: Power0.easeNone, scale: 0.85, yoyo: true, repeat: 1, onComplete: function () {
+            $('#cardContainer3,#copy2').fadeOut(1000);
+            onReverseComplete();
+          }
+        })
+
+        function onReverseComplete() {
+          TweenMax.set("#cardContainer2 img.card2", { css: { transformPerspective: 400, transformStyle: "preserve-3d" } });
+          var arr3D = [];
+          var cssList = [
+            { rotationY: 0, rotationX: 720, rotationZ: -540, z: 280, left: '-60vw', top: '-30vh', marginTop: '-35vw' },
+            { rotationY: 540, rotationX: 360, rotationZ: 360, z: 280, left: '-60vw', top: '100vh', marginTop: '5vw' },
+            { rotationY: 360, rotationX: -360, rotationZ: 180, z: 280, top: '-60vh', marginTop: '-46vw' },
+            { rotationY: -360, rotationX: -360, rotationZ: 360, z: 280, left: '40vw', top: '50vh', marginTop: '-20vw' },
+            { rotationY: -540, rotationX: 0, rotationZ: 360, z: 280, top: '130vh', marginTop: '6vw' },
+            { rotationY: -180, rotationX: -720, rotationZ: 360, z: 280, left: '130vw', top: '-30vh', marginTop: '-35vw' },
+            { rotationY: -540, rotationX: -360, rotationZ: 180, z: 280, left: '130vw', top: '100vh', marginTop: '-5vw' }
+          ]
+          cssList.forEach((item, index) => {
+            if (index == cardIndex || index == 3) return
+            arr3D[index] = TweenMax.to(trans3DBoxes.eq(index), 1.5, { ease: Power0.easeNone, css: item })
+          })
+          arr3D[3] = TweenMax.to(trans3DBoxes.eq(3), 1.5, { ease: Power0.easeNone, css: cssList[cardIndex] })
+          arr3D[cardIndex] = TweenMax.to(trans3DBoxes.eq(cardIndex), 1.5, {
+            ease: Power0.easeNone, css: cssList[3], onComplete: function () {
+              $('.card2').eq(cardIndex).prop('src', _this.meta.picUrl);
+              $('#cardName').fadeIn(500);
+              if (_this.metaDetail.direction != '正立') {
+                TweenMax.set(trans3DBoxes.eq(cardIndex), { css: { rotationZ: 180 } })
+              }
+              setTimeout(function () {
+                _this.status = 3;
+              }, 2500)
+            }
+          })
+        }
+      },
+      playBg: function () {
+        document.getElementById('bgAudio').play();
+      },
+      preLoad: function (needPlayGame) {
+        // document.getElementById('bgAudio').play();
+        if (needPlayGame) {
+          var queue = new createjs.LoadQueue(false);
+          queue.installPlugin(createjs.Sound);
+          queue.on("complete", handleComplete, this);
+          queue.on("progress", handleProgress, this);
+          // 网络音频必须通过XHR与PreloadJS使用时被装入，因此，代码加载是不可能的。这意味着，标签装载不能使用，以避免交叉域的问题。
+          // queue.loadFile({ id: "bgMp3", src: "https://troncell.oss-cn-shanghai.aliyuncs.com/Uploads/Tenants/1018/Common/bg_2019041609101989372503.mp3" });
+          queue.loadManifest([
+            // { id: "hualaMp3", src: "./img/huala.mp3" },
+            { id: "gulaMp3", src: "./img/gula.mp3" },
+            { id: "chooseMp3", src: "./img/choose.mp3" },
+            'https://troncell.oss-cn-shanghai.aliyuncs.com/Uploads/Tenants/1018/Common/main_2019041610045965935109.gif',
+            'https://troncell.oss-cn-shanghai.aliyuncs.com/Uploads/Tenants/1018/Common/biu_2019041610075023757761.gif',
+            "https://troncell.oss-cn-shanghai.aliyuncs.com/Uploads/Tenants/1018/Common/btn_2019041610082814393525.gif",
+            // './img/main.gif','./img/biu.gif','./img/btn.gif',
+            './img/light0.png',
+            './img/copy2.png',
+            './img/card-light.png',
+            './img/light.png',
+            './img/btn.png',
+            './img/taluo-bg.png',
+            './img/card.png',
+          ]);
+          if (this.fromId) {//来自分享
+            this.status = 0;
+            this.dataReady = true;
+            var _this = this;
+            $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+              QrType: 'AfterGame',
+              SecurityKey: this.securityKey,
+              SnsType: "WeChat",
+          FromType:'mobile'
+
+            }, function (result) {
+              if (result.success) {
+                console.log(result)
+                _this.qrCodeImage = result.result.qrCodeImage;
+                _this.checkPreload(true);
+              } else {
+                window.location.href = "/error.html";
+              }
+            })
+          } else {//分享后关注后进入
+            this.startGame();
+          }
+        } else {
+          handleComplete.call(this)
+          this.showResult();
+        }
+
+
+        function handleComplete() {
+          this.progress = '';
+          this.preloadReady = true;
+          this.checkPreload(needPlayGame);
+        }
+        function handleProgress() {
+          this.progress = (queue.progress * 100).toFixed(0) + '%'
+        }
+
+      },
+      startTweenMax: function () {
+        var _this = this;
+        // createjs.Sound.play("hualaMp3");
+        document.getElementById('hualaAudio').play();
+
+        TweenMax.to("#zoom", 1, {
+          opacity: 1, repeat: 1, yoyo: true, delay: 0.3, ease: Power0.easeNone, onComplete: function () {
+            _this.showBiu = true;
+            setTimeout(() => {
+              _this.showBiu = false;
+            }, 1000)
+          }
+        })
+        TweenMax.staggerTo(".card", 0.2, { delay: 0.1, left: '80%', top: '50vh' }, 0.15);
+        TweenMax.staggerTo(".card", 0.3, {
+          delay: 0.3,
+          transformOrigin: "50% 180%",
+          cycle: {// backgroundColor: ["red", "white", "#00f"],left:[0],
+            left: function (index, target) {
+              if (index <= 10) {
+                return '40%'
+              } else {
+                return 45 + (index - 10) / 2 + '%'
+              }
+            },
+            top: function (index, target) {
+              if (index <= 10) {
+                return '0vw';
+              } else {
+                return 10 + (index - 10) / 2 + 'vw'
+              }
+            },
+            rotation: function (index, target) {
+              if (index > 10) index = 10
+              return -35 + index * 6 + 'deg'
+            }
+          }
+        }, 0.15, function () {
+          if (_this.fromId) {
+            _this.clickBtn()
+          } else {
+            $('#copy,#btn').fadeIn()
+          }
+        })
+      },
+      getDate: function () {
+        var myDate = new Date();
+        var month = myDate.getMonth() + 1;
+        if (month < 10) month = '0' + month
+        return `${myDate.getFullYear()}-${month}-01`
+      },
+      showResult: function (needPlayGame) {
+        // enterRoom
+        var _this = this;
+        $.get('https://r.api.troncell.com/api/services/app/MetaPhysics/GetMetaphysicBySubkeyAndId', {
+          'SubKey': _this.subKey,
+          'Id': _this.cardId
+        }, function (result, status) {
+          _this.meta = result.result;
+          _this.cardName = result.result.name;
+          // console.log(result.result.name,123)
+          var queue = new createjs.LoadQueue(false);
+          queue.loadFile(_this.meta.picUrl);
+
+          $.get('https://r.api.troncell.com/api/services/app/DateMetaPhysics/GetDateMetaphysicsBySubkey', {
+            'SubKey': _this.subKey,
+            // 'StartTime': _this.getDate(),
+            'EndTime': _this.getDate(),
+            "TypeId": undefined,
+            'MetaPhysicsId': _this.cardId,
+            "Filter": undefined,
+            "Sorting": 'date DESC',
+            "MaxResultCount": 10,
+            "SkipCount": 0
+          }, function (result, status) {
+            console.log(result.result, '_this.metaDetail')
+            // if (result.result.items[0].lucks[3]) {
+            //   _this.metaDetail = result.result.items[0].lucks[3];
+            // } else {
+            //   _this.metaDetail = result.result.items[0].lucks[0];
+            // }
+            _this.metaDetail = result.result.items[0].lucks.filter(item => {
+              return item.type == 'Month'
+            })[0]
+
+            changeWX(_this.actionDataResult, undefined, {
+              autoLink: true,
+              link: '&wxType=Web&fromId=' + _this.actionId,
+              // description: `🔮我抽到了“${_this.cardName}”，关键词“${_this.metaDetail.keyword}”，🔮78张神秘塔罗牌，探寻命运的指引，或许在这里可以找到答案`,
+              timelineDescription: `🔮我抽到了“${_this.cardName}”，关键词“${_this.metaDetail.keyword}”，🔮78张神秘塔罗牌，探寻命运的指引，或许在这里可以找到答案`,
+              messageDescription: `🔮78张神秘塔罗牌，探寻命运的指引，或许在这里可以找到答案`,
+              title: `🔮我抽到了“${_this.cardName}”，关键词“${_this.metaDetail.keyword}”`,
+            })
+            _this.recommend = result.result.items[0].recommneds[0];
+            $.get('https://s.api.troncell.com/api/services/app/SensingDevice/GetProductBySubKeyAndSkuOuterId', {
+              'SubKey': _this.subKey,
+              'OuterId': _this.recommend.thingId
+            }, function (result, status) {
+              _this.recommendDetail = result.result;
+              _this.dataReady = true;
+              _this.checkPreload(needPlayGame);
+            })
+          })
+        })
+
+      },
+      checkPreload: function (needPlayGame) {
+        // document.getElementById('bgAudio').play();
+        if (this.dataReady && this.preloadReady) {
+          this.loading = false;
+          if (needPlayGame) {
+            setTimeout(() => {
+              this.startTweenMax();
+            }, 1000)
+          } else {
+            this.status = 3;
+          }
+        }
+      },
+      startGame: function () {
+        var _this = this;
+        _this.status = 0;
+        $.get('https://r.api.troncell.com/api/services/app/MetaPhysics/GetRandomMetaphysicBySubkeyAndTypeId', {
+          'SubKey': _this.subKey,
+          'TypeId': 10028//资生堂的塔罗牌
+        }, function (result, status) {
+          _this.cardId = result.result.id;
+          _this.cardName = result.result.name;
+          _this.showResult(true)
+        })
+      }
+
+    },
+    mounted: function () {
+      var _this = this;
+      document.addEventListener("WeixinJSBridgeReady", function () {//微信加载完毕,不同于wx.ready,不需要config
+        setTimeout(() => {
+          if (_this.needWXPreload) {
+            document.getElementById('bgAudio').load();
+            document.getElementById('hualaAudio').load();
+          }
+        }, 100)
+      }, false);
+
+      this.actionDataById();
+      this.fromId = this.kindId('fromId');
+
+
+    }
+  })
+
+</script>
+
+</html>

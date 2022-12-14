@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>ecovacs</title>
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <link href="<%= BASE_URL %>reset.css" rel="stylesheet" type="text/css">
+  <script src="<%= BASE_URL %>preloadjs.min.js"></script>
+  <script src="<%= BASE_URL %>qrcode.min.js"></script>
+  <script src="<%= BASE_URL %>md5.js"></script>
+  <!-- <script src="https://cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script> -->
+  <!-- <script>eruda.init();</script> -->
+  <link rel="stylesheet" href="./swiper-bundle.min.css">
+  <script src="./swiper-bundle.min.js"> </script>
+  <script>
+    function onAppDownloadFinish() {
+      // alert('onAppDownloadFinish');
+      // window.app.loading = false;
+    }
+  </script>
+</head>
+<style>
+  body,
+  html {
+    touch-action: none
+  }
+
+  /* 防止长按保存 */
+  img {
+    pointer-events: none;
+  }
+
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /*阻止ios下点击区域变暗*/
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+</style>
+
+<body>
+  <noscript>
+    <strong>We're sorry but ecovacs doesn't work properly without JavaScript enabled. Please enable it to
+      continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+</html>

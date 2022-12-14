@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>颜值游戏</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="./styles/hongfang.css">
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <div id="app">
+    <img v-bind:src="avatar" v-if="avatar" class="avatar">
+    <div class="description">{{nickName}}颜值游戏体验</div>
+    <div class="like" v-on:click="like()" v-if="!liked">点赞</div>
+    <div class="main">
+      <img src="./img/hongfang/main2.png" style="width:100%;position:relative;opacity: 0;">
+      <img src="./img/loading.gif" style="position:absolute;top:35vh;left:50vw;transform:translateX(-50%);width:8vw;">
+      <img v-bind:src="gameImage" v-if="gameImage" style="width:100%;height:100%;position:absolute;top:0;left:0;">
+    </div>
+    <div class="statistic">
+      <img src="./img/heart.png">
+      <span>{{likeCount}}</span>
+      <img src="./img/share.png">
+      <span>{{shareCount}}</span>
+      <img src="./img/eye.png" style="position:relative;top:-0.5vw;">
+      <span>{{viewCount}}</span>
+      <span style="float:right;margin-right:5vw;">{{nowFormatData}}</span>
+    </div>
+    <div class="bottom">
+      <div class="center" v-if="awardMsg">
+        <div>您已成功领取</div>
+        <div>{{awardMsg}}</div>
+      </div>
+      <div class="center" v-if="errorMsg" style="padding:10px 15vw">
+        <div>{{errorMsg}}</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  function getNowFormatDate() {
+    var date = new Date();
+    var seperator1 = "-";
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    var hour = date.getHours()
+    var minute = date.getMinutes()
+    if (month >= 1 && month <= 9) {
+      month = "0" + month;
+    }
+    if (strDate >= 0 && strDate <= 9) {
+      strDate = "0" + strDate;
+    }
+    if (minute <= 10) {
+      minute = "0" + minute;
+    }
+    var currentdate = year + seperator1 + month + seperator1 + strDate + ' ' + hour + ':' + minute;
+    return currentdate;
+  }
+
+  var nowFormatData = getNowFormatDate();
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      screenType: false,
+      gameImage: '',
+      gameTitle: '',
+      avatar: '',
+      securityKey: '',
+      actionId: '',
+      openId: '',
+      nowFormatData: nowFormatData,
+      score: '',
+      likeCount: '',
+      shareCount: '',
+      viewCount: '',
+      nickName: '',
+      liked: false,
+      awardMsg: '',
+      errorMsg: ''
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      like: function () {
+        this.liked = true;
+        $.post('https://g.api.troncell.com/api/UserAction/LikeAction?actionId=267&openId=o4JqmwPn7Nad23cd4r5VJsAbra-o&snsType=WeChat', {
+          actionId: this.actionId,
+          openId: this.openId,
+          snsType: 'WeChat'
+        }, function (result) {
+          app.likeCount = app.likeCount + 1
+        })
+      }
+    },
+    mounted: function () {
+      this.screenType = this.$options.methods.kindId('screenType');
+      this.actionId = this.$options.methods.kindId('actionId');
+      this.openId = this.$options.methods.kindId('openid');
+      this.isShared = this.$options.methods.kindId('isShared');
+      var actionId = this.actionId
+      var openID = this.$options.methods.kindId('openid');
+
+      // if (this.isShared == 'False') {
+      //   $.ajax({
+      //     type: "POST",
+      //     url: "https://api.syrzs.cn:443/kdshop-new-api/wx/login/byOpenId?token=htxf",
+      //     contentType: "application/json; charset=utf-8",
+      //     data: JSON.stringify({
+      //       // OPEN_ID: this.openId,
+      //       OPEN_ID: openID,
+      //       STORE_ID: 812903
+      //     }),
+      //     success: function (message) {
+      //       $.ajax({
+      //         type: "POST",
+      //         url: "https://api.syrzs.cn:443/kdshop-new-api/coupon/store_plans?token=htxf",
+      //         contentType: "application/json; charset=utf-8",
+      //         headers: {
+      //           'X-SESSIONID': message.BODY.SESSION_ID
+      //         },
+      //         data: JSON.stringify({
+      //           // OPEN_ID: 'o4JqmwPn7Nad23cd4r5VJsAbra-o',
+      //           OPEN_ID: openID,
+      //           SESSION_ID: message.BODY.SESSION_ID,
+      //           STORE_ID: 812903
+      //         }),
+      //         success: function (result) {
+      //           var list = result.BODY.LIST;
+      //           list = list.map(function (item) {
+      //             return {
+      //               PLAN_ID: item.PLAN_ID,
+      //               PRIVILEGE: item.PRIVILEGE
+      //             }
+      //           })
+      //           console.log(list)
+      //           console.log(app.score / 100)
+      //           // var score = 95;
+      //           var score = app.score;
+      //           score = (1.8 - score / 100).toFixed(2);
+      //           for (var i = 0; i < list.length; i++) {
+      //             if (list[i].PRIVILEGE == score) {
+      //               var PLAN_ID = list[i].PLAN_ID;
+      //             }
+      //           }
+
+      //           $.ajax({
+      //             type: "POST",
+      //             url: "https://api.syrzs.cn:443/kdshop-new-api/coupon/get?token=htxf",
+      //             contentType: "application/json; charset=utf-8",
+      //             headers: {
+      //               'X-SESSIONID': message.BODY.SESSION_ID
+      //             },
+      //             data: JSON.stringify({
+      //               SESSION_ID: message.BODY.SESSION_ID,
+      //               STORE_ID: 812903,
+      //               PLAN_ID: PLAN_ID,
+      //               COUNT: 1
+      //             }),
+      //             success: function (r) {
+      //               if (r.RSPMSG == 'succeed') {
+      //                 app.awardMsg = (score * 10).toFixed(1) + '折优惠券';
+      //               } else {
+      //                 app.errorMsg = r.RSPMSG;
+      //               }
+      //             }
+      //           })
+      //         }
+      //       })
+      //     }
+      //   })
+
+
+      // }
+
+
+      //获取游戏信息
+      function getDataByActionId(resolve, reject) {
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': actionId
+        }, function (result, status) {
+          if (result.success) {
+            app.gameTitle = result.result.deviceActivityGame.name;
+            app.avatar = result.result.snsUserInfo.headimgurl;
+            app.nickName = result.result.snsUserInfo.nickname;
+            app.gameImage = result.result.gameImage;
+            app.score = result.result.score;
+            app.shareCount = result.result.shareCount;
+            app.likeCount = result.result.likeCount;
+            app.viewCount = result.result.viewCount;
+            app.transferActionUrl = result.result.transferActionUrl + '&isShared=True';
+            app.securityKey = result.result.deviceActivityGame.securityKey;
+            $.post('https://g.api.troncell.com/api/UserAction/PostDataByUser', {
+              OpenId: app.openId,
+              actionId: app.actionId,
+              QrType: 'AfterGame',
+              SnsType: 'WeChat',
+              SecurityKey: app.securityKey,
+              AvatarUrl: app.avatar
+            }, function (result) { })
+            resolve({
+              tenantId: result.result.deviceActivityGame.tenantId,
+              // openId: result.result.snsUserInfo.openid,
+              openId: app.openId,
+              appid: result.result.deviceActivityGame.activity.weChatAppID,
+              url: encodeURI(location.href.split('#')[0])
+            })
+
+            if (app.isShared == 'False') {
+              $.ajax({
+                type: "POST",
+                url: "https://api.syrzs.cn:443/kdshop-new-api/wx/login/byOpenId?token=htxf",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                  OPEN_ID: openID,
+                  STORE_ID: 812903
+                }),
+                success: function (message) {
+                  $.ajax({
+                    type: "POST",
+                    url: "https://api.syrzs.cn:443/kdshop-new-api/coupon/store_plans?token=htxf",
+                    contentType: "application/json; charset=utf-8",
+                    headers: {
+                      'X-SESSIONID': message.BODY.SESSION_ID
+                    },
+                    data: JSON.stringify({
+                      // OPEN_ID: 'o4JqmwPn7Nad23cd4r5VJsAbra-o',
+                      OPEN_ID: openID,
+                      SESSION_ID: message.BODY.SESSION_ID,
+                      STORE_ID: 812903
+                    }),
+                    success: function (result) {
+                      var list = result.BODY.LIST;
+                      list = list.map(function (item) {
+                        return {
+                          PLAN_ID: item.PLAN_ID,
+                          PRIVILEGE: item.PRIVILEGE
+                        }
+                      })
+                      console.log(list)
+                      console.log(app.score / 100)
+                      // var score = 95;
+                      var score = app.score;
+                      score = (1.8 - score / 100).toFixed(2);
+                      for (var i = 0; i < list.length; i++) {
+                        if (list[i].PRIVILEGE == score) {
+                          var PLAN_ID = list[i].PLAN_ID;
+                        }
+                      }
+
+                      $.ajax({
+                        type: "POST",
+                        url: "https://api.syrzs.cn:443/kdshop-new-api/coupon/get?token=htxf",
+                        contentType: "application/json; charset=utf-8",
+                        headers: {
+                          'X-SESSIONID': message.BODY.SESSION_ID
+                        },
+                        data: JSON.stringify({
+                          SESSION_ID: message.BODY.SESSION_ID,
+                          STORE_ID: 812903,
+                          PLAN_ID: PLAN_ID,
+                          COUNT: 1
+                        }),
+                        success: function (r) {
+                          if (r.RSPMSG == 'succeed') {
+                            app.awardMsg = (score * 10).toFixed(1) + '折优惠券';
+                          } else {
+                            app.errorMsg = r.RSPMSG;
+                          }
+                        }
+                      })
+                    }
+                  })
+                }
+              })
+
+
+            }
+
+
+
+
+          } else {
+            // Tida.toast("网络故障,请重试.");
+          }
+        })
+      }
+
+      new Promise(getDataByActionId).then(function (param) {
+        $.get('https://g.api.troncell.com/WeixinJSSDK/GetWeChatJsViewModel', param, function (result, status) {
+          if (result.success) {
+            wx.config({
+              debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+              appId: result.result.appId, // 必填，公众号的唯一标识
+              timestamp: result.result.timestamp, // 必填，生成签名的时间戳
+              nonceStr: result.result.nonceStr, // 必填，生成签名的随机串
+              signature: result.result.signature,// 必填，签名
+              jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo'
+              ] // 必填，需要使用的JS接口列表
+            });
+            // var link = location.href;
+            // link = link.replace('isShared=False', 'isShared=True');
+            wx.ready(function () {
+              // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+              // wx.updateAppMessageShareData({
+              //   title: 'aaaa', // 分享标题
+              //   desc: '我是描述', // 分享描述
+              //   link: link, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+              //   imgUrl: app.gameImage, // 分享图标
+              // }, function (res) {
+              //   //这里是回调函数 
+              // });
+              wx.onMenuShareAppMessage({
+                title: '看看我的颜值标签', // 分享标题
+                desc: '我在红坊颜值游戏中获得' + app.score + '分,快来看看吧~', // 分享描述
+                link: app.transferActionUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: app.gameImage, // 分享图标
+                success: function () {
+                  // 用户点击了分享后执行的回调函数
+                }
+              });
+              wx.onMenuShareAppMessage({
+                title: '看看我的颜值标签', // 分享标题
+                desc: '我在红坊颜值游戏中获得' + app.score + '分,快来看看吧~', // 分享描述
+                link: app.transferActionUrl, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: app.gameImage, // 分享图标
+                success: function () {
+                  // 用户点击了分享后执行的回调函数
+                }
+              });
+              wx.onMenuShareQQ({
+                title: '看看我的颜值标签', // 分享标题
+                desc: '我在红坊颜值游戏中获得' + app.score + '分,快来看看吧~', // 分享描述
+                link: app.transferActionUrl, // 分享链接
+                imgUrl: app.gameImage,  // 分享图标
+                success: function () {
+                  // 用户确认分享后执行的回调函数
+                },
+                cancel: function () {
+                  // 用户取消分享后执行的回调函数
+                }
+              });
+            });
+          } else {
+            console.log("网络故障,请重试.");
+          }
+        })
+      });
+
+    }
+  })
+
+</script>
+
+
+
+</html>

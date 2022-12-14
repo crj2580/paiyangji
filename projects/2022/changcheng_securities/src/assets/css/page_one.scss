@@ -1,0 +1,44 @@
+#pageone{
+  width: 100vw;
+  height: 100vh;
+  img{
+    position: absolute;
+    z-index: 2;
+  };
+  .qr-code{
+    width: 25.83vw;
+    height: 14.53vh;
+    left: 25vw;
+    top: 28.23vh;
+  };
+  .qr-text{
+    left: 22.03vw;
+    top: 44.74vh;
+    width: 31.67vw;
+    height: 2vh
+  };
+  .logo{
+    left: 111px;
+    top: 89px;
+  };
+  .title{
+    left: 103px;
+    top: 201px
+  };
+  .bottom{
+    z-index: 1;
+    left: 0;
+  };
+  .bottom-text{
+    left: 73px;
+    bottom: 64px;
+  };
+  .bottom-btn-left{
+    left: 70px;
+    bottom: 228px;
+  };
+  .bottom-btn-right{
+    right: 70px;
+    bottom: 228px;
+  };
+}

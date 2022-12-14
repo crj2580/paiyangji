@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>领取成功</title>
+  <script src="/js/TweenMax.min.js"></script>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <style>
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+    }
+
+    .container {
+      /* width: 80vw; */
+      /* margin-left: 10vw; */
+      /* height: calc(85vh - 15vw); */
+      /* margin-top: 10vh; */
+      height: 100vh;
+      background: url(./img/bg.png?v-);
+      background-size: 100% 100%;
+      position: relative;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="container">
+      <img style="position: fixed;height: 92%;top: 0;left: 48.5%;transform: translateX(-50%);" src="./img/bgg_1.png"
+        alt="">
+        <img src="./img/success.png" style="width: 60%; position: absolute;top: 50%;left: 20%;" alt="">
+    </div>
+  </div>
+</body>
+<script>
+  window.onload = function () {
+    TweenMax.to("#board", 30, {
+      left: '-20%', ease: Power0.easeNone,
+      onComplete: function () {
+        TweenMax.fromTo("#board", 40, {
+          left: '100%'
+        }, { left: '-20%', ease: Power0.easeNone, repeat: -1 });
+      }
+    });
+  }
+</script>
+
+</html>

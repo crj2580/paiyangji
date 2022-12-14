@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>恭喜中奖</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+</head>
+
+<style>
+  body {
+    font-size: 5vw;
+  }
+
+  .shadow {
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 0px 9px 0px rgba(196, 196, 196, 0.59);
+  }
+
+  .container {
+    border-radius: 1.5vw;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 3vw 0px rgba(196, 196, 196, 0.59);
+    position: relative;
+    width: 90%;
+    margin: 5vw 5%;
+    z-index: 4;
+    overflow: hidden;
+  }
+
+  .container .containerHead {
+    background: #F0F0F0;
+    font-size: 4.5vw;
+    padding: 3vw;
+    font-weight: bold;
+  }
+
+  .container .info {
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 4vw;
+    line-height: 12vw;
+    height: 12vw;
+    width: 92%;
+    margin: 0 auto;
+    color: #2432AD;
+    font-weight: bold;
+  }
+
+  .container .onlineGameItem {
+    padding: 3vw 0 0;
+    text-align: center;
+    display: inline-block;
+    width: 25%;
+  }
+
+  .container .onlineGameItem .gameImage {
+    width: 70%;
+    border-radius: 8%;
+  }
+
+  .container .arrowContainer {
+    width: 100%;
+    text-align: center;
+    padding: 2vw 0;
+  }
+
+  .container .arrowContainer img {
+    width: 4%;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <img v-if="!isShared" src="./img/mine.png" v-on:click="goMine()"
+      style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;">
+    <div>
+      <div style="width:90%;margin:5%;position:relative;text-align:center;">
+        <img src="./img/annual/share/container.png" style="width:100%;">
+        <div style="position:absolute;top:0;width:100%;font-size:4.2vw;">
+          <div style="margin:6.5vw 0 1vw;">
+            <img :src="snsUserInfo.headimgurl" style="width:11vw;border-radius:50%;border:1vw solid #2156A2;">
+          </div>
+          <div style="color:#2156A2;font-size:5vw;font-weight:bold;">{{snsUserInfo.nickname}}</div>
+          <div style="margin:3vw 0;">
+            <img :src="award.awardImagePath" style="width:30vw;">
+          </div>
+          <div v-if="!isShared">恭喜您</div>
+          <div>{{activityName}}中获得</div>
+          <div style="color:#FF2424;">{{award.name}}</div>
+
+        </div>
+      </div>
+
+
+    </div>
+
+    <div v-if="!isNeedAwardInfo" class="container">
+      <div class="containerHead">
+        创思H5游戏推广
+      </div>
+      <div v-for="(item,index) of onlineGameList" @click="goOnline(item)" v-show="item.extensionData!='NotShowInGameCenter'"
+        class="onlineGameItem">
+        <img class="gameImage" :src="item.imageLink">
+        <div>
+          <div style="font-size:3.3vw;">{{item.name}}</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div v-if="loading" style="position:fixed;width:100%;height:100%;top:0;">
+      <img src="./img/loading.gif"
+        style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+    </div>
+
+    <div style="position:fixed;bottom:0;width:100%;z-index:5;height:5.5vw;background:#fff;"></div>
+    <img v-on:click="goTroncell()" src="./img/troncell.png" style="position:fixed;bottom:0;width:100%;z-index:5;">
+
+
+  </div>
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      snsUserInfo: {},
+      securityKey: '',
+      openId: '',
+      loading: true,
+      award: {},
+      activityName: '',
+      isShared: false,
+      isNeedAwardInfo: false,
+      expressCompany: '',
+      expressNO: '',
+      onlineGameList: [],
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goMine: function () {
+        window.location.href = "./annual-mine.html?actionId=" + this.actionId;
+      },
+      goTroncell: function () {
+        window.location.href = "http://www.troncell.com";
+      },
+      goOnline: function (item) {
+        window.location.href = "/transfer-action.html?securityKey=" + item.securityKey
+      },
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      this.useraward = this.$options.methods.kindId('useraward');
+      this.isShared = this.$options.methods.kindId('isShared');
+      if (this.isShared === 'true') {
+        this.isShared = true;
+      } else {
+        this.isShared = false;
+      }
+
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': this.actionId
+      }, function (result, status) {
+        if (result.success) {
+          console.log(result.result)
+          var newResult = result;
+
+          app.isNeedAwardInfo = result.result.deviceActivityGame.activity.isNeedAwardInfo;
+
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+          app.snsUserInfo = result.result.snsUserInfo;
+          app.activityName = result.result.deviceActivityGame.activity.name;
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetSnsUserAwardById', {
+            UserAwardId: app.useraward,
+            SecurityKey: app.securityKey
+          }, function (result) {
+            app.loading = false;
+            console.log(result.result, 'GetSnsUserAwardById')
+            app.award = result.result.award;
+            app.expressCompany = result.result.expressCompany;
+            app.expressNO = result.result.expressNO;
+
+            //定制分享内容
+            newResult.result.deviceActivityGame.actionShare = {
+              description: "我在" + app.activityName + "中获得了" + app.award.name + ",快来看看吧~",
+              imageLink: app.award.awardImagePath,
+              link: "https://m.sensingstore.com/annual-share.html?isShared=true&actionId=" + app.actionId + '&useraward=' + app.useraward,
+              // title: app.activityName
+              title: "我在" + app.activityName + "中奖啦!"
+            };
+            setWX(newResult)
+          })
+
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetDeviceActivityGames?securityKey=a6362b10931046a2985698c2881b52be', {
+          }, function (result, status) {
+            // var gameList = result.result.map(item => {
+            //   if (item.software && item.software.setting) {
+            //     item.software.setting = JSON.parse(item.software.setting).type;
+            //   }
+            //   return item
+            // });
+            // console.log(gameList)
+            // app.onlineGameList = gameList.filter(item => item.software && item.software.envType == 0 && item.software.setting != 'register' && item.software.setting != 'chat');
+            app.onlineGameList = result.result.filter(item => {
+              return item.securityKey != 'a6362b10931046a2985698c2881b52be'
+            })
+          })
+        }
+      })
+
+
+    }
+  })
+
+</script>
+
+</html>

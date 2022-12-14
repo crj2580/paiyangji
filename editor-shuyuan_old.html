@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>信发系统</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+</head>
+<style>
+  .disabled {
+    pointer-events: none;
+  }
+
+  #app>div {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    font-size: 1vw;
+    background: #fff;
+  }
+
+  #actionContainer {
+    width: 2.5%;
+    height: 100%;
+    border-right: 0.05vw solid #000;
+    overflow: auto;
+  }
+
+  #actionContainer>img {
+    width: 1.25vw;
+    height: 1.25vw;
+    display: block;
+    margin: 1vw auto;
+    cursor: pointer;
+  }
+
+  #layerContainer {
+    width: 8%;
+    height: 100%;
+    overflow: auto;
+  }
+
+  #layerContainer>div {
+    border: 0.05vw solid #000;
+    height: 1.75vw;
+    line-height: 1.75vw;
+    white-space: nowrap;
+    cursor: pointer;
+    display: flex;
+  }
+
+  #layerContainer>div.selected {
+    /* color:blue; */
+    /* border-color:blue; */
+    background: #EDEDFD;
+  }
+
+  #mainContainer {
+    flex-grow: 1;
+    height: 100%;
+    background: #eee;
+    position: relative;
+    overflow: auto;
+    width: 71.5%;
+  }
+
+  #mainContainer::-webkit-scrollbar {
+    width: 0.5vw;
+    height: 0.5vw;
+  }
+
+  #mainContainer::-webkit-scrollbar-track-piece {
+    background-color: #f5f5f5;
+    border-radius: 0.2vw;
+  }
+
+  #mainContainer::-webkit-scrollbar-thumb {
+    border-radius: 0.2vw;
+    background-color: #555;
+  }
+
+  .item {
+    position: absolute;
+    /* transform-origin:0 0; */
+  }
+
+  .item.selected {
+    z-index: 99999 !important;
+    outline: 0.15vw solid #ccc;
+  }
+
+  .item .paint,
+  .item .media,
+  .item .textContent {
+    height: 100%;
+  }
+
+  .item .point {
+    width: 0.7vw;
+    height: 0.7vw;
+    /* border-radius: 50%; */
+    border: 0.04vw solid black;
+    position: absolute;
+    display: none;
+  }
+
+  .item.selected>.point {
+    display: block;
+  }
+
+  .item.locked>.point {
+    display: none;
+  }
+
+  .point.t {
+    left: calc(50% - 0.35vw);
+    top: -0.35vw;
+  }
+
+  .point.r {
+    /* left: calc(100% - 0.35vw); */
+    right: -0.35vw;
+    top: calc(50% - 0.35vw);
+  }
+
+  .point.b {
+    left: calc(50% - 0.35vw);
+    /* top: calc(100% - 0.35vw); */
+    bottom: -0.35vw;
+  }
+
+  .point.l {
+    left: -0.35vw;
+    top: calc(50% - 0.35vw);
+  }
+
+  .point.tl {
+    left: -0.35vw;
+    top: -0.35vw;
+  }
+
+  .point.tr {
+    right: -0.35vw;
+    top: -0.35vw;
+  }
+
+  .point.br {
+    right: -0.35vw;
+    bottom: -0.35vw;
+  }
+
+  .point.bl {
+    left: -0.35vw;
+    bottom: -0.35vw;
+  }
+
+  .point.rotate {
+    left: calc(50% - 0.35vw);
+    top: -3vw;
+    border-radius: 50%;
+  }
+
+  .point.last {
+    left: -3vw;
+    top: calc(50% - 0.6vw);
+    width: 1.2vw;
+    height: 1.2vw;
+    transform: rotate(90deg);
+    border: none;
+  }
+
+  .point.next {
+    right: -3vw;
+    top: calc(50% - 0.6vw);
+    width: 1.2vw;
+    height: 1.2vw;
+    transform: rotate(-90deg);
+    border: none;
+  }
+
+
+
+  #detailContainer {
+    width: 18%;
+    height: 100%;
+    border-left: 0.05vw solid #000;
+    overflow: auto;
+  }
+
+  #detailContainer .operation {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 0.05vw solid #000;
+    padding: 0.5vw 0;
+  }
+
+  #detailContainer .operation div {
+    width: 8%;
+  }
+
+  #detailContainer .operation div img {
+    width: 100%;
+  }
+
+  #detailContainer .detailGroup {
+    padding: 0.5vw;
+    border-bottom: 0.05vw solid #000;
+  }
+
+  #detailContainer .detailGroup label {
+    padding: 0.3vw 0;
+    display: block;
+  }
+
+  .uploadButton b {
+    background-image: linear-gradient(to bottom, #ededed, #bab1ba);
+    box-shadow: 0.1vw 0.1vw 0 0 #899599;
+    text-decoration: none;
+    font-weight: normal;
+  }
+
+  .detailGroup .row .uploadButton+input {
+    width: 20%;
+    margin: 0.1vw;
+    opacity: 0;
+    position: absolute;
+    left: 0;
+  }
+
+  .row {
+    position: relative;
+  }
+
+  .row,
+  .dbRow {
+    display: flex;
+  }
+
+  .row span {
+    width: 20%;
+    margin: 0.1vw;
+  }
+
+  .row input,
+  .row select,
+  .dbRow input,
+  .dbRow select {
+    height: 1.4vw;
+    margin: 0.1vw;
+    border: 0.05vw solid #ccc;
+  }
+
+  .row input,
+  .row select {
+    width: 80%;
+  }
+
+  .dbRow span {
+    width: 21%;
+    margin: 0.1vw;
+  }
+
+  .dbRow input,
+  .dbRow select {
+    width: 29%;
+  }
+
+  .dbRow label {
+    margin: 1% 9%;
+  }
+
+  select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: url("./img/editor/arrow.png") no-repeat scroll right center transparent;
+    background-size: auto 50%;
+  }
+
+
+  /* input:color是由两个伪元素构成 */
+  input::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input::-webkit-color-swatch {
+    border: 0.05vw solid #ccc;
+  }
+
+
+  input[type=checkbox]+label {
+    width: 1.3vw;
+    border: 0.02vw solid #000;
+  }
+
+  input:checked+label::before {
+    display: block;
+    content: "\2714";
+    text-align: center;
+    font-size: 0.7vw;
+    line-height: 0.7vw;
+    color: #000;
+  }
+
+  input[type=checkbox] {
+    display: none;
+  }
+
+
+
+  #hoverContainer {
+    position: fixed;
+    bottom: 2vw;
+    background: #000;
+    border-radius: 0.5vw;
+    padding: 0.5vw 0.75vw 0.25vw;
+    left: 46.5%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    opacity: 0.15;
+    cursor: default;
+  }
+
+  #hoverContainer:hover {
+    opacity: 0.8;
+  }
+
+  #hoverContainer img {
+    width: 1.5vw;
+    margin: 0 0.25vw;
+    cursor: pointer;
+  }
+
+  #hoverContainer img.disabled {
+    opacity: 0.5;
+  }
+
+  .fontBold {
+    font-weight: bold;
+  }
+
+  .fontItalic {
+    font-style: italic;
+  }
+
+
+  #swiperDetailItem {
+    display: flex;
+  }
+
+  #swiperDetailItem .action {
+    width: 55%;
+    margin-left: 10%;
+  }
+
+  #swiperDetailItem .action img {
+    width: 1vw;
+    margin: 0.2vw 0.25vw 0;
+  }
+
+  .mdeiaLoading {
+    position: absolute;
+    max-width: 50%;
+    max-height: 50%;
+    width: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div @mousemove="mousemove($event)" @mouseup="mouseup">
+      <div id="actionContainer">
+        <!-- <div style="text-align:center;">组件</div> -->
+        <img @click="addItem(item.type)" v-for="item in componentList" :src="item.icon" :title="item.displayName">
+      </div>
+
+      <div id="layerContainer">
+        <div :class="{selected:item.selected}" :title="item.displayName" v-for="(item,index) of itemList"
+          @click="selectItem(item)">
+          <div @click.stop="changeEye(item)" style="width:20%;text-align:center;"
+            :style="{'border-right':index?'1px solid #000':'none'}">
+            <img v-show="index&&item.show" src="./img/editor/eye-open.png" style="width:80%;margin-top:10%;">
+            <img v-show="index&&!item.show" src="./img/editor/eye-close.png" style="width:80%;margin-top:10%;">
+          </div>
+          <div style="width:80%;overflow: hidden;text-overflow: ellipsis;text-indent: 0.2vw;">{{item.displayName}}</div>
+        </div>
+      </div>
+
+      <div id="mainContainer">
+
+
+        <!-- <div class="item" :class="{selected:item.selected}" v-for="item of [itemList[0]]" @mousedown="itemMousedown($event,item)"
+          style="z-index: 0;top:50px;" :style="{left:'calc( 50% - '+item.width/2+'px )',width:item.width+'px',height:item.height+'px'}"> -->
+        <div :style="{width:'calc( '+itemList[0].width+'px + '+'8vw )'}" style="min-width:100%;">
+
+          <div class="item" :class="{selected:item.selected}" v-for="item of [itemList[0]]"
+            @mousedown="itemMousedown($event,item)" style="z-index: 0;margin:4vw auto;position: relative;"
+            :style="{width:item.width+'px',height:item.height+'px'}">
+            <div class="paint" style="width:100%;height:100%;" :style="{backgroundColor:item.backgroundColor,
+            opacity:item.backgroundOpacity,
+            backgroundRepeat:item.backgroundRepeat,
+            backgroundImage:'url('+item.backgroundImage+')',
+            backgroundSize:item.backgroundSize,
+            transform:item.transformScale}"></div>
+
+            <div class="item" :class="{selected:item.selected,locked:item.lock}" v-show="item.show" v-if="index"
+              v-for="(item,index) of itemList" @mousedown.stop="itemMousedown($event,item)" draggable="true"
+              @dragstart="preventDefault"
+              :style="{zIndex:item.zIndex,left:item.left+'px',top:item.top+'px',width:item.width+'px',height:item.height+'px',transform:'rotate('+ item.rotate +'deg)'}">
+              <div class="paint" v-if="item.type=='button'||item.type=='image'" :style="{
+                backgroundColor:item.backgroundColor,
+                opacity:item.backgroundOpacity,
+                backgroundRepeat:item.backgroundRepeat,
+                backgroundImage:'url('+item.backgroundImage+')',
+                backgroundSize:item.backgroundSize,
+                borderRadius:item.borderRadius+'px',
+                transform:item.transformScale}">
+              </div>
+              <div class="textContent" v-if="item.type=='text'" v-html="item.textContent"
+                :class="{fontBold:item.fontWeight,fontItalic:item.fontStyle}" :style="{
+                color:item.color,
+                whiteSpace:item.whiteSpace,
+                lineHeight:`${item.lineHeight}px`,
+                textAlign:item.textAlign,
+                fontSize:`${item.fontSize}px`,
+                fontFamily:`${item.fontFamily}`,
+                textIndent:`${item.textIndent}px`,
+                opacity:item.backgroundOpacity,
+                transform:item.transformScale,
+                letterSpacing:`${item.letterSpacing}px`}"></div>
+
+              <video class="media" v-if="item.type=='media'" :src="item.resource" :poster="item.poster"
+                :controls="item.controls" :loop="item.loop" :muted="item.muted" :autoplay="item.autoplay"
+                style="width:100%;"></video>
+              <img v-show="item.type=='media'&&item.loading" class="mdeiaLoading" src="./img/loading0.gif" />
+
+
+              <div v-if="item.type=='html'" style="width:100%;height:100%;position:absolute;"></div>
+              <iframe v-if="item.type=='html'&&item.resource" :src="item.resource"
+                style="height:100%;width:100%;"></iframe>
+
+              <div v-if="item.type=='swiper'" style="height:100%;">
+                <div class="paint" v-show="item.resourceList[item.resourceListIndex].type=='image'" :style="{
+                  opacity:item.resourceList[item.resourceListIndex].backgroundOpacity,
+                  backgroundRepeat:item.resourceList[item.resourceListIndex].backgroundRepeat,
+                  backgroundImage:'url('+item.resourceList[item.resourceListIndex].resource+')',
+                  backgroundSize:item.resourceList[item.resourceListIndex].backgroundSize,
+                  borderRadius:item.resourceList[item.resourceListIndex].borderRadius+'px',
+                  transform:item.transformScale}">
+                </div>
+                <video class="media" v-show="item.resourceList[item.resourceListIndex].type=='media'"
+                  :src="item.resourceList[item.resourceListIndex].resource"
+                  :poster="item.resourceList[item.resourceListIndex].poster"
+                  :controls="item.resourceList[item.resourceListIndex].controls"
+                  :loop="item.resourceList[item.resourceListIndex].loop"
+                  :muted="item.resourceList[item.resourceListIndex].muted"
+                  :autoplay="item.resourceList[item.resourceListIndex].autoplay" style="width:100%;"></video>
+                <img v-show="item.type=='media'&&item.loading" class="mdeiaLoading" src="./img/loading0.gif" />
+
+              </div>
+
+
+              <div v-if="item.type=='qrcode'" style="width:100%;height:100%;position:absolute;">
+                <img v-if="!item.qrcodeImg" :src="componentList[item.type].icon" style="width:100%;height:100%;">
+                <img v-if="item.qrcodeImg" :src="item.qrcodeImg" style="width:100%;height:100%;">
+              </div>
+
+
+
+              <div class="point t" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'t')"></div>
+              <div class="point r" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'r')"></div>
+              <div class="point b" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'b')"></div>
+              <div class="point l" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'l')"></div>
+
+              <div class="point tl" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'tl')"></div>
+              <div class="point tr" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'tr')"></div>
+              <div class="point br" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'br')"></div>
+              <div class="point bl" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'bl')"></div>
+
+              <div class="point rotate" draggable="true" @dragstart="preventDefault"
+                @mousedown.stop="pointMousedown($event,item,'rotate')"></div>
+
+
+              <div v-if="item.type=='swiper'" class="point last" @mousedown.stop="swiperLast(item)">
+                <img src="./img/editor/arrow.png" style="width:100%;margin-left:0.2vw;">
+              </div>
+              <div v-if="item.type=='swiper'" class="point next" @mousedown.stop="swiperNext(item)">
+                <img src="./img/editor/arrow.png" style="width:100%;">
+              </div>
+
+
+
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+
+      <div id="detailContainer">
+        <div class="operation" v-show="selectedItem.type!='canvas'">
+          <div title="显隐" @click.stop="changeEye(selectedItem)">
+            <img v-show="selectedItem.show" src="./img/editor/eye-open.png">
+            <img v-show="!selectedItem.show" src="./img/editor/eye-close.png">
+          </div>
+          <div title="锁定" @click="changeLock(selectedItem)">
+            <img v-show="selectedItem.lock" src="./img/editor/locked.png">
+            <img v-show="!selectedItem.lock" src="./img/editor/unlocked.png">
+          </div>
+          <div title="置顶" @click="actionTop">
+            <img src="./img/editor/action-top.png">
+          </div>
+          <div title="置底" @click="actionBottom">
+            <img src="./img/editor/action-bottom.png">
+          </div>
+          <div title="复制" @click="actionCopy">
+            <img src="./img/editor/action-copy.png">
+          </div>
+          <div title="删除" @click="actionDelete">
+            <img src="./img/editor/action-delete.png">
+          </div>
+        </div>
+        <div :class="{disabled: selectedItem.lock}">
+
+          <div class="detailGroup" v-show="selectedItem.type=='canvas'">
+            <label>画布设置</label>
+            <div class="row">
+              <span>名称:</span>
+              <input type="text" v-model="selectedItem.displayName">
+            </div>
+            <div class="row">
+              <span>类型:</span><span>{{selectedItem.type}}</span>
+            </div>
+            <div class="row">
+              <span>尺寸</span>
+              <select @change="changeCanvasSize()" v-model="selectedItem.canvasSize">
+                <option value="">自定义</option>
+                <option v-for="(item,index) of canvasSizeList" :value="index">{{item.width}}*{{item.height}}</option>
+              </select>
+            </div>
+            <div v-show="selectedItem.canvasSize===''" class="dbRow">
+              <span>宽:</span>
+              <input type="number" v-model.number.trim="movePermit?displayWidth:selectedItem.width">
+              <span>高:</span>
+              <input type="number" v-model.number.trim="movePermit?displayHeight:selectedItem.height">
+            </div>
+          </div>
+
+          <div class="detailGroup" v-show="selectedItem.type!='canvas'">
+            <label>基础属性</label>
+            <div class="row">
+              <span>名称:</span>
+              <input type="text" v-model="selectedItem.displayName">
+            </div>
+            <div class="row">
+              <span>类型:</span><span>{{selectedItem.type}}</span>
+            </div>
+            <div class="dbRow">
+              <span>左:</span>
+              <input type="number" v-model.number.trim="selectedItem.left">
+              <span>上:</span>
+              <input type="number" v-model.number.trim="selectedItem.top">
+            </div>
+            <div class="dbRow">
+              <span>宽:</span>
+              <input type="number" v-model.number.trim="movePermit?displayWidth:selectedItem.width">
+              <span>高:</span>
+              <input type="number" v-model.number.trim="movePermit?displayHeight:selectedItem.height">
+            </div>
+            <div class="dbRow">
+              <span>旋转:</span>
+              <input type="number" v-model.number.trim="selectedItem.rotate">
+              <span>翻转:</span>
+              <select v-model.trim="selectedItem.transformScale">
+                <option value="">无</option>
+                <option value="scaleX(-1)">水平</option>
+                <option value="scaleY(-1)">垂直</option>
+                <option value="scale(-1)">完全翻转</option>
+              </select>
+            </div>
+            <div class="row">
+              <span>层级:</span>
+              <input type="number" v-model.number.trim="selectedItem.zIndex">
+            </div>
+          </div>
+
+
+          <div class="detailGroup" v-show="selectedItem.type=='text'">
+            <label>文本属性</label>
+            <div class="dbRow">
+              <span>字号:</span>
+              <input type="number" v-model="selectedItem.fontSize">
+              <span>字体:</span>
+              <select v-model.trim="selectedItem.fontFamily">
+                <option value="黑体">黑体</option>
+                <option value="宋体">宋体</option>
+              </select>
+            </div>
+            <div class="dbRow">
+              <span>颜色:</span>
+              <input type="color" v-model="selectedItem.color">
+              <span>透明:</span>
+              <input type="text" v-model.trim="selectedItem.opacity">
+            </div>
+            <div class="dbRow">
+              <span>行高:</span>
+              <input type="number" v-model="selectedItem.lineHeight">
+              <span>换行:</span>
+              <select v-model.trim="selectedItem.whiteSpace">
+                <option value="normal">正常</option>
+                <option value="pre">所见即所得</option>
+                <option value="nowrap">禁止换行</option>
+              </select>
+            </div>
+
+            <div class="dbRow">
+              <!-- <span>缩进:</span>
+              <input type="number" v-model.trim="selectedItem.textIndent"> -->
+              <span>间距:</span>
+              <input type="number" v-model.trim="selectedItem.letterSpacing">
+              <span>对齐:</span>
+              <select v-model.trim="selectedItem.textAlign">
+                <option value="left">左对齐</option>
+                <option value="center">居中</option>
+                <option value="right">右对齐</option>
+              </select>
+            </div>
+            <div class="dbRow">
+              <span>加粗:</span>
+              <input id="fontWeight" type="checkbox" v-model="selectedItem.fontWeight">
+              <label for="fontWeight"></label>
+              <span>倾斜:</span>
+              <input id="fontStyle" type="checkbox" v-model.trim="selectedItem.fontStyle">
+              <label for="fontStyle"></label>
+            </div>
+          </div>
+          <div class="detailGroup" v-show="selectedItem.type=='text'">
+            <label>文本内容</label>
+            <textarea cols="30" rows="3" v-model="selectedItem.textContent"></textarea>
+          </div>
+
+          <div class="detailGroup"
+            v-show="selectedItem.type=='canvas'||selectedItem.type=='button'||selectedItem.type=='image'">
+            <label>背景属性</label>
+            <div class="dbRow">
+              <span>颜色:</span>
+              <input type="color" v-model="selectedItem.backgroundColor">
+              <span>透明:</span>
+              <input type="text" v-model.trim="selectedItem.backgroundOpacity">
+            </div>
+            <div class="row">
+              <span class="uploadButton">
+                <b>图片:</b>
+              </span>
+              <input @change="fileupload($event,'backgroundImage','Image')" type="file">
+              <input type="text" v-model.trim="selectedItem.backgroundImage">
+            </div>
+            <div class="dbRow">
+              <span>拉伸:</span>
+              <select v-model.trim="selectedItem.backgroundSize">
+                <option value="">无</option>
+                <option value="cover">覆盖</option>
+                <option value="contain">填充</option>
+                <option value="100% 100%">撑满</option>
+              </select>
+              <span>平铺:</span>
+              <select v-model.trim="selectedItem.backgroundRepeat">
+                <option value="repeat">平铺</option>
+                <option value="no-repeat">无</option>
+                <option value="repeat-x">水平平铺</option>
+                <option value="repeat-Y">垂直平铺</option>
+              </select>
+            </div>
+            <div class="dbRow" v-show="selectedItem.type!='canvas'">
+              <span style="width:19%;">圆角:</span>
+              <input type="number" v-model.trim="selectedItem.borderRadius">
+            </div>
+          </div>
+
+
+          <div class="detailGroup" v-show="selectedItem.type=='media'">
+            <label>媒体属性</label>
+            <div class="row">
+              <!-- <span>资源:</span> -->
+              <span class="uploadButton">
+                <b>资源:</b>
+              </span>
+              <input @change="fileupload($event,'resource','Video')" type="file">
+              <input type="text" v-model.trim="selectedItem.resource">
+            </div>
+            <div class="row">
+              <!-- <span>封面:</span> -->
+              <span class="uploadButton">
+                <b>封面:</b>
+              </span>
+              <input @change="fileupload($event,'poster','Image')" type="file">
+              <input type="text" v-model.trim="selectedItem.poster">
+            </div>
+            <div class="dbRow">
+              <span>自动:</span>
+              <input id="autoplay" type="checkbox" v-model="selectedItem.autoplay">
+              <label for="autoplay"></label>
+              <span>循环:</span>
+              <input id="loop" type="checkbox" v-model.trim="selectedItem.loop">
+              <label for="loop"></label>
+            </div>
+            <div class="dbRow">
+              <span>控制:</span>
+              <input id="controls" type="checkbox" v-model="selectedItem.controls">
+              <label for="controls"></label>
+              <span>静音:</span>
+              <input id="muted" type="checkbox" v-model="selectedItem.muted">
+              <label for="muted"></label>
+            </div>
+
+          </div>
+
+          <div class="detailGroup" v-show="selectedItem.type=='swiper'">
+            <label>轮播列表</label>
+            <div v-for="(item,index) of selectedItem.resourceList" style="margin:0.35vw 0;">
+              <div id="swiperDetailItem">
+                <img @click="item.showDetail=!item.showDetail" src="./img/editor/arrow.png"
+                  style="width:1vw;height:1vw;margin-top:0.2vw;margin-right:0.2vw;"
+                  :style="{transform: item.showDetail?'':'rotate(-90deg)'}">
+                <select v-model="item.type" style="width:25%;">
+                  <option value="image">图片</option>
+                  <option value="media">视频</option>
+                </select>
+                <div class="action" v-show="selectedItem.resourceList.length>1">
+                  <img @click="swiperUp(index)" src="./img/editor/action-up.png">
+                  <img @click="swiperDown(index)" src="./img/editor/action-down.png">
+                  <img @click="swiperDelete(index)" src="./img/editor/action-delete.png">
+                  <img @click="selectedItem.resourceListIndex=index" src="./img/editor/eye-open.png"
+                    :style="{opacity:selectedItem.resourceListIndex==index?1:0.35}">
+                </div>
+              </div>
+
+
+              <div v-show="item.showDetail&&item.type=='image'">
+                <div class="row">
+                  <span class="uploadButton">
+                    <b>链接:</b>
+                  </span>
+                  <input @change="fileupload($event,'resource','Image',item)" type="file">
+                  <input type="text" v-model.trim="item.resource">
+                </div>
+                <div class="dbRow">
+                  <span>圆角:</span>
+                  <input type="number" v-model.trim="item.borderRadius">
+                  <span>透明:</span>
+                  <input type="text" v-model.trim="item.backgroundOpacity">
+                </div>
+                <div class="dbRow">
+                  <span>拉伸:</span>
+                  <select v-model.trim="item.backgroundSize">
+                    <option value="">无</option>
+                    <option value="cover">覆盖</option>
+                    <option value="contain">填充</option>
+                    <option value="100% 100%">撑满</option>
+                  </select>
+                  <span>平铺:</span>
+                  <select v-model.trim="item.backgroundRepeat">
+                    <option value="repeat">平铺</option>
+                    <option value="no-repeat">无</option>
+                    <option value="repeat-x">水平平铺</option>
+                    <option value="repeat-Y">垂直平铺</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <span>配置:</span>
+                  <input type="text" v-model.trim="item.extensionData">
+                </div>
+              </div>
+
+              <div v-show="item.showDetail&&item.type=='media'">
+                <div class="row">
+                  <span class="uploadButton">
+                    <b>资源:</b>
+                  </span>
+                  <input @change="fileupload($event,'resource','Video',item)" type="file">
+                  <input type="text" v-model.trim="item.resource">
+                </div>
+                <div class="row">
+                  <span class="uploadButton">
+                    <b>资源:</b>
+                  </span>
+                  <input @change="fileupload($event,'poster','Image',item)" type="file">
+                  <input type="text" v-model.trim="item.poster">
+                </div>
+                <div class="dbRow">
+                  <span>自动:</span>
+                  <input :id="`swiperAutoplay${index}`" type="checkbox" v-model="item.autoplay">
+                  <label :for="`swiperAutoplay${index}`"></label>
+                  <span>循环:</span>
+                  <input id="`swiperLoop${index}`" type="checkbox" v-model.trim="item.loop">
+                  <label for="`swiperLoop${index}`"></label>
+                </div>
+                <div class="dbRow">
+                  <span>控制:</span>
+                  <input id="`swiperControl${index}`" type="checkbox" v-model="item.controls">
+                  <label for="`swiperControl${index}`"></label>
+                  <span>静音:</span>
+                  <input id="`swiperMuted${index}`" type="checkbox" v-model="item.muted">
+                  <label for="`swiperMuted${index}"></label>
+                </div>
+                <div class="row">
+                  <span>配置:</span>
+                  <input type="text" v-model.trim="item.extensionData">
+                </div>
+              </div>
+
+
+
+
+            </div>
+            <div style="text-align:center;">
+              <div @click="addSwiper"
+                style="border:0.05vw solid #000;padding:0.2vw 0.5vw;display:inline-block;cursor:pointer;">添加</div>
+            </div>
+          </div>
+
+
+
+          <div class="detailGroup" v-show="selectedItem.type=='html'">
+            <label>网页属性</label>
+            <div class="row">
+              <span class="uploadButton">
+                <b>资源:</b>
+              </span>
+              <input @change="fileupload($event,'resource','Other')" type="file">
+              <input type="text" v-model.trim="selectedItem.resource">
+            </div>
+            <div class="row">
+              <span>下载:</span>
+              <select v-model.trim="selectedItem.downloadMode">
+                <option value="">不下载</option>
+                <option value="self">仅下载html</option>
+                <option value="all">完全下载</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div class="detailGroup" v-show="selectedItem.type=='qrcode'">
+            <label>链接配置</label>
+            <div class="row">
+              <span>类型:</span>
+              <select v-model.trim="selectedItem.qrcodeType">
+                <option value="normal">普通</option>
+                <option value="activity" v-if="grantedActivity">活动</option>
+                <!-- <option value="cloud">云码</option> -->
+              </select>
+            </div>
+            <div class="row" v-if="selectedItem.qrcodeType=='normal'">
+              <span>地址:</span>
+              <input type="text" v-model.trim="selectedItem.qrcodeUrl">
+            </div>
+            <div class="row" v-else-if="selectedItem.qrcodeType=='activity'">
+              <span>活动:</span>
+              <select v-model.trim="selectedItem.activityId" @change="getGame(selectedItem)">
+                <option v-for="activity of activityList" :value="activity.id">{{activity.name}}</option>
+              </select>
+            </div>
+            <div class="row" v-if="selectedItem.qrcodeType=='activity'&&selectedItem.activityId">
+              <span>游戏:</span>
+              <select v-model.trim="selectedItem.gameId">
+                <option v-for="game of selectedItem.gameList" :value="game.id">{{game.name}}</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div class="detailGroup">
+            <label>额外信息</label>
+            <textarea cols="30" rows="3" v-model="selectedItem.extensionData"></textarea>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div id="hoverContainer">
+        <div style="display:inline-block;position: relative;top:-0.25vw;">
+          <input type="text" v-model="basicData.name" style="width:8vw;">
+        </div>
+        <img title="后退" @click="historyBack" :class={disabled:!historyList[historyList.nowIndex-1]}
+          src="./img/editor/back-forward.png">
+        <img title="前进" @click="historyForward" :class={disabled:!historyList[historyList.nowIndex+1]}
+          src="./img/editor/back-forward.png" style="transform:scaleX(-1);">
+        <label for="leadingIn">
+          <img title="导入模板" src="./img/editor/leadingIn.png">
+        </label>
+        <input style="display: none;" id="leadingIn" type="file" @change="leadingIn($event)">
+        <img @click="saveToLocal" title="保存到本地" src="./img/editor/saveAs.png">
+        <img @click="saveBack" title="保存" src="./img/editor/save.png">
+        <img @click="cancelBack" title="退出" src="./img/editor/close.png">
+        <!-- <img title="上传到云端" src="./img/editor/upload.png"> -->
+      </div>
+
+    </div>
+
+  </div>
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      token: '',
+      tenantId: '',
+      componentList: {
+        button: { type: 'button', displayName: '热区', icon: './img/editor/button.png' },
+        image: { type: 'image', displayName: '图片', icon: './img/editor/image.png' },
+        text: { type: 'text', displayName: '文本', icon: './img/editor/text.png' },
+        media: { type: 'media', displayName: '视频', icon: './img/editor/media.png' },
+        swiper: { type: 'swiper', displayName: '轮播', icon: './img/editor/swiper.png' },
+        html: { type: 'html', displayName: '网页', icon: './img/editor/html.png' },
+        qrcode: { type: 'qrcode', displayName: '二维码', icon: './img/editor/qrcode.png' },
+      },
+      canvasSizeList: [
+        { width: 1920, height: 1080 },
+        { width: 1080, height: 1920 },
+        { width: 375, height: 600 }
+      ],
+      itemList: [
+        {
+          show: true,
+          lock: false,
+          displayName: '画布',
+          selected: true,
+          type: 'canvas',
+          width: 1080,
+          height: 1920,
+          left: 100,
+          top: 100,
+          rotate: 0,
+          backgroundColor: '#ffffff',
+          backgroundImage: '',
+          backgroundOpacity: 1,
+          backgroundSize: '',
+          backgroundRepeat: 'repeat',
+          canvasSize: 1
+        }
+      ],
+      basicData: {
+        name: '',
+        type: 'basic'
+      },
+      historyList: [],
+      activityList: [],
+      movePermit: false,//拉升/拖动时提供数据
+      displayWidth: 0,
+      displayHeight: 0,
+
+      canvasScale: 1.0,
+      localhost: true,
+      grantedActivity: false
+    },
+    computed: {
+      selectedItem: function () {
+        for (var i = 0; i < this.itemList.length; i++) {
+          if (this.itemList[i].selected) {
+            return this.itemList[i]
+          }
+        }
+        return {}
+      }
+    },
+    // watch: {//deep
+    //   itemList: {
+    //     handler(newValue, oldValue) {
+    //       for (let i = 0; i < newValue.length; i++) {
+    //         if (oldValue[i] != newValue[i]) {
+    //           console.log(newValue)
+    //         } else {
+    //           console.log(oldValue[i], newValue[i])
+    //         }
+    //       }
+    //     },
+    //     deep: true
+    //   }
+    // },
+    methods: {
+      fileupload: function (e, attr, type, target) {
+        var _this = this;
+
+        if (!target) {
+          target = _this.selectedItem
+        }
+        target[attr] = '';
+        target.loading = true;
+        // var reader = new FileReader();
+        // reader.onload = function (evt) {
+        //   target[attr] = evt.target.result;
+        // };
+        // reader.readAsDataURL(e.target.files[0]);
+
+
+
+        var formData = new FormData();
+        formData.append("Prefix", undefined);
+        formData.append("ToResource", true);
+        formData.append("WebUrl", undefined);
+        formData.append("CreateThumbnail", true);
+        formData.append("IsLocal", true);
+        formData.append("FileType", type);
+        formData.append("file", e.target.files[0]);
+        $.ajax({
+          url: (_this.localhost ? 'http://47.103.108.170:809' : 'https://s.captive.com.cn') + '/api/File/UploadSingleBigFile?fileArea=Ads',
+          type: 'POST',
+          headers: {
+            'Abp.TenantId': this.tenantId,
+            'Authorization': this.token
+          },
+          processData: false,
+          contentType: false,
+          data: formData,
+          dataType: "json",
+          success: function (result, status, xhr) {
+            target[attr] = result.result.fileUri;
+            target.loading = false;
+          },
+          error: function (xhr, status, error) {
+            alert(error)
+          }
+        })
+        e.target.value = '';//清除该input框的值,防止下个组件提交相同图片时无法触发change事件(因为共用了input)
+      },
+      addSwiper: function () {
+        this.selectedItem.resourceList.push({
+          type: 'image',
+          resource: '',
+          showDetail: true
+        })
+        this.selectedItem.resourceListIndex = this.selectedItem.resourceList.length - 1;
+      },
+      swiperLast: function (item) {
+        if (item.resourceListIndex == 0) {
+          item.resourceListIndex = item.resourceList.length - 1;
+        } else {
+          item.resourceListIndex--;
+        }
+      },
+      swiperNext: function (item) {
+        if (item.resourceListIndex < item.resourceList.length - 1) {
+          item.resourceListIndex++;
+        } else {
+          item.resourceListIndex = 0;
+        }
+      },
+      swiperUp: function (index) {
+        var target = this.selectedItem.resourceList.splice(index, 1);
+        if (index == 0) {
+          this.selectedItem.resourceList.push(target[0])
+        } else {
+          this.selectedItem.resourceList.splice(index - 1, 0, target[0]);
+        }
+        this.selectedItem.resourceListIndex = 0;
+      },
+      swiperDown: function (index) {
+        var target = this.selectedItem.resourceList.splice(index, 1);
+        if (index == this.selectedItem.resourceList.length) {
+          this.selectedItem.resourceList.unshift(target[0])
+        } else {
+          this.selectedItem.resourceList.splice(index + 1, 0, target[0]);
+        }
+        this.selectedItem.resourceListIndex = 0;
+      },
+      swiperDelete: function (index) {
+        this.selectedItem.resourceList.splice(index, 1);
+        this.selectedItem.resourceListIndex = 0;
+      },
+      leadingIn: function (e) {
+        var reader = new FileReader();
+        reader.readAsText(e.currentTarget.files[0]);
+        reader.onload = () => {
+          try {
+            var data = JSON.parse(reader.result);
+            console.log(data)
+            this.getData(data);
+          } catch (error) {
+            alert('数据格式有误,请重新导入')
+          }
+        }
+      },
+      saveToLocal: function () {
+        var data = {
+          basicData: this.basicData,
+          itemList: this.itemList
+        }
+
+        exportRaw(`${this.basicData.name}${this.getDate()}.json`, JSON.stringify(data))
+
+        function fakeClick(obj) {
+          var ev = document.createEvent("MouseEvents");
+          ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          obj.dispatchEvent(ev);
+        }
+
+        function exportRaw(name, data) {
+          var urlObject = window.URL || window.webkitURL || window;
+          var export_blob = new Blob([data]);
+          var save_link = document.createElement("a");
+          save_link.href = urlObject.createObjectURL(export_blob);
+          save_link.download = name;
+          fakeClick(save_link);
+        }
+      },
+      saveBack: function () {
+        var data = JSON.stringify({
+          basicData: this.basicData,
+          itemList: this.itemList.map(item => {
+            if (item.type == "qrcode" && item.qrcodeType == "activity") {
+              if (item.activityId && item.gameId) {
+                item.gameList = [];
+              } else {//"存在未配置游戏的二维码"
+                item.qrcodeType = "normal";
+              }
+            }
+            return item
+          })
+        })
+        window.parent.postMessage(data, "*");
+      },
+      cancelBack: function () {
+        window.parent.postMessage('', "*");
+      },
+      preventDefault: function (event) {
+        event.preventDefault();
+        return false;
+      },
+      changeCanvasSize: function () {
+        var target = this.canvasSizeList[this.selectedItem.canvasSize]
+        if (target) {
+          this.itemList[0].width = target.width;
+          this.itemList[0].height = target.height;
+        }
+      },
+      changeEye: function (item) {
+        item.show = !item.show;
+        this.saveAnchorToHistory();
+      },
+      changeLock: function (item) {
+        item.lock = !item.lock;
+        this.saveAnchorToHistory();
+      },
+      actionTop: function () {
+        this.selectedItem.zIndex = this.itemList.
+          reduce((lastValue, currentValue, currentIndex, arr) => {
+            if (currentValue.zIndex >= 10000 && lastValue <= currentValue.zIndex) {
+              return currentValue.zIndex + 1
+            } else {
+              return lastValue
+            }
+          }, 10000)
+        this.saveAnchorToHistory();
+      },
+      actionBottom: function () {
+        this.selectedItem.zIndex = this.itemList.
+          reduce((lastValue, currentValue, currentIndex, arr) => {
+            if (currentValue.zIndex < 100 && lastValue >= currentValue.zIndex) {
+              return currentValue.zIndex - 1
+            } else {
+              return lastValue
+            }
+          }, 99)
+        this.saveAnchorToHistory();
+      },
+      actionCopy: function () {
+        var newItem = Object.assign({}, this.selectedItem)
+
+        newItem.displayName += '复制'
+
+        newItem.left = newItem.left + newItem.width / 10;
+        newItem.top = newItem.top + newItem.height / 10;
+
+        this.itemList.push(newItem)
+        this.selectItem(newItem);
+        this.saveAnchorToHistory();
+      },
+      actionDelete: function () {
+        this.itemList.splice(this.itemList.indexOf(this.selectedItem), 1);
+        this.itemList[this.itemList.length - 1].selected = true;
+        this.saveAnchorToHistory();
+      },
+      mousemove: function (e) {
+        var movePermit = this.movePermit;
+        var item = this.selectedItem;
+        if (!movePermit) return
+        var type = movePermit.type,
+          originX = movePermit.originX,
+          originY = movePermit.originY,
+          originLeft = movePermit.originLeft,
+          originTop = movePermit.originTop,
+          originWidth = movePermit.originWidth,
+          originHeight = movePermit.originHeight,
+          originRotate = movePermit.originRotate,
+          originRect = movePermit.originRect;
+        if (type == 'move') {
+          item.left = (e.pageX - originX) / this.canvasScale + originLeft;
+          item.top = (e.pageY - originY) / this.canvasScale + originTop;
+        } else if (type == 'rotate') {
+          var xx = e.pageX - originWidth / 2 - $('.item.selected').offset().left,
+            yy = e.pageY - originHeight / 2 - $('.item.selected').offset().top;
+          var deg = Math.round(Math.atan(xx / -yy) * 180 / Math.PI);
+          if (xx >= 0 && yy < 0) {
+            item.rotate = deg
+          } else if (xx >= 0 && yy >= 0) {
+            item.rotate = 180 + deg
+          } else if (xx < 0 && yy < 0) {
+            item.rotate = 360 + deg
+          } else if (xx < 0, yy >= 0) {
+            item.rotate = 180 + deg
+          }
+        } else {
+          if (type.length == 2) {
+            if (Math.abs(e.pageX - originX) / Math.abs(e.pageY - originY) >= originWidth / originHeight) {
+              if (type == 'br' || type == 'bl') {
+                $('.item.selected').height(e.pageY - originY + originHeight)
+              } else {
+                $('.item.selected').height(originY - e.pageY + originHeight)
+              }
+              $('.item.selected').width($('.item.selected').height() * originWidth / originHeight)
+            } else {
+              if (type == 'tr' || type == 'br') {
+                $('.item.selected').width(e.pageX - originX + originHeight)
+              } else {
+                $('.item.selected').width(originX - e.pageX + originHeight)
+              }
+              $('.item.selected').height($('.item.selected').width() / originWidth * originHeight)
+            }
+          } else {
+            if (type == 'r') {
+              $('.item.selected').width(e.pageX - originX + originWidth)
+            } else if (type == 'b') {
+              $('.item.selected').height(e.pageY - originY + originHeight)
+            } else if (type == 't') {
+              $('.item.selected').height(originY - e.pageY + originHeight)
+            } else if (type == 'l') {
+              $('.item.selected').width(originX - e.pageX + originWidth)
+            }
+          }
+
+          this.displayWidth = $('.item.selected').width();
+          this.displayHeight = $('.item.selected').height();
+          var newRect = this.transformedRect({
+            left: originLeft,
+            top: originTop,
+            rotate: originRotate,
+            // width: type == 'r' || type == 'l' ? originWidth : $('.item.selected').width(),
+            // height: type == 'b' || type == 't' ? originHeight : $('.item.selected').height()
+            width: type == 'b' || type == 't' ? originWidth : $('.item.selected').width(),
+            height: type == 'r' || type == 'l' ? originHeight : $('.item.selected').height()
+          });
+
+          if (type == 'r' || type == 'b' || type == 'br') {
+            setTopAndLeft(0)
+          } else if (type == 'l' || type == 't' || type == 'tl') {
+            setTopAndLeft(4)
+          } else if (type == 'tr') {
+            setTopAndLeft(6)
+          } else if (type == 'bl') {
+            setTopAndLeft(2)
+          }
+          function setTopAndLeft(basePoint) {
+            item.top = -newRect.point[basePoint].y + originRect.point[basePoint].y + originTop
+            item.left = -newRect.point[basePoint].x + originRect.point[basePoint].x + originLeft
+          }
+        }
+      },
+      mouseup: function (e) {
+        if (this.movePermit) {
+          this.movePermit = false;
+          this.selectedItem.width = $('.item.selected').width();
+          this.selectedItem.height = $('.item.selected').height();
+          this.saveAnchorToHistory();
+        }
+      },
+      selectItem: function (item) {
+        if (item.selected) return
+        this.itemList.forEach((item) => {
+          item.selected = false;
+        })
+        item.selected = true;
+        this.saveAnchorToHistory();
+      },
+      addItem: function (type) {
+        var newItem = {
+          show: true,
+          lock: false,
+          selected: false,
+          type: type,
+          width: 100,
+          height: 100,
+          left: 68,
+          top: 118,
+          rotate: 0,
+          extensionData: '',
+          zIndex: 100,
+          transformScale: ''
+        }
+
+        if (type == 'button' || type == 'image') {
+          newItem = Object.assign(newItem, {
+            // backgroundColor: '#FFFF00',
+            backgroundColor: '#eeeeee',
+            // backgroundImage: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3243295980,534498459&fm=26&gp=0.jpg',
+            backgroundImage: '',
+            backgroundOpacity: 1,
+            backgroundSize: '100% 100%',
+            backgroundRepeat: 'repeat',
+            borderRadius: 0
+          })
+        } else if (type == 'text') {
+          newItem = Object.assign(newItem, {
+            color: '#000000',
+            opacity: 1,
+            fontSize: 14,
+            fontFamily:"黑体",
+            letterSpacing: 0,
+            fontWeight: false,
+            fontStyle: false,
+            textIndent: 0,
+            lineHeight: 14,
+            textAlign: 'left',
+            whiteSpace: 'normal',
+            textContent: '测试文本'
+          })
+        } else if (type == 'media') {
+          newItem = Object.assign(newItem, {
+            // width: '',
+            height: '',
+            autoplay: true,
+            loop: false,
+            controls: false,
+            muted: false,
+            resource: '',//./img/editor/six.mp4
+            poster: '',//./img/editor/arrow.png
+          })
+        } else if (type == 'swiper') {
+          newItem = Object.assign(newItem, {
+            resourceListIndex: 0,
+            resourceList: [{
+              showDetail: true,
+              type: 'image'
+            }]
+          })
+        } else if (type == 'html') {
+          newItem = Object.assign(newItem, {
+            resource: '',
+            downloadMode: false
+          })
+        } else if (type == 'qrcode') {
+          newItem = Object.assign(newItem, {
+            qrcodeType: 'normal',
+            activityId: "",
+            gameId: "",
+            gameList: []
+          })
+        }
+
+        newItem.zIndex = this.itemList.
+          reduce((lastValue, currentValue, currentIndex, arr) => {
+            if (currentValue.zIndex < 10000 && lastValue <= currentValue.zIndex) {
+              return currentValue.zIndex + 1
+            } else {
+              return lastValue
+            }
+          }, 100)
+        newItem.displayName = this.itemList.
+          reduce((lastValue, currentValue, currentIndex, arr) => {
+            if (currentValue.type == type && currentValue.displayName && currentValue.displayName.indexOf(type) == 0 && parseInt(currentValue.displayName.substr(type.length)) >= parseInt(lastValue.substr(type.length))) {
+              return type + (parseInt(currentValue.displayName.substr(type.length)) + 1)
+            } else {
+              return lastValue
+            }
+          }, type + 1)
+
+        this.itemList.push(newItem)
+        this.selectItem(newItem);
+
+
+        if (type == 'media') {
+          Vue.nextTick(() => {
+            var _this = this;
+            $('.item.selected video').one('loadedmetadata', function () {
+              _this.selectedItem.height = $('.item.selected').height();
+            })
+          })
+        }
+      },
+
+      itemMousedown: function (e, item) {
+        this.selectItem(item);
+        if (item.type == 'canvas' || item.lock) return
+        // //记录鼠标刚按下时的位置，相对div而言
+        // var offsetX = e.offsetX;//鼠标指针位置相对于触发事件的对象的 x 坐标
+        // var offsetY = e.offsetY;
+        // console.log(offsetX, offsetY)
+        // console.log($(e.target).offset().top)
+        this.displayWidth = item.width;
+        this.displayHeight = item.height;
+        this.movePermit = {
+          type: 'move',
+          originX: e.pageX,
+          originY: e.pageY,
+          originLeft: item.left,
+          originTop: item.top
+        }
+      },
+      transformedRect: function (item) {
+        var x = item.left;
+        var y = item.top;
+        var width = item.width;
+        var height = item.height;
+        var angle = item.rotate;
+
+        var r = Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2)) / 2;
+        // var a = Math.round(Math.atan(height / width) * 180 / Math.PI);
+        var a = Math.atan(height / width) * 180 / Math.PI;
+        var tlbra = 180 - angle - a;
+        var trbla = a - angle;
+        var ta = 90 - angle;
+        var ra = angle;
+
+        var halfWidth = width / 2;
+        var halfHeight = height / 2;
+
+        var middleX = x + halfWidth;
+        var middleY = y + halfHeight;
+
+        var topLeft = {
+          x: middleX + r * Math.cos(tlbra * Math.PI / 180),
+          y: middleY - r * Math.sin(tlbra * Math.PI / 180)
+        };
+        var top = {
+          x: middleX + halfHeight * Math.cos(ta * Math.PI / 180),
+          y: middleY - halfHeight * Math.sin(ta * Math.PI / 180),
+        };
+        var topRight = {
+          x: middleX + r * Math.cos(trbla * Math.PI / 180),
+          y: middleY - r * Math.sin(trbla * Math.PI / 180)
+        };
+        var right = {
+          x: middleX + halfWidth * Math.cos(ra * Math.PI / 180),
+          y: middleY + halfWidth * Math.sin(ra * Math.PI / 180),
+        };
+        var bottomRight = {
+          x: middleX - r * Math.cos(tlbra * Math.PI / 180),
+          y: middleY + r * Math.sin(tlbra * Math.PI / 180)
+        };
+        var bottom = {
+          x: middleX - halfHeight * Math.sin(ra * Math.PI / 180),
+          y: middleY + halfHeight * Math.cos(ra * Math.PI / 180),
+        }
+        var bottomLeft = {
+          x: middleX - r * Math.cos(trbla * Math.PI / 180),
+          y: middleY + r * Math.sin(trbla * Math.PI / 180)
+        };
+        var left = {
+          x: middleX - halfWidth * Math.cos(ra * Math.PI / 180),
+          y: middleY - halfWidth * Math.sin(ra * Math.PI / 180),
+        }
+        var center = {
+          x: middleX,
+          y: middleY,
+        }
+        var minX = Math.min(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x);
+        var maxX = Math.max(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x);
+        var minY = Math.min(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y);
+        var maxY = Math.max(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y);
+        return {
+          point: [topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, center],
+          width: maxX - minX,
+          height: maxY - minY,
+          left: minX,
+          right: maxX,
+          top: minY,
+          bottom: maxY
+        }
+
+
+      },
+      pointMousedown: function (e, item, direction) {
+        this.displayWidth = item.width;
+        this.displayHeight = item.height;
+        this.movePermit = {
+          type: direction,
+          originX: e.pageX,
+          originLeft: item.left,
+          originTop: item.top,
+          originWidth: item.width,
+          originY: e.pageY,
+          originHeight: item.height,
+          originRotate: item.rotate,
+          originRect: this.transformedRect(this.selectedItem)
+        }
+
+      },
+      getDate: function () {
+        var myDate = new Date();
+        var month = myDate.getMonth() + 1, date = myDate.getDate(), hour = myDate.getHours(), minute = myDate.getMinutes(), second = myDate.getSeconds();
+        if (month < 10) month = '0' + month
+        return `${myDate.getFullYear()}${month}${date}${hour}${minute}${second}`
+      },
+      saveAnchorToHistory: function () {
+        Vue.nextTick(() => {
+          if (this.historyList.nowIndex != this.historyList.length - 1) {//back后再次进行操作时,清空所有forward内容
+            this.historyList.splice(this.historyList.nowIndex + 1)
+          }
+          var data = JSON.parse(JSON.stringify({
+            itemList: this.itemList,
+            basicData: this.basicData
+          }))
+          this.historyList.push(data);
+          this.historyList.nowIndex = this.historyList.length - 1;
+        })
+      },
+      historyBack: function () {
+        if (this.historyList[this.historyList.nowIndex - 1]) {
+          var data = this.historyList[this.historyList.nowIndex - 1];
+          console.log(data.itemList)
+          this.itemList = data.itemList;
+          this.basicData = data.basicData;
+          this.historyList.nowIndex--
+        } else {
+          console.log('到头了')
+        }
+      },
+      historyForward: function () {
+        if (this.historyList[this.historyList.nowIndex + 1]) {
+          var data = this.historyList[this.historyList.nowIndex + 1];
+          console.log(data.itemList)
+          this.itemList = data.itemList;
+          this.basicData = data.basicData;
+          this.historyList.nowIndex++
+        } else {
+          console.log('到头了')
+        }
+      },
+      getGame: function (targetItem) {
+        var _this = this;
+        $.ajax({
+          url: "https://g.captive.com.cn/api/services/app/Activity/GetActivityGamesByActivityId",
+          type: 'GET',
+          headers: {
+            'Abp.TenantId': _this.tenantId,
+            'Authorization': _this.token
+          },
+          data: {
+            ActivityId: targetItem.activityId,
+            MaxResultCount: 999,
+            SkipCount: 0
+          },
+          success: function (result, status, xhr) {
+            targetItem.gameList = result.result.items.map(game => ({
+              id: game.id,
+              name: game.name
+            }));
+          },
+          error: function (xhr, status, error) {
+            alert(error)
+          }
+        })
+      },
+      getData: function (data) {
+        if (data.itemList) {
+          this.itemList = data.itemList;
+          data.itemList.forEach(item => {
+            if (item.type == "qrcode" && item.qrcodeType == "activity") {
+              this.getGame(item);
+            }
+          })
+        }
+        if (data.basicData) { this.basicData = data.basicData; }
+        this.saveAnchorToHistory();
+      }
+    },
+    mounted: function () {
+
+      var _this = this;
+      this.basicData.name = `新建画布`;
+      $('input,textarea,select').bind('change', this.saveAnchorToHistory);
+      this.saveAnchorToHistory();
+
+
+      window.addEventListener('message', function (e) {
+        console.log(e.origin);
+        if (e.origin.indexOf('localhost') == -1) {
+          _this.localhost = false;
+        }
+        try {
+          var data = JSON.parse(e.data);
+          console.log(data);
+          _this.token = data.token;
+          _this.tenantId = data.tenantId;
+          _this.grantedActivity = data.grantedActivity;
+          _this.getData(data);
+          $.ajax({
+            url: (_this.localhost ? 'http://47.103.108.170:809' : 'https://s.captive.com.cn') + '/api/services/app/ToolBox/GetToolBoxs',
+            type: 'GET',
+            headers: {
+              'Abp.TenantId': _this.tenantId,
+              'Authorization': _this.token
+            },
+            data: {
+              Enabled: true,
+              Sorting: 'orderNumber ASC',
+              MaxResultCount: 999
+            },
+            success: function (result, status, xhr) {
+              // _this.componentList = result.result.items;
+              // console.log(222, _this.componentList)
+              var newComponentList = {};
+              result.result.items.forEach(item => {
+                newComponentList[item.type] = {
+                  type: item.type,
+                  displayName: item.displayName,
+                  icon: item.icon
+                }
+              })
+              _this.componentList = newComponentList;
+            },
+            error: function (xhr, status, error) {
+              alert(error)
+            }
+          })
+          if (_this.grantedActivity) {
+            $.ajax({
+              url: "https://g.captive.com.cn/api/services/app/Activity/GetActivities",
+              type: 'GET',
+              headers: {
+                'Abp.TenantId': _this.tenantId,
+                'Authorization': _this.token
+              },
+              data: {
+                IsTemplate: false,
+                MaxResultCount: 999,
+                SkipCount: 0
+              },
+              success: function (result, status, xhr) {
+                _this.activityList = result.result.items.map(activity => ({
+                  id: activity.id,
+                  name: activity.name
+                }));
+              },
+              error: function (xhr, status, error) {
+                alert(error)
+              }
+            })
+          }
+
+        } catch (error) {
+          console.log(error);
+          alert('数据格式有误,请重新导入')
+        }
+      });
+
+
+
+
+
+
+
+
+    }
+  })
+
+</script>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>重力飙车</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
+  <script src="/js/TweenMax.min.js"></script>
+  <script src="/js/greensock-js/src/minified/plugins/ModifiersPlugin.min.js"></script>
+  <script src="/js/troncell_wx2.js"></script>
+  <script src="/js/preloadjs.min.js"></script>
+  <script src="/js/soundjs.min.js"></script>
+</head>
+<style>
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  #roadContainer {
+    overflow: hidden;
+    height: 100vh;
+    position: relative;
+  }
+
+  #roadContainer .roadPiece {
+    display: block;
+    height: 12.5vh;
+    width: 46vh;
+    left: calc(50vw - 23vh);
+    background: blue;
+    outline: 1px solid black;
+    position: absolute;
+  }
+
+  .bar {
+    height: 5vh;
+    width: 5vh;
+    background: red;
+    position: absolute;
+  }
+
+  #car {
+    position: absolute;
+    top: 70vh;
+    height: 12.5vh;
+    width: 8vh;
+    /* left: 42vw; */
+  }
+</style>
+
+<body>
+  <div id="app">
+    <!-- <p>转动：<span>{{direction}} {{gamma}}</span></p> -->
+<div>
+  {{roadLine.timeScale()}}
+</div>
+    <div id="roadContainer" @touchstart="speedUp" @touchend="speedDown">
+      <div class="roadPiece" v-for="(roadPiece,index) of roadPieceList" :key="index">
+        {{index}}
+        <div class="bar" v-show="roadPiece.barX" :style="{left:roadPiece.barX+'%'}"></div>
+        <!-- <div class="bar" v-show="roadPiece.barX" :style="{left:'50%'}"></div> -->
+      </div>
+    </div>
+    <img id="car" src="./img/gravity-car/car.png">
+
+  </div>
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      gamma: 0,
+      circleTime: 5,
+      roadPieceList: [{}, {}, {}, {}, {}, {}, {}, {}, {}],
+      driveCarSpace: 0.01,
+      roadLine: new TimelineMax({ repeat: -1 }),
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
+    },
+    computed: {
+      direction() {
+        if (this.gamma < -10) {
+          return -1
+        } else if (this.gamma > 10) {
+          return 1
+        } else {
+          return 0
+        }
+      }
+    },
+    watch: {
+
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      DeviceOrientationHandler(event) {
+        var gamma = event.gamma;
+        if (gamma == null || gamma == undefined) return this.showNoCompat();
+        this.gamma = gamma;
+      },
+      bindEvent() {
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', this.DeviceOrientationHandler);
+        } else {
+          this.showNoCompat();
+        }
+      },
+      showNoCompat() {
+        alert("您的浏览器不支持DeviceOrientation");
+      },
+      initRoad() {
+        this.roadPieceList.forEach((roadPiece, index) => {
+          var targetElement = $('#roadContainer .roadPiece').eq(index);
+          roadPiece.roadMax = TweenMax.fromTo(targetElement, this.circleTime,
+            {
+              y: index * 0.125 * this.windowHeight
+            },
+            {
+              ease: Linear.easeNone,
+              y: this.windowHeight + (index + 1) * 0.125 * this.windowHeight,
+              // repeat: -1,//应采用TimelineMax的repeat而非子的repeat,否则无法获取TimelineMax的progress
+              modifiers: {
+                y: (y) => {
+                  if (y <= this.windowHeight) {
+                    return y;
+                  } else {
+                    return y - 1.125 * this.windowHeight
+                  }
+                }
+              },
+            });
+
+          this.roadLine.add(roadPiece.roadMax, 0);
+        });
+
+        this.roadPieceList.forEach((roadPiece, index) => {
+          this.roadLine.addCallback(() => {//为每次沉没的目标重新设置事件
+            if (index <= this.roadPieceList.length - 2) {
+              var nowOverflowIndex = this.roadPieceList.length - 2 - index;
+            } else {
+              var nowOverflowIndex = index;
+            }
+            this.addAction(nowOverflowIndex);
+          }, this.circleTime / this.roadPieceList.length * (index + 1));
+        })
+
+
+      },
+      initCarDrive() {
+        TweenMax.set('#car', {
+          x: this.windowWidth / 2 - this.windowHeight / 100 * 8 / 2
+        })
+        setInterval(() => {
+          this.driveCar();
+        }, this.driveCarSpace * 1000)
+      },
+      driveCar() {
+        var leftLimit = (this.windowWidth - this.windowHeight / 100 * 46) / 2;
+        var rightLimit = this.windowWidth - (this.windowWidth - this.windowHeight / 100 * 46) / 2 - this.windowHeight / 100 * 8;
+        TweenMax.to('#car', 1, {
+          x: '+=' + this.gamma * 5,
+          modifiers: {
+            x: (x) => {
+              if (x <= leftLimit) {
+                return leftLimit;
+              } else if (x >= rightLimit) {
+                return rightLimit;
+              } else {
+                return x
+              }
+            }
+          },
+        })
+      },
+      addAction(nowOverflowIndex) {//设置事件
+        this.$set(this.roadPieceList[nowOverflowIndex], 'barX', Math.random() * 89);
+      },
+      speedUp() {
+        TweenMax.to(this.roadLine, 5, { timeScale: 3 });
+      },
+      speedDown() {
+        TweenMax.to(this.roadLine, 3, { timeScale: 1 });
+      }
+    },
+    mounted: function () {
+      this.bindEvent();
+      this.initRoad();
+      this.initCarDrive();
+    }
+  })
+
+
+
+
+</script>
+
+</html>

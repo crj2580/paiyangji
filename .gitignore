@@ -1,0 +1,15 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# e2e
+*.psd
+*.pptx
+*.mp4
+*.mov
+*.zip
+*.rar
+*.ttf
+
+backup/
+node_modules
+**/node_modules/
+okr/设计图/

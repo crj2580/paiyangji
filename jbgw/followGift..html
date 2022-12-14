@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>关注有礼</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx.js"></script>
+</head>
+
+<body>
+  <div id="app">
+    <div v-if="loading" class="basicLoading">
+      <img src="/img/loading.gif">
+    </div>
+  </div>
+</body>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      openId: '',
+      securityKey: '',//13b53ef625694a30b56f74f7d0ca9975
+      dispatchedSoftwareId: '',
+      deviceId: '',
+      organizationUnitId: '',
+      loading: false,
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      actionDataById: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        _this.loading = true;
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': _this.actionId
+        }, function (result, status) {
+          if (result.success) {
+            console.log(result.result);
+            console.log('organizationUnitId :', result.result.device.storeOuterId, 'deviceId :', result.result.device.id, 'dispatchedSoftwareId :', result.result.deviceActivityGame.dispatchedSoftwareId);
+            setWX(result, ['hideOptionMenu'])
+            _this.openId = result.result.snsUserInfo.openid;
+            _this.deviceId = result.result.device.id;
+            _this.dispatchedSoftwareId = result.result.deviceActivityGame.dispatchedSoftwareId;
+            _this.organizationUnitId = result.result.device.storeOuterId;
+            _this.getUserData();
+          }
+        })
+      },
+      getUserData: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        _this.loading = true;
+        // $.get('https://api.dajiazww.com/luckyWheel/user', {
+        $.get('https://api.japan-beauty-gateway.com/luckyWheel/user', {
+          'openId': _this.openId
+        }, function (result, status) {
+          _this.loading = false;
+          console.log(result.data)
+          if (result.data.isBind) {//已注册
+            // window.location.href = "https://www.dajiazww.com/#/user";
+            window.location.href = "https://japan-beauty-gateway.com/#/user";
+          } else {//前往注册 
+            // window.location.href = `https://www.dajiazww.com/?storeId=${_this.organizationUnitId}&source=202#/bindPhone`;
+            window.location.href = `https://japan-beauty-gateway.com/?storeId=${_this.organizationUnitId}&source=202#/bindPhone`;
+          }
+        })
+      }
+    },
+    mounted: function () {
+      this.actionDataById();
+    }
+  })
+
+</script>
+
+</html>

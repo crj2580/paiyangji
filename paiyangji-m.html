@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>创思感知</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <!-- <script src="./js/vue.min.js" type="text/javascript"></script> -->
+  <!-- <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script> -->
+</head>
+<style>
+  body {
+    background: #4C108D;
+    transform: perspective(500px) rotatey(0deg);
+  }
+
+  .thankyou {
+    width: 56%;
+    height: 56vw;
+    position: absolute;
+    top: 75vw;
+    left: 22%;
+    display: none;
+  }
+
+  .buttonContainer {
+    width: 56%;
+    height: 56vw;
+    position: absolute;
+    top: 75vw;
+    left: 22%;
+    transform-style: preserve-3d;
+    display: none;
+  }
+
+  .buttonContainer img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .button {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
+  .button1 {
+    transform: translate3d(0px, 0, 1px);
+  }
+
+  .button2 {
+    transform: translate3d(0px, 0, 0px) rotateY(180deg);
+    opacity: 0;
+  }
+
+  .button3 {
+    transform: translate3d(0px, 0, 0px) rotateY(180deg);
+    opacity: 0;
+  }
+
+  .animate {
+    animation-name: button;
+    animation-duration: 1s;
+    animation-fill-mode: both;
+  }
+
+  @keyframes button {
+    from {
+      transform: rotatey(0deg);
+    }
+
+    to {
+      transform: rotatey(180deg);
+    }
+  }
+</style>
+
+<body>
+  <img src="img/paiyangji/bg-m.png" style="position:fixed;width:100%;">
+
+
+  <img class="title" src="img/paiyangji/mobile/title.png" style="position:fixed;width:80%;top:7vh;left:10%;">
+  <img class="box" src="img/paiyangji/mobile/box.png" style="position:fixed;width:80%;top:10vh;left:13%;">
+  <img src="img/paiyangji/mobile/tips.png" style="position:fixed;width:80%;top:84vh;left:10%;">
+
+
+  <div class="buttonContainer">
+    <img class="button button1" src="img/paiyangji/button1.png">
+    <!-- <img class="button button2" src="img/paiyangji/button2.png"> -->
+    <!-- <img class="button button3" src="img/paiyangji/button3.png"> -->
+  </div>
+  <!-- <img src="img/paiyangji/button2.png" class="thankyou"> -->
+  <img src="img/paiyangji/mobile/thanks.png" class="thanks"
+    style="width: 60%;position: absolute;top: 60vh;left: 20%;display: none;">
+
+</body>
+<script>
+  var SecurityKey;
+  var actionId = kindId('actionId');
+  var OpenId = kindId('openid');
+  var PayAmount;
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+
+
+  $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+    actionId
+  }, function (result, status) {
+    // alert(`actionId=${actionId},OpenId=${result.result.snsUserInfo.openid},MyId=${OpenId},isForged=${result.result.isForged}`);
+
+    SecurityKey = result.result.deviceActivityGame.securityKey;
+    //前者为网页授权,拿到的是同一个action,后者为公众号授权,拿到的是不同的actionId
+    if (OpenId != result.result.snsUserInfo.openid || result.result.isForged) {
+      console.log('该二维码已被扫过,请重新扫码')
+      alert('重新扫码')
+      return
+    }
+    // {"ActivityPayRule":{"ActivityPayType":0,"PayAmount":0.01}}
+    var rule = result.result.deviceActivityGame.activity.rules;
+    if (rule) {
+      rule = JSON.parse(rule);
+      if (rule.ActivityPayRule && rule.ActivityPayRule.ActivityPayType == 0) {
+        PayAmount = rule.ActivityPayRule.PayAmount;
+      }
+    }
+
+
+    $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction', {
+      OpenId,
+      actionId,
+      QrType: 'BeforeGame',
+      SnsType: 'Wechat',
+      SecurityKey
+    }, function (result) {
+      if (result.success) {
+        console.log(result.result)
+        if (result.result.canNextAward) {
+          console.log('可以抽')
+          $('.buttonContainer').fadeIn();
+          $('.button1').one('click', function () {
+            if (PayAmount) {
+
+              $.ajax({
+                type: "POST",
+                url: "https://o.api.troncell.com/api/services/app/SensingShop/WxPayOrderForActivity?actionId=" + actionId + "&securityKey=" + SecurityKey,
+                contentType: "application/json; charset=utf-8",
+                success: function (message) {
+                  console.log("WxPayOrderForActivity", message.result);
+                  WeixinJSBridge.invoke(
+                    'getBrandWCPayRequest',
+                    message.result,
+                    function (res) {
+                      if (res.err_msg == "get_brand_wcpay_request:ok") {
+                        // 使用以上方式判断前端返回,微信团队郑重提示：
+                        //res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
+                        DoLotteryAwardByAction();
+                      }
+                    });
+                },
+                error: function (message) { }
+              })
+
+            } else {
+              DoLotteryAwardByAction();
+            }
+          })
+          setTimeout(function () {//一直不抽就隐藏掉
+            $('.buttonContainer').fadeOut();
+          }, 18000)
+        } else {
+          console.log('不能抽了');
+          console.log(result.result.awards[0]);
+          // $('.thankyou').fadeIn();
+          $('.thanks').fadeIn();
+        }
+      }
+    })
+  })
+
+
+
+
+  function DoLotteryAwardByAction() {
+    $.ajax({
+      type: "POST",
+      url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        actionId,
+        SecurityKey
+      }),
+      success: function (message) {
+        console.log(message)
+        if (message.success) {
+          console.log('恭喜抽中', message.result)
+          if (message.result.award.type == 2) {//谢谢
+            $('.box').prop('src', 'img/paiyangji/mobile/box1.png')
+            setTimeout(function () {
+              $('.box').prop('src', 'img/paiyangji/mobile/box2-0.png')
+            }, 100)
+            setTimeout(function () {
+              $('.box').prop('src', 'img/paiyangji/mobile/box3-0.png')
+            }, 200)
+
+            $('.title').fadeOut();
+            $('.buttonContainer').fadeOut();
+            // $('.button2').css('opacity', 1)
+          } else {//中奖
+            $('.box').prop('src', 'img/paiyangji/mobile/box1.png')
+            setTimeout(function () {
+              $('.box').prop('src', 'img/paiyangji/mobile/box2-1.png')
+            }, 100)
+            setTimeout(function () {
+              $('.box').prop('src', 'img/paiyangji/mobile/box3-1.png')
+            }, 200)
+
+            $('.title').fadeOut();
+            $('.buttonContainer').fadeOut();
+            // $('.button3').css('opacity', 1)
+          }
+          // $('.buttonContainer').addClass("animate");
+        }
+      },
+      error: function (message) {
+
+      }
+    })
+  }
+
+
+
+</script>
+
+</html>

@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Document</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <link href="./machine.css" rel="stylesheet" type="text/css">
+
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="./js/GenerateCanvas.js?v=1" type="text/javascript"></script>
+  <script src="./js/map.js"></script>
+  <script src="./js/CircleProgress.js?v=1"></script>
+  <script src="/js/TweenMax.min.js"></script>
+  <script src="/js/preloadjs.min.js"></script>
+
+  <script>if (window.module) { module = window.module };</script>
+</head>
+
+
+<body>
+  <div id="app" v-cloak>
+    <div class="basicLoading" v-show="loading">
+      <img src="/img/loading.gif">
+    </div>
+    <div v-show="showMsg" class="basicMsg">
+      <div style="padding:6vw;font-size:3.5vw;">
+        {{showMsg}}
+      </div>
+    </div>
+
+    <template v-if="status==1||status==2">
+      <!-- 下方区域 -->
+      <div class="ballWrapper" style="position: fixed;left: 0;top: 0;width: 100vw;height: 100vh;">
+        <div class="selectTip"
+          style="position: absolute;left:0;width: 100%;text-align: center;top: -20%;color: #fff;font-size: 2vw;">
+          请从以下烧杯中选择一份进行制作</div>
+        <div class="beaderWrapper" style="width: 60%;
+      overflow: hidden;
+      position: absolute;
+      bottom:-1%;
+      left: 30%;font-size: 1.3vw;color: #ba814b;">
+          <div style="display: flex;justify-content: space-around;margin-bottom: -1%;">
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[0].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(0)">
+              <canvas ref="cvs01" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">眼部精华</span>
+            </div>
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[1].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(1)">
+              <canvas ref="cvs02" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">祛痘精华</span>
+            </div>
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[2].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(2)">
+              <canvas ref="cvs03" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">美白精华</span>
+            </div>
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[3].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(3)">
+              <canvas ref="cvs04" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">控油精华</span>
+            </div>
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[4].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(4)">
+              <canvas ref="cvs05" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">抗皱精华</span>
+            </div>
+            <div style="width: 6vw;position: relative;"
+              :style="{display:(status==2&&!beakerList[5].ballList.length)?'none':'block'}"
+              @click.stop.prevent="selectBallAndBeaker(5)">
+              <canvas ref="cvs06" style="position: absolute;left: 0;bottom:0;width: 103px;height: 109px;"></canvas>
+              <img style="width:90%;float: left;" src="./img/beaker/beaker.png">
+              <span style="float: right;writing-mode: vertical-lr;width: 10%;">保湿面霜</span>
+            </div>
+          </div>
+          <img style="width: 100%;" src="./img/table1.png?v=1">
+        </div>
+      </div>
+    </template>
+
+
+    <template v-if="status==1">
+      <!-- 左侧区域 -->
+      <div style="width: 40%;position: fixed;left: 1%; font-family: 'yuanti';">
+        <img style="width: 100%;" src="./img/left_bg.png?v=1">
+        <img :src="userInfo.headimgurl"
+          style="width: 5vw; height: 5vw; border-radius: 50%; position: absolute;left: 9%;top: 2%;">
+
+        <div style="width: 54%;border-bottom: 2px solid #ffc889; color: #94673d;position: absolute;left: 27%;top: 3%;">
+          <div style="font-size: 1.6vw;font-weight: 700;">{{ userInfo.nickname}}{{userInfo.sex}}士</div>
+          <div style="margin: .7vw 0; font-size: 1.3vw;">
+            <span>年龄：{{ userInfo.age }}</span> |
+            <span>城市：{{ userInfo.city }}</span>
+          </div>
+        </div>
+
+        <div
+          style="position: absolute;;width: 100%;text-align: center;font-weight: 700;font-size: 1.8vw;color: #94673d; top: 19%; letter-spacing: 2px;">
+          专属肌肤AI智能检测报告</div>
+
+        <div class="face-container">
+          <img style="width: 84%;left:8%;top:-24%;position: absolute;" src="./img/dashed.png">
+          <div style="width:20vw;height:20vw;position:relative;margin: 0 auto;">
+            <img src="../game2/img/circle_rule1.png" style="width: 76%; position: absolute;left: 12%;top: 0%;">
+
+            <img src="../game2/img/dashed2.png" style="width: 86%;
+            position: absolute;
+            left: 7%;
+            top: -6%;">
+
+            <canvas :id="'canvas' + curProblemIndex" class="canvas" :key="curProblemIndex"></canvas>
+
+            <div class="userFace">
+              <img style="width: 100%;height: 100%;" :src="userInfo.playerImage">
+            </div>
+
+            <img style="width: 50%;position: absolute;left: 25%; bottom: 39%;" src="../game2/img/dashed1.png">
+
+            <div @touchstart.stop.prevent="handleTabChange(key)" v-for="(value, key, index) in skinMap" class="iconTab"
+              :class=`iconBtn${index}`>
+              <img v-if="curProblemIndex == index" style="width: 100%;" :src=`./img/iconbtn/${key}02.png`> <img v-else
+                style="width: 100%;" :src=`./img/iconbtn/${key}01.png`> </div> </div> </div> <div class="titleWrapper">
+              {{ keyList[curProblemIndex] }} {{ curProblem.avarage }}分
+            </div>
+
+            <div class="ball">
+              <p style="font-size: 2vw;font-weight: 700;">{{ userInfo.allGrade }}<span
+                  style="font-size: 1.2vw;">分</span>
+              </p>
+            </div>
+
+          </div>
+          <!-- 中间区域 -->
+          <div style="position: absolute;left: 40%;
+      top: 10%;
+      width: 48%;
+      height: 68%;font-family: 'yuanti'; font-size: 1.2vw;color: #94673d;">
+            <!-- 各项 -->
+            <template v-if="!currentName">
+              <div style="position: relative;">
+                <img src="./img/report_bg1.png?v=1">
+                <div
+                  style="position: absolute;font-size: 1.2vw;color: #9d8158;top: 4%;left: 50%;transform:translateX(-42%);">
+                  {{ keyList[curProblemIndex] }}肌肤分析报告</div>
+                <div style="position: absolute;width: 90%;top: 19%;left: 6%;">
+                  <div style="overflow: hidden;">
+                    <img style="width: 4%;float: left;" :src="'./img/icon/' + keyList[curProblemIndex] +'.png'">
+                    <div style="float: right; width: 92%;">
+                      <div>{{ curProblem.description }}</div>
+                    </div>
+                  </div>
+
+                  <div style="overflow: hidden; margin-top: 0.5vw;">
+                    <img style="width: 4%;float: left;" src="./img/icon/yuanyin.png">
+                    <div style="float: right; width: 92%;">
+                      <div style="white-space: pre-wrap;height: 14vh;overflow-y: auto;">原因：{{ curProblem.cause }}</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <div style="position: relative;">
+                <img src="./img/agreement_bg.png?v=1">
+                <div
+                  style="position: absolute;font-size: 1.2vw;color: #9d8158;top: 3%;left: 50%;transform:translateX(-42%);">
+                  {{ keyList[curProblemIndex] }}改善方法</div>
+                <div style="position: absolute;width: 88%;top: 19%;left: 6%;height: 66%;
+            overflow-y: auto;" :key="curProblemIndex">
+                  <div style="overflow: hidden;">
+                    <img style="width: 4%;float: left;" src="./img/icon/dengpao.png">
+                    <div style="float: right; width: 92%;">
+                      <div>{{ curProblem.how }}</div>
+                    </div>
+                  </div>
+
+                  <div style="overflow: hidden; margin-top: 1vw;">
+                    <img style="width: 4%;float: left;" src="./img/icon/yuanyin.png">
+                    <div style="float: right; width: 92%;">
+                      <div style="margin-bottom: .5vw;">推荐成分</div>
+
+                      <div style="overflow: hidden;" v-for="item in curProblem.medicineList">
+                        <img style="width: 20%;float: left;" :src="'./img/medicine/'+ item.name +'.png?v=1'">
+                        <div style="width: 76%;float: right;">
+                          {{ item.name }}<br />
+                          {{ medicineMap[item.name].description }}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- 详细 -->
+            <template v-else>
+              <img style="width: 100%;" src="./img/fenxi.png">
+              <div style="width:2vw;position: absolute;right: 5%;top: 5%;" @click="handleCloseInfoWrap">
+                <img src="./img/guanbi.png" style="width: 100%;"></div>
+
+              <div style="width:86%;height:80%;left:7%;position: absolute;top: 12%;color: #4b4b4b;">
+                <div style="font-size: 1.3vw;text-indent:3em;margin-bottom: 2vw;">{{ currentName }}</div>
+
+                <div style="margin-bottom: 2vw; overflow: hidden;">
+                  <div style="float: left;margin-right: 2vw;width: 16%;">
+                    <img style="width:2vw;vertical-align: middle;margin-right: 1.6vw;" src="./img/icon/DNA.png">
+                    成分
+                  </div>
+                  <div style="float: left;width: 78%;">{{ medicineMap[currentName].chengfen }}</div>
+                </div>
+
+                <div style="margin-bottom: 2vw;overflow: hidden;">
+                  <div style="float: left;margin-right: 2vw;width: 16%;">
+                    <img style="width:2vw;vertical-align: middle;margin-right: 1.6vw;" src="./img/icon/gongxiao.png">
+                    功效
+                  </div>
+                  <div style="float: left;width: 78%;">{{ medicineMap[currentName].gongxiao }}</div>
+                </div>
+
+                <div style="margin-bottom: 2vw;overflow: hidden;">
+                  <div style="float: left;margin-right: 2vw;width: 16%;">
+                    <img style="width:2vw;vertical-align: middle;margin-right: 1.6vw;" src="./img/icon/info.png">
+                    说明
+                  </div>
+                  <div style="float: left;white-space: pre-line;width: 78%;height: 14vw;overflow-y: auto;">
+                    {{ medicineMap[currentName].shuoming }}</div>
+                </div>
+
+                <div v-if="curProblem.medicineList.filter(i => i.status == 0).length != 1"
+                  style="width: 30%;left:40%;position: absolute;bottom: 0;" @click.stop.prevent="handleNextClick">
+                  <img src="./img/gonext.png" style="width: 100%;">
+                </div>
+                <div v-else style="width: 30%;left:40%;position: absolute;bottom: 0;"
+                  @touchstart.stop.prevent="handleCollection">
+                  <img src="./img/collection.png" style="width: 100%;">
+                </div>
+              </div>
+            </template>
+
+          </div>
+
+          <div
+            style="text-align: left;color:#b28255;font-size: 1.4vw;letter-spacing: 2px;position: absolute;top: 15%;right: 3%;">
+            待收集成分</div>
+          <!-- 右侧区域 -->
+          <div
+            style="position: absolute; width: 7%;height: 100%;right: 2%;display: flex;flex-direction: column;justify-content: center;">
+            <div class="imgWrapper" style="position: relative;" v-for="(key, index) in curProblem.medicineList"
+              @click.stop="handleBallClick($event,index)"
+              v-show="curProblem.medicineList.find(item => item.status == 0)">
+              <img :key="index" style="width: 100%;" :src="'./img/ball/' + key.name + '.png'">
+            </div>
+          </div>
+
+          <div style="position: absolute;right: 4%;bottom: 13%;z-index: 111;" @click="toggleProblemFn(skipFlag)"
+            v-if="!(curProblemIndex==7&&medicinesList.length==0)">
+            <img style="width:100%;" src="./img/skip.png">
+          </div>
+
+          <div style="position: absolute;right: 4%;bottom: 13%;z-index: 111;" @click="startMake"
+            v-if="(curProblemIndex==7&&medicinesList.length!=0)">
+            <img style="width:100%;" src="./img/zhizuo.png">
+          </div>
+
+    </template>
+
+
+
+    <template v-if="status==2||status==3||status==4">
+      <!-- 通用左侧栏 -->
+      <div style="width: 40%;position: fixed;left: 1%; font-family: 'yuanti';z-index:10;">
+        <img style="width: 100%;" src="./img/left_bg.png?v=1">
+        <!-- :src="userInfo.headimgurl"  -->
+        <img :src="userInfo.headimgurl"
+          style="width: 5vw; height: 5vw; border-radius: 50%; position: absolute;left: 9%;top: 2%;">
+
+        <div style="width: 50%;border-bottom: 2px solid #ffc889; color: #94673d;position: absolute;left: 27%;top: 3%;">
+          <!--   -->
+          <div style="font-size: 1.6vw;font-weight: 700;">{{ userInfo.nickname}}{{userInfo.sex}}士</div>
+          <div style="margin: .7vw 0; font-size: 1.3vw;">
+            <span>年龄：{{ userInfo.age }}</span> |
+            <span>城市：{{ userInfo.city }}</span>
+          </div>
+        </div>
+
+        <div
+          style="position: absolute;;width: 100%;text-align: center;font-weight: 700;font-size: 1.6vw;color: #94673d; top: 19%;letter-spacing: 2px;">
+          专属肌肤AI智能检测报告</div>
+
+        <div class="rotate" style="width: 20vw;height: 20vw;left: 25%;
+        top: 16vw;">
+          <!-- <img class="img7" src="../game3/img/rotate/1.png"> -->
+          <img class="img6" src="../game3/img/rotate/6-1.png?v=1">
+          <img class="img5" src="../game3/img/rotate/5.png">
+          <img class="img4" src="../game3/img/rotate/4.png">
+          <img class="img3" src="../game3/img/rotate/3.png">
+          <img class="img2" src="../game3/img/rotate/2.png">
+          <img class="img1" src="../game3/img/rotate/1.png">
+          <!-- <img class="circle" src="../game3/img/rotate/6-1.png"> -->
+
+          <div class="grade" :class="'grade' + index" v-for="(value, key, index) in skinMap" :key="index">
+            {{ value.avarage }}</div>
+
+          <div class="allGrade">
+            <div style="font-size: 2vw;text-align: center;">{{ userInfo.allGrade }}</div>
+            <div style="font-weight: normal;">肌肤得分</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+
+    <transition name="fade">
+
+      <template v-if="status==0">
+        <div>
+          <img src="./img/bg1.png" style="width:100%;height:100%;position:absolute;">
+          <canvas class="myCanvas1" ref="myCanvas1"></canvas>
+          <img src="./img/ready.png" style="width:100%;height:100%;position:absolute;">
+          <div class="rotate">
+            <img class="img6" src="./img/rotate/6-1.png?v=1">
+            <img class="img7" src="./img/rotate/6-2.png?v=1">
+            <img class="img5" src="./img/rotate/5.png">
+            <img class="img4" src="./img/rotate/4.png">
+            <img class="img3" src="./img/rotate/3.png">
+            <img class="img2" src="./img/rotate/2.png">
+            <img class="img1" src="./img/rotate/1.png">
+          </div>
+          <img v-if="qrCodeImage" :src="qrCodeImage"
+            style="width: 9vw;height: 9vw;position: absolute;top: 19.5vw;left: 45.5vw;">
+        </div>
+
+      </template>
+    </transition>
+
+    <img v-if="status==2||status==3||status==4" class="bottle" ref="bottle"
+      :src="beakerIndex==5?'./img/beaker/bottle2.png':'./img/beaker/bottle.png'">
+
+    <transition name="fade">
+      <template v-if="status==2||status==3">
+        <div>
+          <canvas class="myCanvas2" ref="myCanvas2"></canvas>
+          <div class="tip2">
+            <img src="./img/tip2beaker.png" style="position:absolute;width:20vw;left:60vw;top:7vw;">
+            <img src="./img/arrow2beaker.png" style="position:absolute;width:20vw;left:58vw;top:18vw;">
+          </div>
+          <div class="beaker" ref="beaker">
+            <img ref="matter" class="matter" src="">
+            <img ref="water" class="water" src="./img/beaker/water.gif">
+            <img src="./img/beaker/beaker.png" style="width:100%;height:100%;position:absolute;top:0;left:0;">
+          </div>
+          <div v-if="status==2" key="status2" @click.once="addAllBall"
+            style="width:10vw;position:absolute;right:14%;bottom:18%;">
+            <img src="./img/addAllBall.png" style="width:100%;">
+          </div>
+
+          <img class="beaker-bottle" ref="beaker-bottle"
+            :src="beakerIndex==5?'./img/beaker/beaker-bottle2.gif':'./img/beaker/beaker-bottle.gif'">
+
+          <template v-if="status==3" key="status3">
+            <div class="shiyan" ref="shiyan">
+              <img class="shiyanImg1" src="./img/shiyan.png">
+              <img class="shiyanImg2" style="display: none;" src="./img/shiyan2.gif">
+            </div>
+            <div class="tip3">
+              <img src="./img/tip2shiyan.png">
+            </div>
+            <div @click.once="startStir" class="startStir">
+              <img src="./img/startStir.png">
+            </div>
+          </template>
+        </div>
+      </template>
+    </transition>
+
+    <transition name="fade">
+      <template v-if="status==4" key="status4">
+        <div style="position:absolute;width:28vw;left:50vw;top:6vw;">
+          <img src="./img/qrcode2Container.png?v=1" style="width:100%;">
+          <div @click="back2home" style="position:absolute;left:110%;top:105%;width:25%;">
+            <img src="./img/back2home.png" style="width:100%;">
+          </div>
+          <img :src="qrCodeImage2" style="position:absolute;width:40%;left:30%;top:42%;">
+          <div style="font-size: 2.5vw;color:#FDCE97;position:absolute;bottom:10%;width:100%;text-align: center;">
+            {{countDown}}s
+          </div>
+          <div style="text-align: center;top:102%;width:100%;font-size:1.6vw;position: absolute;">
+            <div>手机微信扫码</div>
+            <div>请至前台小姐姐处出示产品专属码</div>
+          </div>
+        </div>
+      </template>
+    </transition>
+
+    <div v-if="status==1||status==2||status==3" style="position: absolute;right: 0;bottom: 0;z-index: 111;"
+      @click="window.location.reload()">
+      <img style="width:100%;" src="./img/goIndex.png">
+    </div>
+  </div>
+
+</body>
+<style>
+  .fade-enter-active {
+    transition: opacity 3s
+  }
+
+  .fade-leave-active {
+    transition: opacity 2s
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0
+  }
+</style>
+<script>
+  console.log("jQuery", jQuery);
+  jQuery.ajaxSetup({
+    timeout: 10000,
+    error: function (jqXHR, textStatus, errorThrown) {
+      switch (jqXHR.status) {
+        case (500):
+          console.log("服务器系统内部错误");
+          break;
+        case (401):
+          console.log("未登录");
+          break;
+        case (403):
+          console.log("无权限执行此操作");
+          break;
+        case (408):
+          console.log("请求超时");
+          break;
+        default:
+          console.log("未知错误");
+      }
+      setTimeout(function () {
+        window.location.reload();
+      }, 3000)
+    },
+    success: function (data) {
+    }
+  });
+</script>
+<script>
+  // import CircleProgress from "./js/CircleProgress.js";
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    console.log(name, r);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  };
+  var app = new Vue({
+    el: '#app',
+    data: {
+      myCvs: null,
+      medicineMap,
+      curProblem: {},
+      curProblemIndex: 0,
+      keyList: [],
+      medicinesList: [],
+      skinMap,
+      userInfo: {
+        headimgurl: '',
+        nickname: '',
+        age: '',
+        city: '',
+        sex: '',
+        playerImage: ''
+      },
+      loading: false,
+      showMsg: null,
+      status: 0,//0等待扫码 1详细信息 2出现杯子 3搅拌 4扫码取货
+      ballsInBeaker: [],
+      beakerCanvas: null,
+      securityKey: "6327114435124b0d8495e18ac0939fd4",
+      subkey: '1d58532656854db49d0fbc6b4547e253',
+      actionId: null,
+      qrCodeImage: null,
+      qrCodeImage2: null,
+      openId: null,
+      lastActionData: null,
+      countDown: kindId("countDown") || 20,
+      skipFlag: false,
+      currentName: '',
+      beakerList: [],
+      beakerIndex: null,
+    },
+    watch: {
+      curProblemIndex(newVal) {
+        var curProblem = this.skinMap[this.keyList[this.curProblemIndex]];
+
+        console.log(curProblem, this.medicinesList);
+
+        // this.medicinesList.forEach(item => {
+        //   curProblem.medicineList.find(i => i.name == item) && (curProblem.medicineList.find(i => i.name == item).status = 1)
+        // })
+      }
+    },
+    methods: {
+      selectBallAndBeaker(index) {
+        if (this.status == 2) {
+          this.beakerIndex = index;
+          console.log(this.beakerList[index].ballList.map(item => item.name));
+          jQuery('.ballWrapper').fadeOut();
+          jQuery(".tip2").fadeOut(6000);
+          this.$nextTick(() => {
+            this.beakerCanvas = generateCanvas({
+              canvasElement: this.$refs.myCanvas2,
+              width: 960,
+              height: 800,
+              ballNameList: this.beakerList[index].ballList.map(item => item.name),
+              beakerElement: this.$refs.beaker,
+              callbackInBeaker: this.beakerCallback,
+              speed: 1.5
+            });
+          })
+        }
+      },
+
+      startMake() {
+        if (this.curProblemIndex == 7) {
+          jQuery('.ballWrapper').css({
+            'background-color': 'rgba(0,0,0,0.5)',
+            'z-index': '111'
+          });
+          jQuery('.beaderWrapper').css('color', '#fff')
+          TweenMax.to('.beaderWrapper', 3, {
+            left: '20%',
+            top: '50%',
+            onComplete() {
+              TweenMax.to('.selectTip', 2, {
+                top: '35%',
+                onComplete() { }
+              })
+            }
+          })
+          this.goStatus2();
+
+        }
+      },
+
+      handleCloseInfoWrap() {
+        this.currentName = '';
+      },
+      handleNextClick() {
+        this.curProblem.medicineList.find(item => item.name == this.currentName).status = 1;
+
+        var nameList = this.curProblem.medicineList.filter(i => i.status == 0)
+        if (nameList != 0) {
+          this.currentName = nameList[0].name;
+        }
+      },
+      handleCollection() {
+        var _this = this;
+        this.curProblem.medicineList.find(item => item.name == this.currentName).status = 1;
+
+        if (this.curProblemIndex == 0 || this.curProblemIndex == 4) {
+          this.flyToBreaker('-700%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[0].addBall(item.name);
+                _this.medicinesList.push(item.name);
+              }
+            })
+          })
+        }
+
+        if (this.curProblemIndex == 1) {
+          this.flyToBreaker('-600%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[1].addBall(item.name);
+                _this.medicinesList.push(item.name)
+              }
+            })
+          })
+        }
+
+        if (this.curProblemIndex == 2) {
+          this.flyToBreaker('-500%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[2].addBall(item.name);
+                _this.medicinesList.push(item.name)
+              }
+
+            })
+          })
+        }
+
+        if (this.curProblemIndex == 3 || this.curProblemIndex == 5) {
+          this.flyToBreaker('-400%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[3].addBall(item.name);
+                _this.medicinesList.push(item.name)
+              }
+
+            })
+          })
+        }
+
+        if (this.curProblemIndex == 6) {
+          this.flyToBreaker('-300%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[4].addBall(item.name);
+                _this.medicinesList.push(item.name)
+              }
+
+            })
+          })
+        }
+
+        if (this.curProblemIndex == 7) {
+          this.flyToBreaker('-100%', '40%', function () {
+            _this.curProblem.medicineList.forEach(item => {
+              if (_this.medicinesList.find(i => i == item.name)) {
+                console.log(11111);
+              } else {
+                _this.beakerList[5].addBall(item.name);
+                _this.medicinesList.push(item.name)
+              }
+            })
+          })
+        }
+      },
+
+      flyToBreaker(x, y, callback) {
+        var _this = this;
+        this.skipFlag = true;
+        TweenMax.to('.imgWrapper', 1.3, {
+          left: x,
+          top: y,
+          opacity: 0,
+          ease: Power1.easeIn,
+          onComplete() {
+            callback && callback();
+            _this.toggleProblemFn();
+            $(".imgWrapper").css({ 'position': 'relative', 'transform': 'none', 'opacity': 1, 'left': 0, 'top': 0 });
+            _this.skipFlag = false;
+          }
+        });
+      },
+
+
+      toggleProblemFn(flag) {
+        if (flag) {
+          return
+        }
+        this.currentName = '';
+
+        if (this.curProblemIndex == 7) {
+          return
+        }
+
+        this.curProblemIndex++;
+
+        this.curProblem = this.skinMap[this.keyList[this.curProblemIndex]];
+
+        // if (this.curProblem.avarage == 100) {
+        //   this.toggleProblemFn()
+        //   this.curProblem = this.skinMap[this.keyList[this.curProblemIndex]];
+        // }
+
+        this.$nextTick(() => {
+          this.initProgress();
+        })
+      },
+
+      handleTabChange(key) {
+        this.currentName = '';
+        this.curProblemIndex = this.keyList.findIndex(i => i == key);
+        this.curProblem = this.skinMap[this.keyList[this.curProblemIndex]];
+        this.$nextTick(() => {
+          this.initProgress();
+          // jQuery('.imgWrapper').show();
+        })
+      },
+
+      handleBallClick(e, index) {
+        // var _this = this;
+        var name = this.curProblem.medicineList[index].name;
+        this.currentName = name;
+      },
+
+      initProgress() {
+        var initWidth = window.innerWidth * 0.2;
+        // 计算角度
+        var endAngle = parseInt(this.curProblem.avarage * 2) + 180;
+
+        new CircleProgress({
+          canvasId: "canvas" + this.curProblemIndex,
+          r: 160, //默认100，半径
+          w: initWidth, //画布宽，默认500
+          h: initWidth, //画布高，默认500
+          startAngle: 160, //起始角度，默认180
+          endAngle: endAngle, //终止角度，必须传 380
+          interval: 16, //帧间隔时间，默认5ms
+          duration: 1000, //动画时间，默认2000
+          lineWidth: 10, //描边线宽度，默认15
+          bgColor: "transparent", //背景色，默认#cccc
+          colors: {
+            0: "#FFF2C3",
+            1: "#FFCA8B",
+          },
+          precision: 1,
+          endPointColor: "#FFCA8B",
+          endPointR: 10,
+        });
+      },
+
+
+      goStatus1() {
+        this.medicinesList = []
+        this.status = 1;
+
+        // if (window.localStorage.getItem('data')) {
+        //   this.lastActionData = JSON.parse(window.localStorage.getItem('data'))
+        // } else {
+        //   window.localStorage.setItem('data', JSON.stringify(this.lastActionData))
+        // }
+        //todo
+        // this.lastActionData = { "deviceActivityGame": { "tenantId": 5152, "name": "游戏2-肌肤检测", "softwareId": 0, "software": null, "dispatchedSoftwareId": 0, "deviceId": 73632, "subKey": null, "activityId": 181, "activity": { "tenantId": 5152, "organizationUnitId": null, "name": "肌肤检测", "imagePath": null, "address": null, "activityUrl": null, "activityLogoPath": null, "isSendAwardMessage": false, "beforeWeChatMessageId": null, "openDate": null, "endDate": null, "viewCount": 0, "likeCount": 0, "activityShareId": null, "weChatAppID": "wx37e46819d148d5fb", "weixinPublicAccountInfoId": 51, "taobaoSellerID": null, "externalAccessTokenInfoId": 0, "isEnableWhiteUser": false, "isEnableBlackUser": false, "organizer": null, "isAllowedRepeatAward": true, "isNeedAwardInfo": false, "isNeedValidate": false, "rules": null, "activityExcutedDate": null, "isTemplate": false, "iconPath": null, "description": null, "isNeedRegister": false, "ownerName": null, "isPublic": true, "contactor": null, "outerId": null, "contactorPhone": null, "auditStatus": 1, "activityShare": null }, "isShareAction": false, "dispatchedActivityId": null, "supportedPlayersCount": 1, "onlineBackground": null, "onlineForeground": null, "offlineBackground": null, "offlineForeground": null, "materialPacketUrl": null, "maxPlayCountPerUser": 0, "minPlayTimeDiff": 0, "isGameStarted": false, "lastGameOverTime": null, "isNeedCheckBeforScanQRCode": true, "securityKey": "8b56fd6914ad4017b8b71e01aca510d0", "weChatAuthorizationType": 4, "taobaoAuthorizationType": 0, "actionShareId": 256, "actionShare": { "title": null, "link": null, "imageLink": null, "description": null, "activityShareType": 0, "id": 256 }, "extensionData": null, "points": 0, "id": 3127 }, "device": { "id": 73632, "name": "screen2", "mac": null, "os": null, "onlineTrafficTarget": null, "outerId": null, "storeId": null, "storeName": null, "storeOuterId": null, "outType": null, "taobaoDeviceId": null, "subKey": "1d58532656854db49d0fbc6b4547e253" }, "externalAccessSession": null, "transferActionUrl": "https://g.api.troncell.com/transfer/action?actionId=376774", "activityFlows": [], "qrCodeId": "364365", "score": null, "postUrl": null, "gameImage": "", "playerImage": "http://sensinggame.oss-cn-hangzhou.aliyuncs.com/upload/Customer/5152/Activities/181/ActivityGames/3127/UserData/playerimage2021011507051739685560.jpg", "playerPhone": null, "playerEmail": null, "playerAge": 0, "shareCount": 0, "viewCount": 1, "likeCount": 0, "scanQrCodeTime": null, "isSigned": false, "awardId": null, "isForged": null, "forgedReason": null, "type": null, "extensionData": "{\"error_code\":0,\"error_msg\":\"SUCCESS\",\"log_id\":4510115001358,\"timestamp\":1610694316,\"cached\":0,\"sex\":\"男\",\"skinType\":\"油性\",\"skinSensitivity\":\"不太敏感\",\"result\":{\"face_num\":1,\"face_list\":[{\"face_token\":\"d71da5dd0c3d9d3dc3d69506e558c2d4\",\"location\":{\"left\":135.17,\"top\":158.86,\"width\":304,\"height\":331,\"degree\":2},\"skin\":{\"color\":4,\"smooth\":2},\"acnespotmole\":{\"acne_num\":3,\"acne_list\":[{\"type\":0,\"score\":0.4,\"left\":145.71,\"top\":382.58,\"right\":148.8,\"bottom\":386.65,\"center_x\":147,\"center_y\":384,\"radius\":1},{\"type\":0,\"score\":0.2,\"left\":168.98,\"top\":381.28,\"right\":172.22,\"bottom\":385.34,\"center_x\":170,\"center_y\":383,\"radius\":1},{\"type\":0,\"score\":0.16,\"left\":182.64,\"top\":400.68,\"right\":185.75,\"bottom\":404.68,\"center_x\":184,\"center_y\":402,\"radius\":1}],\"speckle_num\":0,\"speckle_list\":[],\"mole_num\":0,\"mole_list\":[]},\"wrinkle\":{\"wrinkle_num\":1,\"wrinkle_types\":[5],\"wrinkle_data\":[[{\"x\":340,\"y\":321},{\"x\":341,\"y\":322},{\"x\":342,\"y\":323},{\"x\":342,\"y\":324},{\"x\":343,\"y\":325},{\"x\":344,\"y\":326},{\"x\":344,\"y\":327},{\"x\":345,\"y\":328},{\"x\":345,\"y\":329},{\"x\":346,\"y\":330},{\"x\":346,\"y\":331},{\"x\":347,\"y\":332},{\"x\":347,\"y\":333},{\"x\":348,\"y\":334},{\"x\":348,\"y\":335},{\"x\":349,\"y\":336},{\"x\":349,\"y\":337},{\"x\":350,\"y\":338},{\"x\":351,\"y\":339},{\"x\":351,\"y\":340},{\"x\":352,\"y\":341},{\"x\":352,\"y\":342},{\"x\":353,\"y\":343},{\"x\":354,\"y\":344},{\"x\":354,\"y\":345},{\"x\":355,\"y\":346},{\"x\":356,\"y\":347},{\"x\":357,\"y\":348},{\"x\":357,\"y\":349},{\"x\":357,\"y\":350},{\"x\":358,\"y\":351},{\"x\":359,\"y\":352},{\"x\":360,\"y\":353},{\"x\":359,\"y\":352},{\"x\":359,\"y\":351},{\"x\":358,\"y\":350},{\"x\":358,\"y\":349},{\"x\":357,\"y\":348},{\"x\":356,\"y\":347},{\"x\":356,\"y\":346},{\"x\":355,\"y\":345},{\"x\":355,\"y\":344},{\"x\":354,\"y\":343},{\"x\":353,\"y\":342},{\"x\":353,\"y\":341},{\"x\":352,\"y\":340},{\"x\":351,\"y\":339},{\"x\":351,\"y\":338},{\"x\":350,\"y\":337},{\"x\":350,\"y\":336},{\"x\":349,\"y\":335},{\"x\":348,\"y\":334},{\"x\":348,\"y\":333},{\"x\":347,\"y\":332},{\"x\":347,\"y\":331},{\"x\":346,\"y\":330},{\"x\":346,\"y\":329},{\"x\":345,\"y\":328},{\"x\":345,\"y\":327},{\"x\":344,\"y\":326},{\"x\":344,\"y\":325},{\"x\":343,\"y\":324},{\"x\":342,\"y\":323},{\"x\":341,\"y\":322}]]},\"eyesattr\":{\"dark_circle_left\":[[{\"x\":373,\"y\":248},{\"x\":372,\"y\":249},{\"x\":371,\"y\":249},{\"x\":371,\"y\":250},{\"x\":370,\"y\":251},{\"x\":340,\"y\":251},{\"x\":339,\"y\":250},{\"x\":339,\"y\":249},{\"x\":331,\"y\":249},{\"x\":331,\"y\":250},{\"x\":330,\"y\":251},{\"x\":329,\"y\":251},{\"x\":328,\"y\":252},{\"x\":328,\"y\":258},{\"x\":329,\"y\":259},{\"x\":329,\"y\":261},{\"x\":330,\"y\":261},{\"x\":331,\"y\":262},{\"x\":331,\"y\":264},{\"x\":333,\"y\":266},{\"x\":333,\"y\":268},{\"x\":334,\"y\":268},{\"x\":336,\"y\":270},{\"x\":337,\"y\":270},{\"x\":338,\"y\":271},{\"x\":338,\"y\":272},{\"x\":340,\"y\":274},{\"x\":341,\"y\":274},{\"x\":342,\"y\":275},{\"x\":343,\"y\":275},{\"x\":344,\"y\":276},{\"x\":344,\"y\":277},{\"x\":346,\"y\":277},{\"x\":347,\"y\":278},{\"x\":350,\"y\":278},{\"x\":351,\"y\":279},{\"x\":371,\"y\":279},{\"x\":372,\"y\":278},{\"x\":373,\"y\":278},{\"x\":374,\"y\":277},{\"x\":375,\"y\":277},{\"x\":375,\"y\":276},{\"x\":376,\"y\":275},{\"x\":378,\"y\":275},{\"x\":380,\"y\":273},{\"x\":380,\"y\":271},{\"x\":381,\"y\":270},{\"x\":382,\"y\":270},{\"x\":382,\"y\":269},{\"x\":383,\"y\":268},{\"x\":383,\"y\":266},{\"x\":384,\"y\":265},{\"x\":384,\"y\":263},{\"x\":385,\"y\":262},{\"x\":386,\"y\":262},{\"x\":386,\"y\":259},{\"x\":387,\"y\":258},{\"x\":387,\"y\":251},{\"x\":386,\"y\":250},{\"x\":386,\"y\":249},{\"x\":385,\"y\":249},{\"x\":384,\"y\":248}]],\"dark_circle_right\":[[{\"x\":194,\"y\":240},{\"x\":193,\"y\":241},{\"x\":193,\"y\":242},{\"x\":192,\"y\":243},{\"x\":191,\"y\":243},{\"x\":191,\"y\":251},{\"x\":192,\"y\":251},{\"x\":193,\"y\":252},{\"x\":193,\"y\":254},{\"x\":194,\"y\":255},{\"x\":194,\"y\":257},{\"x\":195,\"y\":258},{\"x\":196,\"y\":258},{\"x\":197,\"y\":259},{\"x\":197,\"y\":260},{\"x\":198,\"y\":261},{\"x\":199,\"y\":261},{\"x\":201,\"y\":263},{\"x\":201,\"y\":264},{\"x\":202,\"y\":265},{\"x\":203,\"y\":265},{\"x\":204,\"y\":266},{\"x\":206,\"y\":266},{\"x\":207,\"y\":267},{\"x\":207,\"y\":268},{\"x\":208,\"y\":268},{\"x\":209,\"y\":269},{\"x\":215,\"y\":269},{\"x\":216,\"y\":270},{\"x\":227,\"y\":270},{\"x\":228,\"y\":269},{\"x\":233,\"y\":269},{\"x\":234,\"y\":268},{\"x\":235,\"y\":268},{\"x\":235,\"y\":267},{\"x\":236,\"y\":266},{\"x\":238,\"y\":266},{\"x\":239,\"y\":265},{\"x\":241,\"y\":265},{\"x\":242,\"y\":264},{\"x\":242,\"y\":263},{\"x\":243,\"y\":262},{\"x\":244,\"y\":262},{\"x\":244,\"y\":261},{\"x\":245,\"y\":260},{\"x\":245,\"y\":258},{\"x\":246,\"y\":257},{\"x\":247,\"y\":257},{\"x\":247,\"y\":255},{\"x\":248,\"y\":254},{\"x\":248,\"y\":248},{\"x\":247,\"y\":247},{\"x\":246,\"y\":247},{\"x\":245,\"y\":246},{\"x\":245,\"y\":245},{\"x\":241,\"y\":245},{\"x\":240,\"y\":244},{\"x\":214,\"y\":244},{\"x\":213,\"y\":243},{\"x\":208,\"y\":243},{\"x\":206,\"y\":241},{\"x\":203,\"y\":241},{\"x\":202,\"y\":240}]],\"dark_circle_left_type\":[0],\"dark_circle_right_type\":[0],\"eye_bags_left\":[[{\"x\":339,\"y\":258},{\"x\":339,\"y\":259},{\"x\":337,\"y\":261},{\"x\":336,\"y\":261},{\"x\":336,\"y\":266},{\"x\":337,\"y\":266},{\"x\":338,\"y\":267},{\"x\":338,\"y\":269},{\"x\":340,\"y\":271},{\"x\":340,\"y\":272},{\"x\":341,\"y\":272},{\"x\":343,\"y\":274},{\"x\":345,\"y\":274},{\"x\":346,\"y\":275},{\"x\":350,\"y\":275},{\"x\":351,\"y\":276},{\"x\":351,\"y\":277},{\"x\":354,\"y\":277},{\"x\":355,\"y\":278},{\"x\":365,\"y\":278},{\"x\":366,\"y\":277},{\"x\":369,\"y\":277},{\"x\":369,\"y\":276},{\"x\":370,\"y\":275},{\"x\":372,\"y\":275},{\"x\":373,\"y\":274},{\"x\":375,\"y\":274},{\"x\":377,\"y\":272},{\"x\":378,\"y\":272},{\"x\":378,\"y\":271},{\"x\":379,\"y\":270},{\"x\":379,\"y\":269},{\"x\":380,\"y\":268},{\"x\":380,\"y\":262},{\"x\":378,\"y\":260},{\"x\":348,\"y\":260},{\"x\":347,\"y\":259},{\"x\":347,\"y\":258}]],\"eye_bags_right\":[[{\"x\":202,\"y\":252},{\"x\":201,\"y\":253},{\"x\":201,\"y\":254},{\"x\":200,\"y\":255},{\"x\":200,\"y\":260},{\"x\":201,\"y\":261},{\"x\":201,\"y\":262},{\"x\":202,\"y\":263},{\"x\":202,\"y\":264},{\"x\":204,\"y\":264},{\"x\":205,\"y\":265},{\"x\":208,\"y\":265},{\"x\":209,\"y\":266},{\"x\":227,\"y\":266},{\"x\":228,\"y\":265},{\"x\":230,\"y\":265},{\"x\":231,\"y\":264},{\"x\":233,\"y\":264},{\"x\":233,\"y\":262},{\"x\":234,\"y\":261},{\"x\":234,\"y\":256},{\"x\":233,\"y\":255},{\"x\":232,\"y\":255},{\"x\":231,\"y\":254},{\"x\":231,\"y\":253},{\"x\":212,\"y\":253},{\"x\":211,\"y\":252}]]},\"blackheadpore\":{\"poly\":[],\"circles\":[]},\"sunmary_score\":97,\"acne_score\":91,\"speckle_score\":100,\"mole_score\":100,\"wrinkle_score\":97,\"eye_bags_score\":97,\"dark_circle_score\":97,\"blackhead_score\":100,\"pore_score\":100,\"smooth_score\":40}]}}", "snsUserInfoId": 66520, "snsUserInfo": { "id": 66520, "openid": "o0sTJjuS_qi9mC5jOXOQpMXx0fjo", "nickname": "投", "sex": 1, "language": null, "city": "", "country": "博茨瓦纳", "province": "", "headimgurl": "https://thirdwx.qlogo.cn/mmopen/vi_32/bjyE8on7Qn9KgBl2ppb4nia1qthB3yGUibeJrdriaUicBP8NdKU5v9P9GaIvtfV0uOL3VXeFPoAicxwgqMKTUciadkmA/132", "unionid": "opzOewMLUfOwXLUI2oWA0NZTMfCI", "remark": null, "weixinGroupid": 0, "snsType": 1 }, "creationTime": "2021-01-15T15:05:17.3967759", "isSuccess": true, "failReason": null, "id": 376774 };
+
+        var gameInfo = JSON.parse(this.lastActionData.extensionData);
+        this.userInfo.headimgurl = this.lastActionData.snsUserInfo.headimgurl;
+        this.userInfo.nickname = this.lastActionData.snsUserInfo.nickname;
+        this.userInfo.playerImage = this.lastActionData.playerImage;
+        this.userInfo.sex = gameInfo.sex;
+
+        let skinData = JSON.parse(this.lastActionData.extensionData).result.face_list[0];
+
+        this.userInfo.skin = skinData.skin;
+
+        this.userInfo.allGrade = skinData.sunmary_score
+
+        for (var key in this.skinMap) {
+
+          for (var skin in skinData) {
+
+            if (this.skinMap[key].avarage == skin) {
+              this.skinMap[key].avarage = skinData[skin];
+            }
+
+            if (this.skinMap[key].name == skin) {
+              this.skinMap[key].keys.forEach((i, index) => {
+                console.log(i);
+                if (i.num) {
+                  if (i.name == 'circles') {
+                    let arr = []
+                    skinData[skin][i.name].forEach(item => {
+                      let ary = []
+                      if (item[i.num]) {
+                        ary = item[i.num];
+                      }
+                      arr.push(...ary);
+                    });
+                    i.num = arr.length;
+                  } else {
+                    i.num = skinData[skin][i.num];
+                  }
+                } else {
+                  i.num = skinData[skin][i.name].length == 0 ? '无' : '有';
+                }
+              })
+            }
+          }
+        }
+
+        for (var obj in this.skinMap) {
+          this.skinMap[obj].medicineList = [];
+          this.skinMap[obj].medicines.forEach(item => {
+            this.skinMap[obj].medicineList.push({
+              name: item,
+              status: 0
+            })
+          })
+        }
+
+        this.keyList = Object.keys(this.skinMap);
+        this.curProblemIndex = 0
+        this.curProblem = this.skinMap[this.keyList[this.curProblemIndex]]
+
+        console.log(this.curProblem);
+        this.$nextTick(() => {
+          for (var i = 1; i < 7; i++) {
+            this.beakerList.push(generateCanvas({
+              canvasElement: this.$refs['cvs0' + i],
+              width: 103,
+              height: 109,
+              r: 20,
+              ballNameList: [],
+              speed: .5,
+            }))
+          }
+
+          this.initProgress()
+        })
+
+      },
+
+      deleteBall(touchedBall) {
+        for (let key in this.skinMap) {
+          this.skinMap[key].medicineList.forEach(item => {
+            if (touchedBall.name == item.name && item.status == 1) {
+              item.status = 0;
+              this.$forceUpdate();
+              if (this.medicinesList.indexOf(item.name) != -1) {
+                this.medicinesList.splice(this.medicinesList.indexOf(item.name), 1);
+              }
+            }
+          })
+        }
+      },
+
+      goStatus2() {
+        this.status = 2;
+
+      },
+      goStatus3() {
+        this.status = 3;
+        this.$nextTick(() => {
+          TweenMax.to('.shiyan', 2, {
+            left: "48%",
+            opacity: "1",
+            onComplete: () => {
+              jQuery(".shiyan .shiyanImg1")[0].src = "./img/shiyan1.gif";
+              setTimeout(() => {
+                jQuery(".startStir").fadeIn();
+              }, 2000)
+            }
+          });
+          TweenMax.to('.beaker', 2, {
+            top: "47%",
+          });
+          setTimeout(() => {
+            jQuery(".tip3").fadeOut(2000);
+          }, 3000)
+        })
+      },
+      startStir() {
+        jQuery(".startStir").fadeOut();
+        jQuery(".shiyan .shiyanImg1")[0].style.display = "none";
+        jQuery(".shiyan .shiyanImg2")[0].style.display = "block";
+        setTimeout(() => {
+          TweenMax.to('.shiyan', 2, { left: "-30%", opacity: "0" });
+          TweenMax.to('.beaker', 2, {
+            top: "54.5%", onComplete: () => {
+              this.goStatus4()
+            }
+          });
+        }, 3000)
+      },
+      goStatus4() {
+        this.PostPlayerData4ActionQrcode_2();
+        this.$refs["beaker-bottle"].style.display = "block";
+        this.$refs["beaker"].style.display = "none";
+        setTimeout(() => {
+          this.$refs["beaker-bottle"].style.display = "none";
+          this.$refs["bottle"].style.display = "block";
+          TweenMax.fromTo('.bottle', 1, {
+            left: "52%",
+            top: this.beakerIndex == 5 ? "72.5%" : "48.5%"
+          }, {
+            left: "42%",
+            top: this.beakerIndex == 5 ? "42.5%" : "28.5%",
+            onComplete: () => {
+              this.status = 4;
+              var interval = setInterval(() => {
+                if (this.countDown > 0) {
+                  this.countDown--
+                } else {
+                  clearInterval(interval)
+                  window.location.reload();
+                }
+              }, 1000)
+            }
+          })
+        }, 2000)
+      },
+      beakerCallback(ball, ballList) {
+        // this.ballsInBeaker.push({});
+        this.$refs.matter.style.display = "block";
+        this.$refs.matter.src = "";
+        var random = Math.random() * 3;
+        if (random <= 1) {
+          this.$refs.matter.src = "./img/beaker/emulsion2.gif";
+        } else if (random <= 2) {
+          this.$refs.matter.src = "./img/beaker/dust2.gif";
+        } else {
+          this.$refs.matter.src = "./img/beaker/liquid2.gif";
+        }
+
+        TweenMax.to('.water', 1.2, {
+          height: ballList.filter(ball => ball.status == 2).length / ballList.length * 80 + "%",
+        })
+        if (ballList.every(ball => ball.status == 2)) {
+          console.log("全部进了锅")
+          setTimeout(() => {
+            this.goStatus3();
+          }, 1200)
+        }
+      },
+      ActionDataById() {
+        jQuery.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          actionId: this.actionId
+        }, (result) => {
+          if (result.result.snsUserInfo) {
+            console.log("result.result.snsUserInfo", result.result.snsUserInfo);
+            this.openId = result.result.snsUserInfo.openid;
+            this.GetPlayGamesByUser();
+          } else {
+            setTimeout(() => {
+              this.ActionDataById();
+            }, 1000)
+          }
+        })
+      },
+      PostPlayerData4ActionQrcode_1() {
+        this.loading = true;
+        jQuery.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'BeforeGame',
+          SecurityKey: this.securityKey,
+          SnsType: 'WeChat',
+        }, (result) => {
+          if (result.success) {
+            console.log(result.result)
+            this.loading = false;
+            this.actionId = result.result.actionId;
+            this.qrCodeImage = result.result.qrCodeImage;
+            this.ActionDataById();
+          }
+        })
+      },
+      PostPlayerData4ActionQrcode_2() {
+        jQuery.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: this.securityKey,
+          SnsType: 'WeChat',
+          ExtensionData: JSON.stringify({
+            beakerIndex: this.beakerIndex,
+            ownerOpenId: this.openId,
+          })
+        }, (result) => {
+          if (result.success) {
+            console.log(result.result)
+            this.qrCodeImage2 = result.result.qrCodeImage;
+          }
+        })
+      },
+      GetPlayGamesByUser() {
+        jQuery.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetPlayGamesByUser', {
+          OpenId: this.openId,
+          SecurityKey: this.securityKey,
+          MaxResultCount: 999,
+          SnsType: 'WeChat'
+        }, result => {
+          var historyAction = result.result.items.find(item => {
+            return item.gameId == 3127
+          });//找到所有第二幕的参与记录
+          if (historyAction) {
+            console.log("historyAction", historyAction)
+            var lastActionId = historyAction.actionUrl.split("?actionId=")[1];
+            jQuery.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+              actionId: lastActionId
+            }, (result) => {
+              this.lastActionData = result.result;
+              jQuery.get(`https://g.api.troncell.com/api/services/app/SengsingDevice/GetUserPaper?SubKey=${this.subkey}&PaperId=30&UserActionId=${lastActionId}`, (res) => {
+                if (res.result.questionItems) {
+                  this.userInfo.city = res.result.questions[1].answer.split('/')[1];
+                  this.userInfo.age = res.result.questionItems[0].content;
+                  this.goStatus1();
+                } else {
+                  this.showMsg = '请先完成肌肤调查问卷，再定制您的肌肤方案'
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 3000);
+                }
+              })
+            })
+          } else {
+            this.showMsg = "请先进行肌肤检测,再参与本游戏";
+            setTimeout(() => {
+              this.showMsg = null;
+              window.location.reload();
+            }, 5000)
+          }
+
+        })
+      },
+      back2home() {
+        window.location.reload();
+      },
+      addAllBall() {
+        this.beakerCanvas.ballList.forEach(ball => {
+          ball.status = 2;
+        })
+        TweenMax.to('.water', 1.2, {
+          height: "80%",
+          onComplete: () => {
+            console.log("全部进了锅")
+            this.goStatus3();
+          }
+        })
+      },
+
+    },
+    mounted() {
+      // this.goStatus1()//todo
+
+      this.PostPlayerData4ActionQrcode_1();
+      var queue = new createjs.LoadQueue();
+      queue.on("complete", function () { console.log("preloaded") }, this);
+      queue.loadManifest([
+        './img/beaker/water.gif',
+        './img/beaker/beaker-bottle.gif',
+        './img/beaker/beaker-bottle2.gif',
+        './img/beaker/dust2.gif',
+        './img/beaker/liquid2.gif',
+        './img/beaker/emulsion2.gif',
+        './img/beaker/beaker.png',
+        './img/beaker/bottle.png',
+        './img/beaker/bottle2.png',
+        './img/shiyan.png',
+        './img/shiyan1.gif',
+        './img/shiyan2.gif',
+      ]);
+
+      generateCanvas({
+        canvasElement: this.$refs.myCanvas1,
+        width: 1575,
+        height: 800,
+        ballNameList: ["依克多因", "接骨木提取物", "神经酰胺", "抗坏血酸葡糖苷AA2G", "烟酰胺", "积雪草提取物", "玻尿酸", "角鲨烷", "霍霍巴籽油", "玻色因"],
+        speed: 1.5
+      });
+    }
+  });
+
+
+
+
+</script>
+
+</html>

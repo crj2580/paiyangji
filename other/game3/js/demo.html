@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <meta name="format-detection" content="telephone=no,email=no,adress=no">
+  <title></title>
+  <style>
+    .canvacContainer {
+      width: 300px;
+      height: 300px;
+    }
+
+    .canvacContainer canvas {
+      transform-origin: left top;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="canvacContainer">
+    <canvas id="canvas"></canvas>
+  </div>
+</body>
+<script type="module">
+  import CircleProgress from "./js/CircleProgress.js";
+
+  new CircleProgress({
+    canvasId: "canvas",
+    r: 100, //默认100，半径
+    w: 500, //画布宽，默认500
+    h: 500, //画布高，默认500
+    startAngle: 160, //起始角度，默认180
+    endAngle: 380, //终止角度，必须传
+    interval: 16, //帧间隔时间，默认5ms
+    duration: 1000, //动画时间，默认2000
+    lineWidth: 16, //描边线宽度，默认15
+    bgColor: "transparent", //背景色，默认#cccc
+    colors: {
+      0: "#FFF2C3",
+      1: "#FFCA8B",
+    },
+    // type: 'half', //画半圆或者圆，full｜half。默认full[半圆指从起始角度向终止角度过渡的半个圆]
+    precision: 4,
+    endPointColor: "#FFCA8B",
+    endPointR: 10,
+  });
+
+</script>
+
+</html>

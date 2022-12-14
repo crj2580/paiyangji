@@ -1,0 +1,409 @@
+#App.App.App {
+  background-image: url(./assets/img/App/bg-p.png);
+}
+
+#App.App.App .menu {
+  bottom: 12vh;
+  height: 6.6vmax;
+  width: 90%;
+  left: 5%;
+  background-image: url("./assets/img/App/menu-p.png");
+  background-position: center center;
+  background-size: 100% 2%;
+  background-repeat: no-repeat;
+  z-index: 2;
+}
+
+#App.App.App .menu div:nth-child(1) {
+  left: 7%;
+}
+
+#App.App.App .menu div:nth-child(2) {
+  left: 22.5%;
+}
+
+#App.App.App .menu div:nth-child(3) {
+  left: 38%;
+}
+
+#App.App.App .menu div:nth-child(4) {
+  left: 45.5%;
+  width: 11vw;
+  height: 11vw;
+  top: 9vh;
+  background-image: url("./assets/img/App/home.png");
+  background-size: 100% 100%;
+}
+
+#App.App.App .menu div:nth-child(5) {
+  right: 37.5%;
+}
+
+#App.App.App .menu div:nth-child(6) {
+  right: 22%;
+}
+
+#App.App.App .menu div:nth-child(7) {
+  right: 7.5%;
+}
+
+#App.App.App #Home {
+  background-image: url(./assets/img/Home/bg-p.png);
+}
+
+#App.App.App #Home .container {
+  height: 38%;
+  width: 70%;
+  top: 22%;
+}
+
+#App.App.App #Environment .map {
+  width: 72%;
+  height: 66%;
+  left: 14%;
+  top: 10%;
+  background-image: url(./assets/img/Environment/map-p.png);
+}
+
+#App.App.App #Activity .outer-container #swiper-container {
+  margin-top: 8vh;
+  height: 56vh;
+}
+
+#App.App.App #Activity .outer-container #swiper-container .swiper-slide {
+  width: 100%;
+  height: 52vw;
+}
+
+#App.App.App #Activity .prev {
+  background-image: url(./assets/img/btn-up.png);
+  left: auto;
+  right: 7%;
+  top: 8%;
+}
+
+#App.App.App #Activity .next {
+  background-image: url(./assets/img/btn-down.png);
+  right: 7%;
+  top: 72%;
+}
+
+#App.App.App #Search .brand-container {
+  left: 6vw;
+  top: 38vh;
+  height: 40vmax;
+  background-color: transparent;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+#App.App.App #Search .brand-container .brand-main {
+  height: 91%;
+}
+
+#App.App.App #Search .brand-container .brand-main .swiper-container .swiper-slide {
+  width: 100%;
+  height: 100%;
+}
+
+#App.App.App #Search .brand-container .brand-main .swiper-container .swiper-slide .brand-item {
+  width: 30%;
+  margin-right: 2%;
+  height: 10vmax;
+}
+
+#App.App.App #Search .brand-container .btn1 {
+  bottom: 4vh;
+}
+
+#App.App.App #Search .brand-container .btn2 {
+  bottom: 0vh;
+}
+
+#App.App.App #Search .keybord-container {
+  top: 8vh;
+  width: 84vw;
+  left: 8vw;
+}
+
+#App.App.App #Search .keybord-container .form-control .input {
+  width: 82%;
+}
+
+#App.App.App #Recommend .nav {
+  margin: 8vh 2vw 0;
+  width: 96vw;
+}
+
+#App.App.App #Recommend .sub-nav {
+  width: 90vw;
+  margin-top: 4vh;
+}
+
+#App.App.App #Recommend .sub-nav .swiperSubNav {
+  width: 82vw;
+}
+
+#App.App.App #Recommend .sub-nav .swiperSubNav .swiper-slide .subnav-box .sub-item {
+  width: 14vw;
+}
+
+#App.App.App #Recommend .main {
+  height: 70vw;
+  margin-top: 6vh;
+}
+
+#App.App.App #Recommend .main .swiperBrand {
+  width: 72vw;
+  height: 43vh;
+}
+
+#App.App.App #Recommend .main .swiperBrand .swiper-slide {
+  height: 10.7vh;
+}
+
+#App.App.App #Recommend .prevSlider {
+  background-image: url(./assets/img/btn-up.png);
+  left: 87%;
+  top: 22%;
+}
+
+#App.App.App #Recommend .nextSlider {
+  background-image: url(./assets/img/btn-down.png);
+  left: 87%;
+  top: 64%;
+}
+
+#App.App.App #Queue .queueContainer {
+  padding-top: 18vmin;
+}
+
+#App.App.App #Queue .queueContainer .swiper-container {
+  margin-left: 2vw;
+  height: 66vmax;
+  width: 88vw;
+}
+
+#App.App.App #Queue .queueContainer .swiper-container .swiper-slide .storeListContainer .itemContainer {
+  height: 25%;
+  width: 100%;
+}
+
+#App.App.App #Queue .prev {
+  background-image: url(./assets/img/btn-up.png);
+  left: auto;
+  right: 2%;
+  top: 11.5%;
+}
+
+#App.App.App #Queue .next {
+  background-image: url(./assets/img/btn-down.png);
+  top: 73.5%;
+}
+
+#App.App.App #QueueDetail .back {
+  position: absolute;
+  left: 46.5%;
+  bottom: 4vh;
+}
+
+#App.App.App #QueueDetail .main {
+  height: 76%;
+  width: 76%;
+  left: 12%;
+  top: 12%;
+}
+
+#App.App.App #QueueDetail .main .logo {
+  width: 80%;
+  height: 50%;
+  top: 25%;
+  left: 50%;
+}
+
+#App.App.App #QueueDetail .main .name {
+  width: 100%;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+}
+
+#App.App.App #QueueDetail .main .slogan {
+  left: 10%;
+  width: 80%;
+  max-width: 80%;
+  text-align: center;
+  top: 59%;
+  padding-bottom: 1.5vmax;
+  text-indent: 0;
+  padding-right: 0;
+}
+
+#App.App.App #QueueDetail .main .addressAndTime {
+  left: 15%;
+  width: 70%;
+  top: 68%;
+}
+
+#App.App.App #QueueDetail .main .qrcodeContainer {
+  right: 35%;
+  bottom: 11%;
+}
+
+#App.App.App #QueueDetail .main .tip {
+  left: 0%;
+  width: 100%;
+  text-align: center;
+  bottom: 4%;
+}
+
+#App.App.App #RoomDetail .back {
+  right: 47%;
+  bottom: 22%;
+}
+
+#App.App.App #RoomDetail .main {
+  width: 100%;
+  height: 48vh;
+  left: 0;
+  top: 20%;
+}
+
+#App.App.App #RoomDetail .main .imageUrl {
+  top: 18%;
+  width: 100%;
+  height: 51vw;
+}
+
+#App.App.App #RoomDetail .main .description {
+  width: 100%;
+  left: 0;
+  padding: 0 2%;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  top: 82%;
+}
+
+#App.App.App #RoomDetail .main .goRoom {
+  right: 2%;
+  bottom: 2%;
+}
+
+#App.App.App #RoomDetail .main .addressAndTel {
+  top: 10%;
+}
+
+#App.App.App #Navigation #leftBtnList {
+  left: auto;
+  right: 5%;
+  bottom: 20%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+#App.App.App #Navigation #topBtnList {
+  left: 5vw;
+  top: 42vh;
+}
+
+#App.App.App #Navigation #brandList {
+  width: 76vw;
+  height: 26vh;
+  left: 12vw;
+  top: 8.5vh;
+  background-color: transparent;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+#App.App.App #Navigation #brandList .title {
+  text-align: right;
+  position: relative;
+  bottom: 1vw;
+  right: 1vw;
+}
+
+#App.App.App #Navigation #brandList .swiper-container {
+  width: 100%;
+  height: 88%;
+  top: 12%;
+  left: 0%;
+}
+
+#App.App.App #Navigation #brandList .swiper-container .swiper-slide {
+  text-align: center;
+  position: relative;
+}
+
+#App.App.App #Navigation #brandList .swiper-container .swiper-slide .logoListContainer .logoContainer {
+  width: 19%;
+  height: 30%;
+}
+
+#App.App.App #Navigation #brandList .btn-up {
+  background-image: url(./assets/img/btn-left.png);
+  display: block;
+  left: -6vw;
+  top: 50%;
+}
+
+#App.App.App #Navigation #brandList .btn-down {
+  background-image: url(./assets/img/btn-right.png);
+  left: calc(100% + 6vw);
+  top: 50%;
+}
+
+#App.App.App #Navigation #mapContainer {
+  top: 40vh;
+}
+
+#App.App.App #Navigation #floorList {
+  height: 7vw;
+  width: 82vw;
+  top: 35vh;
+  left: 9%;
+}
+
+#App.App.App #Navigation #floorList .swiper-container .floorContainer {
+  width: 14vw;
+  height: 100%;
+}
+
+#App.App.App #Navigation #floorList .swiper-container .floorContainer .floorItem {
+  height: 100%;
+}
+
+#App.App.App #Navigation #floorList .swiper-container .floorContainer .floorItem img {
+  width: 2vmax;
+  vertical-align: middle;
+}
+
+#App.App.App #Navigation #floorList .swiper-container .floorContainer .line {
+  top: 20%;
+  height: 60%;
+  left: 110%;
+  width: 0.4vw;
+}
+
+#App.App.App #Navigation #floorList .arrow-up {
+  width: 2.5vmax;
+  height: 2.5vmax;
+  left: -4%;
+  top: 1vw;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  background-image: url(./assets/img/Navigation/arrow-prev.png);
+}
+
+#App.App.App #Navigation #floorList .arrow-down {
+  width: 2.5vmax;
+  height: 2.5vmax;
+  left: 104%;
+  top: 1vw;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  background-image: url(./assets/img/Navigation/arrow-next.png);
+}
+/*# sourceMappingURL=Portrait.css.map */

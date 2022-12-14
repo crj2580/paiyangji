@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>活动中心</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+
+  <link href="./node_modules/swiper/dist/css/swiper.min.css" rel="stylesheet" type="text/css" />
+  <script src="./node_modules/swiper/dist/js/swiper.min.js"></script>
+  <script src="./node_modules/vue-awesome-swiper/dist/vue-awesome-swiper.js"></script>
+</head>
+
+<style>
+  .container {
+    border-radius: 1.5vw;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 0px 3vw 0px rgba(196, 196, 196, 0.59);
+    position: relative;
+    width: 90%;
+    margin: 5vw 5%;
+    z-index: 4;
+    overflow: hidden;
+  }
+
+  .container .containerHead {
+    background: #F0F0F0;
+    font-size: 4.5vw;
+    padding: 3vw;
+    font-weight: bold;
+  }
+
+  .container .info {
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 4vw;
+    line-height: 12vw;
+    height: 12vw;
+    width: 92%;
+    margin: 0 auto;
+    color: #2432AD;
+    font-weight: bold;
+  }
+</style>
+
+<body>
+  <div id="app" :style="{'touch-action':showNeedValidated?'none':'auto'}">
+    <img src="./img/mine.png" v-on:click="goMine()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;">
+    <img v-if="loading" src="./img/loading.gif"
+      style="position:fixed;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+
+    <img src="./img/annual/center/header.png" style="width:100%;">
+
+    <div v-if="showNeedValidated" style="text-align:center;font-size:5vw;"><b>{{showNeedValidated}}</b></div>
+
+    <div class="container">
+      <div class="containerHead">
+        线上互动
+      </div>
+      <div v-for="(item,index) of gameList"
+        v-if="item.software&&item.software.envType == 0&&item.software.setting!='register'"
+        style="padding: 3vw 4vw 0vw;">
+        <div style="border-bottom:1px solid #f0f0f0;display: flex;">
+          <div style="width:20%;"><img :src="item.software.logoUrl" style="width:100%;"></div>
+          <div style="width:50%;padding-left:1vw;">
+            <div style="font-size:5vw;">{{item.name}}</div>
+            <div style="margin-top:2vw;font-size: 3.5vw;color:#a0a0a0;">
+              <img v-if="!item.hasPlayed" src="./img/annual/center/grey.png" style="width:4vw;">
+              <span v-if="!item.hasPlayed" style="position:relative;top:-0.5vw;">尚未参与</span>
+              <img v-if="item.hasPlayed" src="./img/annual/center/green.png" style="width:4vw;">
+              <span v-if="item.hasPlayed&&item.software.setting!='chat'" style="position:relative;top:-0.5vw;">
+                <span v-if="item.maxScore">你的最高分</span>
+                <span v-if="item.maxScore" style="font-size:4.5vw;color:#F09503;">{{item.maxScore}}</span>
+              </span>
+              <span v-if="item.hasPlayed&&item.software.setting=='chat'">已经参与</span>
+            </div>
+
+          </div>
+          <div style="width:30%;">
+            <img v-on:click="startGame(item.securityKey)" v-if="isValidated&&item.software.setting!='chat'"
+              src="./img/annual/center/startGame.png" style="width:100%;margin-top:4vw;">
+            <img v-if="!isValidated&&item.software.setting!='chat'" src="./img/annual/center/unStartGame.png"
+              style="width:100%;margin-top:4vw;">
+            <img v-on:click="startGame(item.securityKey)" v-if="isValidated&&item.software.setting=='chat'"
+              src="./img/annual/center/startChat.png" style="width:100%;margin-top:4vw;">
+            <img v-if="!isValidated&&item.software.setting=='chat'" src="./img/annual/center/unStartChat.png"
+              style="width:100%;margin-top:4vw;">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="containerHead">
+        线下互动
+      </div>
+      <div class="info">
+        <img src="./img/annual/center/address.png" style="width:5vw;vertical-align:middle;">
+        请到<span style="color:#F09503;">线下活动专区</span>体验
+      </div>
+
+      <swiper :options="swiperOption" style="padding-left:5%;padding-right:10%;">
+        <template v-for="(item,index) of gameList">
+          <swiper-slide v-if="item.software&&item.software.envType!=0">
+            <div style="width:100%;text-align:center;margin:3vw 0;">{{item.name}}</div>
+            <div @click="goOffline(item)"><img :src="item.software.logoUrl" style="width:100%;"></div>
+            <div style="font-size:3.2vw;width:100%;text-align: center;;">
+              <img v-if="!item.hasPlayed" src="./img/annual/center/grey.png" style="width:3vw;">
+              <span v-if="!item.hasPlayed" style="position:relative;top:-0.5vw;">尚未参与</span>
+              <img v-if="item.hasPlayed" src="./img/annual/center/green.png" style="width:3vw;">
+              <span v-if="item.hasPlayed" style="position:relative;top:-0.5vw;">您已参与</span>
+            </div>
+          </swiper-slide>
+        </template>
+
+      </swiper>
+    </div>
+
+
+    <div class="container">
+      <div class="containerHead">
+        年会奖品
+        <img v-on:click="goAwardList()" src="./img/annual/center/goAwardList.png"
+          style="position:absolute;right:2vw;width:27%;top:5vw;">
+      </div>
+      <div class="info">
+        <img src="./img/annual/center/award.png" style="width:5vw;vertical-align:middle;">
+        本活动您<span style="color:#F09503;">有机会获得以下奖品</span>
+      </div>
+      <div style="display:flex;flex-wrap: wrap;text-align:center;margin:3vw 0;">
+        <div v-for="(item,index) of awardList" style="width:25%;font-size:3vw;margin:2vw 0;">
+
+          <div><img :src="item.awardImagePath" style="height:15vw;position: relative;"></div>
+          <div style="color:#FF3131;">
+            ¥{{item.description}}
+          </div>
+          <div style="width:100%;margin:0.5vw 0;">{{item.name}}</div>
+
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+</body>
+<script>
+  Vue.use(window.VueAwesomeSwiper)
+  var app = new Vue({
+    el: '#app',
+    data: {
+      securityKey: '',
+      gameList: [],
+      actionId: '',
+      openId: '',
+      awardList: [],
+      Flows: {},
+      loading: true,
+      isNeedValidate: false,
+      isValidated: false,
+      showNeedValidated: false,
+      isSigned: false,
+      swiperOption: {
+        // loop: true,
+        slidesPerView: 3,
+        spaceBetween: 20,
+        // navigation: {
+        //   nextEl: '.swiper-button-next',
+        //   prevEl: '.swiper-button-prev'
+        // }
+      },
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      startGame: function (securityKey) {
+        console.log(securityKey)
+        window.location.href = "./transfer-action.html?securityKey=" + securityKey
+      },
+      goMine: function () {
+        window.location.href = "./annual-mine.html?actionId=" + this.actionId
+      },
+      goAwardList: function () {
+        window.location.href = app.Flows.awardRanking + "?actionId=" + this.actionId
+      },
+      goOffline(game) {
+        console.log("goOffline", game)
+        if (game.securityKey == "38bc58745f184483a276bc7e07464856") {
+          window.location.href = "./annual/laser/laser.html?actionId=" + this.actionId;
+        } else {//跳转到目标页面
+          if (!game.hasPlayed) return
+          console.log(game)
+          window.location.href = game.actionUrl;
+        }
+      }
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': this.actionId
+      }, function (result, status) {
+        if (result.success) {
+          setWX(result)
+          app.Flows = setFlow(result)
+          console.log(app.Flows)
+          console.log(result.result, 'ActionDataById')
+          // app.isValidated = result.result.isValidated;
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+          app.openId = result.result.snsUserInfo.openid;
+          app.isNeedValidate = result.result.deviceActivityGame.activity.isNeedValidate;
+
+
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyPersonDataInActivity', {
+            OpenId: app.openId,
+            SecurityKey: app.securityKey,
+            SnsType: 'WeChat',
+          }, function (result) {
+            if (result.success) {//注册后才会生成result.result
+              // console.log('aaa', result.result)
+              if (result.result) {
+                app.isSigned = result.result.isSigned;
+              }
+              if ((app.isNeedValidate && result.result && result.result.isValidated) || !app.isNeedValidate) {
+                app.isValidated = true;
+              } else {
+                app.showNeedValidated = '通过认证后方可参与游戏'
+              }
+            }
+          })
+
+
+
+
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetDeviceActivityGames?securityKey=' + app.securityKey, {
+          }, function (result, status) {
+            if (result.success) {
+              var gameList = result.result;
+              console.log(gameList, 'GetDeviceActivityGames')
+
+              $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetPlayGamesByUser', {
+                OpenId: app.openId,
+                SecurityKey: app.securityKey,
+                MaxResultCount: 999,
+                SnsType: 'WeChat'
+              }, function (result, status) {
+                if (result.success) {
+                  for (var i = 0; i < gameList.length; i++) {
+                    if (gameList[i].software && gameList[i].software.setting) {
+                      gameList[i].software.setting = JSON.parse(gameList[i].software.setting).type;
+                    }
+                    gameList[i].hasPlayed = false;
+
+                    for (var j = 0; j < result.result.items.length; j++) {
+                      if (gameList[i].id == result.result.items[j].gameId) {
+                        gameList[i].hasPlayed = true;
+                        gameList[i].maxScore = result.result.items[j].maxScore;
+                        gameList[i].actionUrl = result.result.items[j].actionUrl;
+                      }
+
+                    }
+                  }
+                  app.gameList = gameList;
+                  gameList.forEach(element => {
+                    console.log(element.name,element)
+                  });
+                }
+              })
+
+              $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByActivity', {
+                SecurityKey: app.securityKey,
+                Sorting: 'awardSeq ASC',//DESC
+                MaxResultCount: 99
+              }, function (result, status) {
+                if (result.success) {
+                  app.loading = false;
+                  console.log(result.result, 'GetAwardsByActivity')
+                  app.awardList = result.result.items;
+                }
+              })
+
+            }
+          })
+
+
+
+
+
+
+
+
+        }
+      })
+
+
+
+    }
+  })
+
+</script>
+
+</html>

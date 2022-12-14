@@ -1,0 +1,28 @@
+.red {
+  background-color: yellow;
+}
+#big {
+  color: yellow;
+}
+body {
+  opacity: 0.5;
+  color: red;
+  color: yellow;
+}
+body li {
+  font-size: 50px;
+}
+body li:before {
+  content: "hello world";
+}
+@media (min-width: 768px) {
+  .element {
+    font-size: 1.2rem;
+  }
+}
+.element:header {
+  content: "hello world";
+}
+.element .test > li {
+  height: 50px;
+}

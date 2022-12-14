@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>娃娃机</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="./js/Quorra/Quorra_troncell.js?v=1.4" type="text/javascript"></script>
+</head>
+<style>
+  body {
+    background: url(img/dollMachine/bg.png);
+    background-size: cover;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .free {
+    -webkit-animation-fill-mode: both;
+    -webkit-animation: free 3s infinite;
+  }
+
+  @-webkit-keyframes free {
+    0% {
+      transform: rotateZ(0deg);
+    }
+
+    15% {
+      transform: rotateZ(0deg);
+    }
+
+    35% {
+      transform: rotateZ(20deg);
+    }
+
+    55% {
+      transform: rotateZ(-25deg);
+    }
+
+    100% {
+      transform: rotateZ(0deg);
+    }
+  }
+
+  .out-round {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    top: 25%;
+    left: 25%;
+    border-radius: 50%;
+    border: 3px solid #E22C46;
+    border-left: 3px solid transparent;
+    animation: outRound 1s linear infinite running;
+  }
+
+  @keyframes outRound {
+    0% {
+      transform: rotate(120deg)
+    }
+
+    100% {
+      transform: rotate(-240deg)
+    }
+  }
+</style>
+
+<body>
+  <div id="app" style="width:100%;height:100%;position:relative;">
+    <!-- <div style="position:fixed;z-index:999;font-size:5vw;">vue{{stopRequest}}</div> -->
+    <!-- <div style="position:fixed;z-index:999;font-size:5vw;top:5vw;">jq<span id="jq"></span></div> -->
+
+
+    <img src="./img/dollMachine/tip.png" style="position:absolute;width:38%;top:29%;left:43%;">
+    <img class="free" src="./img/dollMachine/free.png" style="position:absolute;width:13%;top:27%;left:56%;">
+
+    <div v-if="!stopRequest">
+      <!-- <img v-if="qrCodeImage" :src="qrCodeImage" style="width:17%;position:absolute;left:42%;top:38%;border-radius:2vw;border:0.5vw solid #E22C46;"> -->
+      <div style="width:17vw;height:17vw;position:absolute;left:42%;top:38%;border-radius:2vw;border:0.5vw solid #E22C46;overflow:hidden;">
+        <img v-if="qrCodeImage" @load="successLoadImg(0)" :src="qrCodeImage" style="width:100%;height:100%;">
+        <div v-if="showRound0" class="out-round"></div>
+      </div>
+      <div style="color:#E22C46;width:17%;font-weight:bold;font-size:3vw;position:absolute;top:70%;left:42%;text-align:center;">微信</div>
+
+      <!-- <img v-if="qrCodeImage2" :src="qrCodeImage2" style="width:17%;position:absolute;left:65%;top:38%;border-radius:2vw;border:0.5vw solid #E22C46;"> -->
+      <div style="width:17vw;height:17vw;position:absolute;left:65%;top:38%;border-radius:2vw;border:0.5vw solid #E22C46;;overflow:hidden;">
+        <img v-if="qrCodeImage2" @load="successLoadImg(1)" :src="qrCodeImage2" style="width:100%;height:100%;">
+        <div v-if="showRound1" class="out-round"></div>
+      </div>
+      <div style="color:#E22C46;width:17%;font-weight:bold;font-size:3vw;position:absolute;top:70%;left:65%;text-align:center;">淘宝</div>
+
+      <div style="position:absolute;left:43%;top:80%;font-size:2.2vw;">
+        <div>1 扫描二维码并关注。</div>
+        <div>2 关注后免费获得一次抓取机会。</div>
+        <div>3 微信分享好友/朋友圈可额外获得一次机会。</div>
+      </div>
+    </div>
+
+
+    <div v-if="stopRequest">
+      <img :src="userInfo.headimgurl" style="width:12%;position:absolute;left:42%;top:40%;border-radius:2vw;border:0.5vw solid #E22C46;">
+      <div style="position:absolute;left:58%;top:47%;font-size:3.5vw;text-overflow: ellipsis;max-width: 35%;overflow: hidden;white-space: nowrap;">
+        {{userInfo.nickname}}
+      </div>
+      <div style="position:absolute;left:42%;top:70%;font-size:3vw;color:#E22C46;">
+        <div>感谢您关注我们</div>
+        <div v-if="!noChance">游戏已开始,祝您好运</div>
+        <div v-if="noChance">抓娃娃次数已耗尽</div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+
+  $.ajaxSetup({
+    timeout: 10000,
+    error: function (jqXHR, textStatus, errorThrown) {
+      switch (jqXHR.status) {
+        case (500):
+          console.log("服务器系统内部错误");
+          break;
+        case (401):
+          console.log("未登录");
+          break;
+        case (403):
+          console.log("无权限执行此操作");
+          break;
+        case (408):
+          console.log("请求超时");
+          break;
+        case (0):
+          console.log("跨域");
+          break;
+        default:
+          console.log("未知错误", 'jqXHR', jqXHR, 'textStatus', textStatus, 'errorThrown', errorThrown);
+      }
+      setTimeout(function(){
+        window.location.reload();
+      },1000)
+    },
+    success: function (data) {
+      console.log("操作成功");
+    }
+  });
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      securityKey: '',//深圳零售展
+      securityKey2: '',//阪织屋
+      qrCodeImage: '',
+      qrCodeImage2: '',
+      actionId: '',
+      actionId2: '',
+      nowActionId: '',
+      nowSecurityKey: '',
+      userInfo: null,
+      stopRequest: false,
+      noChance: false,
+      showRound0: true,
+      showRound1: true
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      successLoadImg: function (index) {
+        console.log(index)
+        if (index == 0) {
+          this.showRound0 = false;
+        } else {
+          this.showRound1 = false;
+        }
+      },
+      dropSuccess: function (data) {
+        // if (JSON.parse(data).successed) {
+        //   // alert(JSON.parse(data).cargoRoadNo)
+        //   // 调接口告知后端消耗机会
+        // } else {
+        //   // alert('失败')
+        // }
+        $.ajax({
+          type: "POST",
+          url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            actionId: this.nowActionId,
+            SecurityKey: this.nowSecurityKey
+          }),
+          success: function (message) {
+            console.log(message)
+            if (message.success) {
+              // alert('lottery')
+            }
+          }
+        })
+      },
+      actionDataById: function (actionId, SnsType, SecurityKey) {
+        var that = this;
+        if (that.stopRequest) {
+          return
+        }
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': actionId
+        }, function (result, status) {
+          if (that.stopRequest) {
+            return
+          }
+
+          if (result.result.snsUserInfo) {//有人扫码了
+
+            that.userInfo = result.result.snsUserInfo;
+            if (that.userInfo && that.userInfo.headimgurl) {
+              that.userInfo.headimgurl = that.userInfo.headimgurl.replace("http:", "https:");
+            }
+
+            $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction', {
+              OpenId: that.userInfo.openid,
+              actionId: actionId,
+              QrType: 'BeforeGame',
+              SnsType: SnsType,
+              SecurityKey: SecurityKey
+            }, function (result) {
+              if (that.stopRequest) {
+                return
+              }
+              that.stopRequest = true;
+
+              $('#jq').text(that.stopRequest);
+              // that.$forceUpdate()
+
+              if (result.result.canNextAward) {//还能抽
+                that.nowActionId = actionId;
+                that.nowSecurityKey = SecurityKey;
+                Quorra.doDropCargo(1);
+
+                // setTimeout(function () {
+                //   that.dropSuccess()
+                // }, 1000)
+                // setTimeout(function () {
+                //   that.finishCallback()
+                // }, 3000)
+              } else {
+                //已经参与
+                that.noChance = true;
+                setTimeout(function () {
+                  that.finishCallback();
+                }, 8000)
+              }
+            })
+          } else {
+            setTimeout(function () {
+              // actionDataById(actionId, SnsType, SecurityKey);
+              that.$options.methods.actionDataById.bind(that)(actionId, SnsType, SecurityKey);
+            }, 2000)
+          }
+
+
+        })
+      },
+      finishCallback: function () {//初始化
+        var that = this;
+
+        that.qrCodeImage = "";
+        that.qrCodeImage2 = "";
+
+        this.showRound0 = true;
+        this.showRound1 = true;
+
+        that.nowActionId = '';
+        that.nowSecurityKey = '';
+        that.stopRequest = false;
+        that.userInfo = null;
+        that.noChance = false;
+        $('#jq').text(that.stopRequest);
+
+
+        $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: that.securityKey,
+          IsSendWeChatMsg: true,
+          SnsType: 'WeChat',
+          FromType:'mobile'
+
+        }, function (result) {
+          if (result.success) {
+            console.log(result.result)
+            that.qrCodeImage = result.result.qrCodeImage;
+            that.actionId = result.result.actionId;
+            // actionDataById(that.actionId, 'WeChat', that.securityKey)
+            that.$options.methods.actionDataById.bind(that)(that.actionId, 'WeChat', that.securityKey);
+          }
+        })
+
+        $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: that.securityKey2,
+          SnsType: 'Taobao',
+          IsTransferred: false,
+          FromType:'mobile'
+
+        }, function (result) {
+          if (result.success) {
+            console.log(result.result)
+            that.qrCodeImage2 = result.result.qrCodeImage;
+            that.actionId2 = result.result.actionId;
+            // actionDataById(that.actionId2, 'Taobao', that.securityKey2)
+            that.$options.methods.actionDataById.bind(that)(that.actionId2, 'Taobao', that.securityKey2);
+          }
+        })
+
+
+      }
+
+    },
+    mounted: function () {
+      Quorra.setCallback('dropCargoCallback', this.dropSuccess)
+      Quorra.setCallback('finishCallback', this.finishCallback)
+
+
+      this.securityKey = this.$options.methods.kindId('securityKey') || 'd45e83b93d7740bfb728c011dc80f5f0';
+      this.securityKey2 = this.$options.methods.kindId('securityKey2') || 'e5fec2255e5840a88b76036e014068bf';
+
+      this.$options.methods.finishCallback.bind(this)();
+
+      // console.log(this.$forceUpdate,111)
+    }
+  })
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</html>

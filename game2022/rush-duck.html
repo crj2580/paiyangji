@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>冲鸭</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
+  <script src="/js/TweenMax.min.js"></script>
+  <script src="/js/troncell_wx2.js"></script>
+  <script src="/js/preloadjs.min.js"></script>
+  <script src="/js/soundjs.min.js"></script>
+</head>
+<style>
+  /* 防止长按保存 */
+  img {
+    pointer-events: none;
+  }
+
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /*阻止ios下点击区域变暗*/
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+
+  body {
+    background: #2FA8F2;
+    overflow: hidden;
+  }
+
+  #container {
+    background-image: url(./img/rush-duck/pool.png);
+    width: 100%;
+    background-size: 100%;
+    background-position: right 0 bottom 48vw;
+    position: fixed;
+    z-index: 1;
+  }
+
+  img {
+    z-index: 5;
+  }
+
+  .ring {
+    position: absolute;
+  }
+
+  .coupon {
+    position: absolute;
+    width: 50%;
+    left: 25%;
+    top: 46%;
+  }
+</style>
+
+<body>
+  <div id="app" @click="doJump" style="height:100vh;">
+
+    <div v-if="loading" class="basicLoading">
+      <img src="/img/loading.gif">
+    </div>
+
+    <div v-if="showScore" style="position:fixed;width:30%;top:5vw;left:35%;z-index:10;">
+      <div
+        style="position:absolute;width:100%;text-align:center;font-size:10vw;color:#fff;line-height:30vw;text-shadow:2px 2px 4px #4B9FC4;">
+        {{nowScore|parseInt}}
+      </div>
+      <img src="./img/rush-duck/score-container.png" style="width:100%;">
+    </div>
+
+    <transition @enter="titleEnter" @leave="fadeLeave">
+      <img v-if="showTitleAndRule" src="./img/rush-duck/title.png"
+        style="position:fixed;width:80vw;top:10vh;left:10vw;">
+    </transition>
+
+
+    <transition @enter="startEnter" @leave="fadeLeave">
+      <div v-if="showStart" @click.stop="startGame"
+        style="position:fixed;width:28vh;top:30vh;left:calc(50vw - 14vh);z-index:5;">
+        <img src="./img/rush-duck/start.png" style="width:100%;">
+      </div>
+    </transition>
+    <div v-if="showTitleAndRule"
+      style="position:fixed;width:64%;left:18%;top:56vh;font-size:5vw;color:#fff;text-shadow:2px 2px 4px #4B9FC4;z-index:10;">
+      规则说明： <br>
+      点击屏幕在游泳圈间跳跃。<br>
+      注意不要撞到泳池边哦~
+    </div>
+
+
+    <transition @enter="startEnter">
+      <img v-if="showPointer" src="./img/rush-duck/pointer.png"
+        style="position:fixed;width:8vh;bottom:8vh;left:calc(50vw + 8vh);">
+    </transition>
+
+    <img v-show="girl.show" ref="girl" :src="girl.src" style="position:fixed;"
+      :style="{left:girl.left+'vw',width:girl.width+'vw',transform: 'rotate(' + girl.rotation + 'deg)',bottom:girl.bottom+'vh'}">
+
+    <div ref="container" id="container" :style="{bottom:containerBottom+'vh',height:containerHeight+'vh'}">
+      <img src="./img/rush-duck/pool-bottom.png" style="position:absolute;width:100%;bottom:0;">
+      <img src="./img/rush-duck/stage.png" style="position: absolute;width:24vh;bottom:2vh;left:calc(50vw - 12vh);">
+
+      <template v-for="ring of ringList">
+        <img :ref="'ring'+ring.id" class="ring" :src="ring.src"
+          :style="{width:ringWidth+'vw',bottom:ring.bottom+'vh',left:ring.left+'vw',transform: 'rotate(' + ring.rotation + 'deg)'}"
+          :key="ring.id">
+      </template>
+
+    </div>
+
+    <transition @enter="overEnter">
+      <div v-if="showOver" style="position:fixed;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:20;">
+        <div ref="overContainer" style="position:absolute;width:80%;top:10vh;left:10%;">
+          <div
+            style="font-weight:bold;top:23%;position:absolute;width:100%;text-align:center;font-size:7vw;color:#2FA8F2;">
+            本次得分
+          </div>
+          <div
+            style="font-weight:bold;top:30%;position:absolute;width:100%;text-align:center;font-size:12vw;color:#F6940B;">
+            {{nowScore|parseInt}}
+          </div>
+
+          <template v-if="!noTicket">
+            <img class="coupon" v-if="nowScore<=500" src="./img/rush-duck/p10.png">
+            <img class="coupon" v-if="nowScore>=500&&nowScore<=1000" src="./img/rush-duck/p50.png">
+            <img class="coupon" v-if="nowScore>1000" src="./img/rush-duck/p80.png">
+          </template>
+
+
+
+          <div @click="goList" style="position:absolute;top:68%;width:35%;left:12.5%;">
+            <img src="../img/goList.png" style="width:100%;">
+          </div>
+          <div @click="restartGame" style="position:absolute;top:68%;width:35%;right:12.5%;">
+            <img src="../img/restartGame.png" style="width:100%;">
+          </div>
+
+          <img src="./img/rush-duck/over-container.png" style="width:100%;">
+        </div>
+      </div>
+    </transition>
+
+  </div>
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      //后台控制
+      securityKey: undefined,
+      openId: undefined,
+      actionId: undefined,
+      //界面显示
+      loading: true,
+      showTitleAndRule: false,
+      showStart: false,
+      showPointer: false,
+      showScore: false,
+      showOver: false,
+      nowScore: 0,
+      //游戏参数
+      jumpTime: 2.5,
+      jumpDistance: 100,//120
+      ring1Period: 2,
+      ring2Period: 1.3,
+      ringPeriodOffset: 0.25,//时间偏差
+      ring2Deg: 45,
+      ringWidth: 22,//25
+      //逻辑属性
+      ringList: [],
+      lastRingId: 0,//最近一次添加的ringId
+      jumpReady: false,
+      containerBottom: 0,
+      containerHeight: 100,
+      nowRingId: -1,//当前停留的ringId,-1则为还没开始
+      girl: {
+        show: true,
+        width: 22,//25
+        src: "./img/rush-duck/girl.png",
+        left: undefined,
+        bottom: 12,
+        rotation: 0,
+        tweenMax: undefined
+      },
+      noTicket: false,
+      girlDriveInterval: undefined,
+      SnsUserInfoId: undefined
+    },
+    filters: {
+      parseInt: function (value) {
+        return parseInt(value)
+      }
+    },
+    watch: {
+      nowRingId: function (newValue, oldValue) {//人进游泳圈
+        if (newValue <= oldValue) return
+        var nowRing = this.ringList.find(item => {
+          return item.id == newValue
+        })
+        if (!nowRing) return
+        this.girl.show = false;
+        if (nowRing.type == 1) {
+          nowRing.src = "./img/rush-duck/ring-now-1.png"
+        } else if (nowRing.type == 2) {
+          nowRing.src = "./img/rush-duck/ring-now-2.png"
+        }
+        TweenMax.to(this.$data, 0.75, {
+          // nowScore: (newValue + 1) * 50 + (newValue - oldValue) * 100
+          nowScore: this.nowScore + (newValue - oldValue) * 100
+
+        })
+      },
+      showPointer: function (newValue) {
+        if (!newValue) {
+          this.girl.src = "./img/rush-duck/girl-jump2.png";
+        }
+      },
+      jumpReady: function (newValue) {//人离开游泳圈
+        if (!newValue) {
+          var nowRing = this.ringList.filter(item => {
+            return item.id == this.nowRingId
+          })[0]
+          if (!nowRing) return
+          this.girl.show = true;
+          if (nowRing.type == 1) {
+            nowRing.src = "./img/rush-duck/ring-1.png";
+            this.girl.left = nowRing.left + this.ringWidth / 2 - this.girl.width / 2;//人宽25vw 游泳圈宽25vw
+            this.girl.rotation = 0;
+          } else if (nowRing.type == 2) {
+            nowRing.src = "./img/rush-duck/ring-2.png";
+            var nowDeg = -this.ring2Deg + 2 * this.ring2Deg * nowRing.tweenMax.progress();
+            this.girl.tweenMax = TweenMax.fromTo(this.$data.girl, this.jumpTime, {
+              left: nowRing.left,
+              rotation: nowDeg / 2
+            }, {
+              left: Math.tan(nowDeg * Math.PI / 180) * this.jumpDistance,
+              // ease: Power0.easeNone
+            })
+          }
+        }
+
+
+      }
+    },
+    computed: {
+
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      preLoad: function (needPlayGame) {
+        return new Promise((resolve, reject) => {
+          var queue = new createjs.LoadQueue(false);
+          queue.installPlugin(createjs.Sound);
+          queue.on("complete", handleComplete, this);
+          queue.loadManifest([
+            './img/rush-duck/stage.png',
+            './img/rush-duck/girl.png',
+            './img/rush-duck/girl-dead.png',
+            './img/rush-duck/girl-jump.png',
+            './img/rush-duck/girl-jump2.png',
+            './img/rush-duck/title.png',
+            './img/rush-duck/pointer.png',
+            './img/rush-duck/start.png',
+            './img/rush-duck/ring-1.png',
+            './img/rush-duck/ring-2.png',
+            './img/rush-duck/ring-now-1.png',
+            './img/rush-duck/ring-now-2.png',
+            './img/rush-duck/pool.png',
+          ]);
+          function handleComplete() {
+            resolve('preLoad成功');
+          }
+        })
+      },
+      actionDataById() {
+        return new Promise((resolve, reject) => {
+          this.actionId = this.kindId('actionId');
+          $.post('https://activity.api.troncell.com/api/UserAction/ActionDataById', {
+            actionId: this.actionId
+          }, (result) => {
+            if (result.success) {
+              this.loading = false;
+              // setWX(result);
+              if (this.noTicket) {
+                setWX(result, ['hideOptionMenu'])
+              } else {
+                setWX(result);
+              }
+              this.openId = result.result.snsUserInfo.openid;
+              this.securityKey = result.result.deviceActivityGame.securityKey;
+              this.SnsUserInfoId = result.result.snsUserInfoId.id;
+              resolve('actionDataById成功');
+            }
+          })
+        })
+      },
+      goList() {
+        window.location.href = 'https://m.sensingstore.com/plane-ranking.html?actionId=' + this.actionId;
+      },
+      initGame() {
+        this.showTitleAndRule = true;
+        this.showStart = true;
+        this.fillRing();
+      },
+      restartGame() {
+        TweenMax.killAll(true);
+        this.showOver = false;
+        this.lastRingId = 0;//最近一次添加的ringId
+        this.containerBottom = 0;
+        this.containerHeight = 100;
+        this.nowRingId = -1;//当前停留的ringId,-1则为还没开始
+        this.girl.left = 50 - this.girl.width / 2;
+        this.girl.bottom = 12;
+        this.girl.rotation = 0;
+        this.girl.tweenMax = undefined;
+        this.gamma = 0;
+        this.girl.src = "./img/rush-duck/girl-jump2.png";
+        this.timeScale = 1;
+        TweenMax.set(this.$refs.girl, { left: this.girl.left + 'vw' });
+        this.nowScore = 0;
+        this.ringList = [];
+        this.fillRing();
+        this.showPointer = true;
+        var _this = this;
+        setTimeout(function () {
+          _this.jumpReady = true;
+        })
+        $.post('https://activity.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', {
+          QrType: 'AfterGame',
+          SecurityKey: this.securityKey,
+          SnsType: "WeChat",
+          FromType: 'mobile',
+          SnsUserInfoId: this.SnsUserInfoId
+        }, function (result) {
+          if (result.success) {
+            console.log(result.result.actionId);
+            _this.actionId = result.result.actionId;
+          }
+        })
+      },
+      startGame() {
+        this.showTitleAndRule = false;
+        this.showStart = false;
+        this.jumpReady = true;
+        this.showScore = true;
+      },
+      doJump() {
+        if (!this.jumpReady) return
+        if (this.showPointer) this.showPointer = false;
+        this.jumpReady = false;
+        var girlElement = this.$refs.girl;
+        TweenMax.to(this.$data, this.jumpTime, {
+          containerBottom: this.containerBottom - this.jumpDistance,
+          onUpdateParams: ["{self}"],
+          onUpdate: (self) => {
+            var girlC = {
+              top: girlElement.offsetTop,
+              bottom: girlElement.offsetTop + girlElement.offsetHeight,
+              left: girlElement.offsetLeft,
+              right: girlElement.offsetLeft + girlElement.offsetWidth,
+            }
+            //检测是否碰壁
+            if (girlC.left < -document.body.clientWidth * 0.1 || girlC.right > document.body.clientWidth * 1.1) {
+              self.kill();
+              this.girlDead();
+              return
+            }
+
+            //检测是否接触游泳圈
+            for (var item of this.ringList) {
+              if (item.id == this.nowRingId) {//当前停留的游泳圈
+                continue
+              }
+              var ringElement = this.$refs["ring" + item.id][0];//当 ref 和 v-for 一起使用的时候，你得到的引用将会是一个包含了对应数据源的这些子组件的数组。
+              var ringC = {
+                top: $(ringElement).offset().top,
+                bottom: $(ringElement).offset().top + ringElement.offsetHeight,
+                left: ringElement.offsetLeft,
+                right: ringElement.offsetLeft + ringElement.offsetWidth,
+              }
+
+              if (girlC.top < ringC.top && girlC.bottom > ringC.bottom && (girlC.left + this.girl.width / 1.5) < ringC.right && (girlC.right - this.girl.width / 1.5) > ringC.left) {//有接触
+                this.nowRingId = item.id;
+                if (this.girl.tweenMax) {
+                  this.girl.tweenMax.kill();
+                }
+                self.kill();
+                this.clearRing();
+                this.fillRing();
+                this.jumpReady = true;
+                break
+              }
+            }
+          },
+          onComplete: () => {
+            this.girlDead();
+          }
+        })
+      },
+      girlDead() {
+        if (this.girl.tweenMax) {
+          this.girl.tweenMax.kill();
+        }
+        this.girl.src = "./img/rush-duck/girl-dead.png";
+        $.post('https://activity.api.troncell.com/api/UserAction/PostDataByUser', {
+          OpenId: this.openId,
+          actionId: this.actionId,
+          QrType: 'AfterGame',
+          SnsType: 'WeChat',
+          Score: parseInt(this.nowScore),
+          SecurityKey: this.securityKey
+        }, result => {
+
+        })
+        TweenMax.to(this.$data.girl, 1.5, {
+          rotation: 720,
+          bottom: -30,
+          onUpdateParams: ["{self}"],
+          onUpdate: (self) => {
+            if (this.$refs.girl.offsetTop > document.body.clientHeight) {
+              this.showOver = true;
+              self.kill();
+            }
+          }
+        })
+      },
+      titleEnter(el, done) {
+        TweenMax.fromTo(el, 0.7, {
+          ease: Power0.easeNone,
+          scale: 0
+        }, {
+          scale: 1
+        })
+        done();
+      },
+      startEnter(el, done) {
+        TweenMax.to(el, 0.4, {
+          scale: 0.8, yoyo: true, repeat: -1, ease: Power0.easeNone
+        });
+        done();
+      },
+      fadeLeave(el, done) {
+        TweenMax.to(el, 0.4, {
+          opacity: 0, ease: Power0.easeNone, onComplete: () => {
+            this.showPointer = true;
+            done();
+          }
+        });
+      },
+      overEnter(el, done) {
+        TweenMax.from(this.$refs.overContainer, 0.8, {
+          top: '-30vh', scale: 0.5, ease: Power0.easeNone
+        });
+        done();
+      },
+      ringFactory() {
+        var ring = {
+          id: this.lastRingId,
+          bottom: parseInt((this.lastRingId + 1) * 40 + Math.random() * 15),
+          period: this.ring1Period * (1 - this.ringPeriodOffset + Math.random() * 2 * this.ringPeriodOffset),
+          rotation: 0,
+        }
+        if (ring.id < 3) {
+          ring.type = 1;
+        } else if (this.ringList.length >= 2 && this.ringList[this.ringList.length - 1].type == 2 && this.ringList[this.ringList.length - 2].type == 2) {//防止连续旋转无法继续游戏
+          ring.type = 1;
+        } else {
+          ring.type = (Math.random() < 0.666) ? 1 : 2;
+        }
+        if (ring.type == 1) {
+          ring.left = 0;
+          ring.src = "./img/rush-duck/ring-1.png";
+          ring.tweenMax = TweenMax.to(ring, ring.period, {
+            left: 100 - this.ringWidth, repeat: -1, yoyo: true, ease: Power0.easeNone, paused: true
+          })
+        } else if (ring.type == 2) {
+          ring.left = Math.random() * (100 - this.ringWidth);
+          ring.rotation = -this.ring2Deg;
+          ring.period = this.ring2Period * (1 - this.ringPeriodOffset + Math.random() * 2 * this.ringPeriodOffset);
+          ring.src = "./img/rush-duck/ring-2.png";
+          ring.tweenMax = TweenMax.to(ring, ring.period, {
+            rotation: this.ring2Deg, repeat: -1, yoyo: true, ease: Power0.easeNone, paused: true
+          })
+        }
+        ring.tweenMax.play(Math.random() * ring.period * 2);//在随机位置开始运动
+        this.lastRingId++;
+        console.log(ring)
+        return ring
+      },
+      fillRing() {
+        while (this.ringList.length < 8) {//将游泳圈补足8个
+          let ring = this.ringFactory();
+          this.ringList.push(ring);
+        }
+        //游泳池总比最高的游泳圈高两个页面高
+        this.containerHeight = this.ringList[this.ringList.length - 1].bottom + 200;
+      },
+      clearRing() {//清理当前停留的游泳圈的所有游泳圈
+        var nowRingIndex;
+        this.ringList.forEach((item, index) => {
+          if (this.nowRingId == item.id) {
+            nowRingIndex = index;
+          }
+        })
+        this.ringList = this.ringList.splice(nowRingIndex);
+      },
+
+    },
+    created: function () {
+      this.girl.left = 50 - this.girl.width / 2;
+    },
+    mounted: function () {
+      this.noTicket = this.kindId("noTicket");
+      Promise.all([this.preLoad(), this.actionDataById()]).then((result) => {//解构赋值
+        this.loading = false;
+        this.initGame();
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+  })
+
+
+
+
+</script>
+
+</html>

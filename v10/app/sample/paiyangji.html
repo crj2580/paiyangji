@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/Quorra/Quorra.js" type="text/javascript"></script>
+  <script src="/js/sensing-device-sdk-quorra-1.0.js" type="text/javascript"></script>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script>
+</head>
+
+<body>
+  <div id="app">
+    <!-- <div v-show="showMsg" class="basicMsg">
+      <div style="padding:6vw;font-size:3.5vw;">
+        {{showMsg}}
+      </div>
+    </div>
+
+    {{ua}}
+
+    <div>
+      <button @click="getSubkey">获取subkey</button>{{subkey}}
+    </div>
+
+    <div>
+      <button @click="getAppHomeUrl">获取主业地址</button>{{appHomeUrl}}
+    </div>
+
+    {{ online ? 'Online' : 'Offline' }}
+    <div>
+      <button @click="doDropCargo">调货</button>
+    </div> -->
+  </div>
+</body>
+
+<!-- <script src="/js/babel.js"></script>
+<script src="/js/polyfill.js"></script>
+
+<script src="/js/vue.min.js"></script> -->
+
+
+<script>
+  // const { reactive, ref, toRefs, createApp, onMounted } = Vue
+  // const app = createApp({
+  //   setup() {
+  //     window.jsCallbackByAndroid = (action, dateJson) => {
+  //       if (action == 'dropCargoDone') {
+  //         if (dateJson.success == true) {
+  //           alert(dateJson.result)
+  //         }
+  //       }
+  //     }
+  //     const state = reactive({
+  //       subkey: '',
+  //       showMsg: '',
+  //       appHomeUrl: '',
+  //       dropStatus: '',
+  //       ua: window.navigator.userAgent
+  //     })
+  //     onMounted(() => {
+  //     })
+  //     const mSensingDevice = SensingDevice.getInstance();
+  //     const showTip = (msg) => {
+  //       state.showMsg = msg
+  //       setTimeout(() => {
+  //         state.showMsg = ""
+  //       }, 2000)
+  //     }
+  //     if (!mSensingDevice.getSubKey()) {
+  //       state.showMsg = '当前不在派样机环境内'
+  //     }
+  //     const getSubkey = () => {
+  //       state.subkey = mSensingDevice.getSubKey()
+  //     }
+  //     const getAppHomeUrl = () => {
+  //       state.appHomeUrl = mSensingDevice.getAppHomeUrl()
+  //     }
+  //     const doDropCargo = () => {
+  //       mSensingDevice.doDropCargo('110')
+  //     }
+  //     return {
+  //       ...toRefs(state),
+  //       getSubkey,
+  //       getAppHomeUrl,
+  //       showTip,
+  //       doDropCargo,
+  //       jsCallbackByAndroid
+  //     }
+  //   }
+  // })
+  // app.mount('#app')
+
+  // vue2
+  // var mSensingDevice = SensingDevice.getInstance();
+  // var app = new Vue({
+  //   el: '#app',
+  //   data: function () {
+  //     return {
+  //       subkey: '',
+  //       showMsg: '',
+  //       appHomeUrl: '',
+  //       dropStatus: '',
+  //       ua: window.navigator.userAgent,
+  //       online: window.navigator.onLine
+  //     }
+  //   },
+  //   mounted: function () {
+
+  //   },
+  //   methods: {
+  //     getSubkey: function () {
+  //       this.subkey = mSensingDevice.getSubKey()
+  //     },
+  //     getAppHomeUrl: function () {
+  //       this.appHomeUrl = mSensingDevice.getAppHomeUrl()
+  //     },
+  //     showTip: function (msg) {
+  //       var _this = this;
+  //       this.showMsg = msg;
+  //       setTimeout(function () {
+  //         _this.showMsg = ''
+  //       }, 2000)
+  //     },
+  //     doDropCargo: function () {
+  //       mSensingDevice.doDropCargo('110')
+  //     },
+  //   }
+  // })
+
+  // var jsCallbackByAndroid = function (action, dateJson) {
+  //   if (action == 'dropCargoDone') {
+  //     if (dateJson.success == true) {
+  //       alert(dateJson.result)
+  //     }
+  //   }
+  // }
+
+    document.getElementById('app').innerHTML = window.navigator.userAgent
+</script>
+
+</html>

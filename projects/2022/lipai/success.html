@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>领取精美礼品一份</title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <style>
+      #ticketNo {
+        color: #c61217;
+        font-size: 5vw;
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        top: 34%;
+        font-weight: 700;
+        font-family: "heiti";
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="ticketNo"></div>
+    <div
+      style="
+        width: 100vw;
+        height: 100vh;
+        background: url(./imgs/allRight.png) no-repeat center center;
+        background-size: cover;
+      "
+    ></div>
+
+    <script>
+      function kindId(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        console.log(name, r);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        }
+      }
+    </script>
+  </body>
+</html>

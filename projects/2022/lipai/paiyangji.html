@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>答题</title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/js/vue.min.js" type="text/javascript"></script>
+
+    <!-- <script src="./js/Quorra.js" type="text/javascript"></script> -->
+    <script src="/js/sensing-device-sdk-quorra-1.0.js"></script>
+    <script src="/js/TweenMax.min.js" type="text/javascript"></script>
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+  </head>
+  <style>
+    @font-face {
+      font-family: "bold";
+      src: url(./fonts/SourceHanSansCN-Bold.otf);
+    }
+
+    @font-face {
+      font-family: "heavy";
+      src: url(./fonts/SourceHanSansCN-Heavy.otf);
+    }
+
+    @font-face {
+      font-family: "medium";
+      src: url(./fonts/SourceHanSansCN-Medium.otf);
+    }
+
+    @font-face {
+      font-family: "normal";
+      src: url(./fonts/SourceHanSansCN-Normal.otf);
+    }
+
+    img {
+      pointer-events: none;
+    }
+    #app {
+      /* background: url(img/bg.png); */
+      background-size: cover;
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      font-family: "normal";
+    }
+
+    .msg {
+      padding: 6vw;
+      font-size: 3.5vw;
+    }
+
+    .qrcode {
+      position: absolute;
+      width: 36vw;
+      height: 36vw;
+      right: 31%;
+      top: 28.4%;
+    }
+
+    .gohome {
+      width: 20vw;
+      position: absolute;
+      left: 64%;
+      top: 12%;
+      z-index: 5;
+    }
+
+    .verificationCode {
+      position: absolute;
+      width: 100%;
+      left: 0;
+      top: 0;
+      height: 100vh;
+    }
+
+    .codeNum {
+      position: absolute;
+      top: 40vw;
+      left: 18vw;
+      height: 10.19vh;
+      width: 64vw;
+      box-sizing: border-box;
+      background-size: contain;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qusetion-container {
+      position: absolute;
+      width: 100%;
+      left: 8%;
+      top: 18%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .questionClass {
+      display: flex;
+      flex-direction: row;
+      width: 68%;
+      font-size: 4vw;
+      font-family: "normal";
+      color: #fff;
+      margin-left: 10vw;
+    }
+
+    .questionIndex {
+      padding: 0 1vw;
+      height: 3vh;
+      background: orange;
+      margin-right: 2vw;
+    }
+
+    .answerClass {
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 2vh;
+      font-family: "normal";
+    }
+
+    .answer-container {
+      width: 60vw;
+      text-align: left;
+      margin-bottom: 2vw;
+      margin-left: 10vw;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .answer-content {
+      width: 100%;
+      height: 100%;
+      font-size: 3.6vw;
+    }
+
+    .answer-option {
+      color: #fff;
+      font-size: 5vw;
+      margin-right: 2vw;
+    }
+
+    .rightAnswer {
+      position: absolute;
+      top: 59.7vh;
+      left: 19vw;
+      font-size: 4.4vw;
+      color: #036eb7;
+    }
+
+    .footerBtn {
+      position: fixed;
+      z-index: 10000;
+      top: 7%;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .btn {
+      width: 40%;
+    }
+
+    .btnBg {
+      position: absolute;
+      font-size: 3.5vw;
+      font-family: "normal";
+      color: #fff;
+      top: 0.4vh;
+      left: 2vw;
+      z-index: 2;
+    }
+
+    #keyboardContainer {
+      box-sizing: border-box;
+      position: absolute;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      top: 39.6vh;
+      left: 1vw;
+      font-size: 6vw;
+      text-align: center;
+    }
+
+    .keyboardItem {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: url(./imgs/code.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      box-sizing: border-box;
+      color: #036eb7;
+      border-radius: 5px;
+    }
+
+    .keyboardItem div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      left: 0;
+      top: 0;
+      line-height: 13vw;
+      font-family: "bold";
+      font-weight: bold;
+    }
+
+    #inputContainer {
+      position: absolute;
+      width: 90%;
+      left: 1%;
+      height: 10vw;
+      display: flex;
+      justify-content: center;
+      top: 6%;
+      font-size: 4.5vw;
+      text-align: center;
+      line-height: 4vw;
+      font-weight: bold;
+      color: #fff;
+      padding: 4vw;
+      border: 0.5vw solid #f6ac4e;
+      background-color: #fef8ea;
+      border-radius: 4vw;
+    }
+
+    .inputItem {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .buttonContainer {
+      position: absolute;
+      left: 29%;
+      top: 48%;
+      width: 42vw;
+      z-index: 5;
+    }
+
+    .keyboardItemWrapper {
+      position: relative;
+      width: 13vw;
+      height: 10vh;
+      margin: 0 3vw 3vw 0.7vw;
+      flex-grow: 0;
+      color: rgb(16, 27, 121);
+    }
+
+    .keyboardItem img {
+      width: 100%;
+      height: 100%;
+    }
+
+    .textarea {
+      border: 0;
+      background-image: url(./img/框.png);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-color: #fef8ea;
+      width: 55%;
+      height: 49vw;
+      padding: 3vw;
+      box-sizing: border-box;
+      font-size: 5vw;
+      color: #000;
+      left: 23%;
+      top: 20%;
+      position: absolute;
+      outline: none;
+    }
+
+    .page {
+      position: absolute;
+      width: 14vw;
+      right: 5%;
+    }
+
+    .selected {
+      opacity: 0.5;
+    }
+
+    .answerOption {
+      width: 30vw;
+      height: 4vh;
+      line-height: 4vh;
+      margin-bottom: 1.8vh;
+      position: relative;
+      text-align: center;
+    }
+
+    .answerOption_small {
+      width: 30vw;
+      height: 4vh;
+      line-height: 4vh;
+      margin-bottom: 2vh;
+      position: relative;
+    }
+
+    .chara1 {
+      position: absolute;
+      bottom: 5.548vh;
+      left: 29.51vw;
+      width: 38.04vw;
+      height: 26.218vh;
+      animation: charaMove 1s infinite ease-in-out alternate;
+    }
+
+    .chara2 {
+      position: absolute;
+      bottom: 10vh;
+      left: 28vw;
+      width: 38.04vw;
+      height: 26.218vh;
+      z-index: 2;
+      animation: charaMove 1s infinite ease-in-out alternate;
+    }
+
+    .code-wrapper {
+      position: absolute;
+      left: 18.22vw;
+      top: 24.443vh;
+      width: 65.6vw;
+      height: 32.99vh;
+    }
+
+    .light-animation {
+      border-radius: 100px;
+      animation: light 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes charaMove {
+      from {
+        transform: translateY(10px);
+      }
+      to {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes light {
+      100% {
+        box-shadow: 0 0 122px rgb(143, 217, 252);
+      }
+    }
+  </style>
+
+  <body>
+    <div id="app">
+      <div class="basicLoading" v-show="loading">
+        <!-- <img src="./assets/img/loading.gif" /> -->
+      </div>
+
+      <!-- 信息提示 -->
+      <div v-show="showMsg" class="basicMsg">
+        <div class="msg">{{ showMsg }}</div>
+      </div>
+
+      <!-- 首页背景 -->
+      <img
+        v-show="logicType == 1"
+        src="./imgs/bgImg.png"
+        style="position: absolute; width: 100%; height: 100%"
+      />
+      <!-- 首页小人 -->
+      <img
+        v-show="logicType == 1 || logicType == 2"
+        :class="logicType == 2 ? 'chara2' : 'chara1'"
+        src="./imgs/chara1.png"
+        alt="小人图"
+      />
+      <!-- 边框光效 -->
+      <img
+        v-show="logicType == 1"
+        class="code-wrapper light-animation"
+        src="./imgs/code_wrapper.png"
+        alt="code_wrapper"
+      />
+      <!-- 首页二维码图片 -->
+      <img v-show="logicType == 1" :src="qrcode" class="qrcode" />
+
+      <!-- 键盘背景 -->
+      <img
+        v-show="logicType==3"
+        src="./imgs/bg_aboove.png"
+        style="width: 100%; height: 100%"
+        alt=""
+      />
+
+      <!-- 开始页面 -->
+      <img
+        v-show="logicType == 2 "
+        src="./imgs/begin.png"
+        style="position: absolute; width: 100%; height: 100vh; top: 0vh"
+      />
+
+      <!-- 测一测按钮 -->
+      <div class="buttonContainer" @click="clickButton">
+        <img
+          v-show="logicType==2"
+          src="./imgs/takeTest.png"
+          alt=""
+          style="width: 100%"
+        />
+      </div>
+
+      <!-- 答题背景 -->
+      <img
+        v-show="logicType == 4 && !qrCodeImage"
+        src="./imgs/bg-above4.png"
+        style="width: 100%; height: 100%"
+        alt=""
+      />
+
+      <!-- 答题完成背景 -->
+      <img
+        v-show="logicType == 4 && qrCodeImage"
+        src="./imgs/bg_above2.png"
+        style="width: 100%; height: 100vh"
+      />
+
+      <!-- 返回首页按钮 -->
+      <div
+        v-show="logicType == 4 && qrCodeImage || logicType == 3"
+        @click="returnHome"
+        class="gohome"
+      >
+        <img src="./imgs/goHome.png" style="width: 100%" alt="" />
+      </div>
+
+      <!-- 去答题按钮 -->
+      <div
+        v-show="logicType==1"
+        @click="clickButton1"
+        class="buttonContainer"
+        style="width: 24vw; top: 60%; left: 62vw"
+      >
+        <img src="./imgs/startBtn.png" style="width: 100%" />
+      </div>
+
+      <!-- 去输入验证码按钮 -->
+      <div
+        v-show="logicType==1"
+        @click="clickButton2"
+        class="buttonContainer"
+        style="left: 18vw; width: 24vw; top: 60%"
+      >
+        <img src="./imgs/goIndex.png" style="width: 100%" />
+      </div>
+
+      <!-- 键盘&输入验证码 -->
+      <div v-if="logicType == 3" class="verificationCode">
+        <!-- <img src="../assets/img/goHome.png" @click="returnHome()" class="gohome" alt="" /> -->
+        <div class="codeNum">
+          <img
+            v-show="!codeList.length"
+            style="width: 40vw; height: 2.5vh"
+            src="./imgs/input.png"
+          />
+          <div
+            v-show="codeList.length"
+            v-for=" (input,index) of [0,1,2,3,4,5]"
+            style="font-size: 9.26vw"
+          >
+            {{codeList[index]}}
+          </div>
+        </div>
+
+        <!-- 键盘 -->
+        <div id="keyboardContainer" style="padding: 0 20vw">
+          <div v-for="(item,index) of keyList" class="keyboardItemWrapper">
+            <div
+              class="keyboardItem"
+              @click="clickKey(item)"
+              :style="{'font-size': (item == '返回'|| item == '清除') ? '5vw' : '9vw'}"
+            >
+              <div>{{ item }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-show="wrongCode"
+          style="
+            font-size: 4vw;
+            line-height: 5vh;
+            padding: 3vh 0;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            position: fixed;
+            width: 50%;
+            left: 25%;
+            background: rgba(0, 0, 0, 0.75);
+            top: 40%;
+            border-radius: 3vw; ;
+          "
+        >
+          券码不存在或已被使用,<br />
+          请重新输入
+        </div>
+      </div>
+
+      <!-- 答题 -->
+      <div v-if="logicType==4" class="qusetion-container">
+        <!-- 成功 -->
+        <template v-if="qrCodeImage">
+          <!-- 倒数时 -->
+          <!-- <div style="position: absolute;color:#c61217;font-size: 5vw;font-weight: 700;right: 11.5%;top: 7.5%;">
+            {{timeCount}}s
+          </div> -->
+
+          <!-- <img src="./assets/img/bg_above2.png"
+            style="width: 100%; height: 100vh;position: absolute;left: -8%;top: -18vh;" /> -->
+          <img
+            :src="qrCodeImage"
+            style="
+              width: 36vw;
+              height: 36vw;
+              right: 39.1%;
+              top: 6.8vh;
+              position: absolute;
+              border-radius: 3vw;
+            "
+          />
+        </template>
+
+        <!-- 答题 -->
+        <template v-else>
+          <!-- <img src="./img/bg-above2.png" style="position: absolute; width: 100%; height: 100vh; top: 0vh" /> -->
+          <div class="questionClass">
+            <!-- 题号 -->
+            <div class="questionIndex">{{realQuestionIndex+1}}</div>
+            <!-- 题目 -->
+            <div>{{realQuestionList[realQuestionIndex].title}}</div>
+          </div>
+
+          <div class="answerClass">
+            <div
+              v-for="(answer,answerIndex) of realQuestionList[realQuestionIndex].questionItems"
+              @click="selectAnswer(answer,realQuestionIndex)"
+              class="answer-container"
+              :class="answer.hasSelected ? 'selected' : ''"
+            >
+              <img
+                v-if="realQuestionList[realQuestionIndex].hasSelected && !answer.isAnswer "
+                :src="!(realQuestionList[realQuestionIndex].hasSelected && !answer.isAnswer)||'./imgs/wrong_red.gif'"
+                style="width: 10%; position: absolute; z-index: 2"
+              />
+
+              <img
+                v-if="realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer"
+                :src="!(realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer) || './imgs/right_red.gif'"
+                style="width: 10%; position: absolute; z-index: 2"
+              />
+
+              <!-- <img
+                v-if="realQuestionIndex == 4 && answer.hasSelected"
+                src="./imgs/right_red.gif"
+                style="width: 10%; position: absolute; z-index: 2"
+              /> -->
+
+              <div class="answer-option">
+                <div v-show="answerIndex==0">A</div>
+                <div v-show="answerIndex==1">B</div>
+                <div v-show="answerIndex==2">C</div>
+                <div v-show="answerIndex==3">D</div>
+              </div>
+
+              <div class="answer-content">{{answer.content}}</div>
+            </div>
+
+            <div class="rightAnswer" style="display: flex; flex-direction: row">
+              正确答案：
+              <div
+                v-for="(prefix,prefixIndex) of realQuestionList[realQuestionIndex].questionItems"
+                v-show="prefix.isAnswer && showRightAnswer"
+              >
+                {{prefix.prefix}}
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- 上一题&下一题按钮 -->
+      <div class="footerBtn">
+        <!-- 返回首页 -->
+        <div
+          v-show="logicType==4 && realQuestionIndex == 0 && errorAnswer == 0"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 10%"
+          @click="returnHome()"
+        >
+          <img src="./imgs/return.png" style="width: 100%" />
+        </div>
+        <!-- 重新答题按钮 -->
+        <div
+          v-show="logicType==4 && !qrCodeImage && errorAnswer != 0"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 10%"
+          @click="preQuestion"
+        >
+          <div class="btnBg">重新答题</div>
+          <img src="./imgs/btnBg.png" style="width: 100%" />
+        </div>
+        <!-- 下一题按钮 -->
+        <div
+          v-show="realQuestionIndex!=4&&logicType==4&&!qrCodeImage&&!changeBtn"
+          class="btn"
+          style="width: 18vw; height: 5vh; position: absolute; left: 66%"
+          @click="nextQuestion"
+        >
+          <img src="./imgs/next.png" style="width: 100%" />
+        </div>
+        <!-- 继续答题按钮 -->
+        <div
+          v-show="logicType==4 && !qrCodeImage && realQuestionIndex!=4 && changeBtn"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 66%"
+          @click="continuer"
+        >
+          <div class="btnBg">继续答题</div>
+          <img src="./imgs/btnBg.png" style="width: 100%" />
+        </div>
+        <!-- 确认按钮 -->
+        <div
+          v-show="realQuestionIndex==4&&logicType==4&&!qrCodeImage"
+          class="btn"
+          style="width: 18vw; height: 5vh; position: absolute; left: 66%"
+          @click="notarize"
+        >
+          <img src="./imgs/notarize.png" style="width: 100%" />
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var mSensingDevice = SensingDevice.getInstance();
+
+    $.ajaxSetup({
+      timeout: 10000,
+      error: function (jqXHR, textStatus, errorThrown) {
+        switch (jqXHR.status) {
+          case 500:
+            console.log("服务器系统内部错误");
+            break;
+          case 401:
+            console.log("未登录");
+            break;
+          case 403:
+            console.log("无权限执行此操作");
+            break;
+          case 408:
+            console.log("请求超时");
+            break;
+          default:
+            console.log("未知错误");
+        }
+        setTimeout(function () {
+          window.location.reload();
+        }, 3000);
+      },
+      success: function (data) {
+        console.log("操作成功");
+      },
+    });
+
+    // 设备二
+    var SecurityKey =
+      mSensingDevice.getSecurityKey() || "b670e86a80be469290a1d19368decdcc";
+    var subkey =
+      mSensingDevice.getSubKey() || "2de5a03759e74150b1f4a38abb50e43d";
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        logicType: 1, // 0初始化 1输入取货码 2大屏答题  3取货码 4 取货成功
+        codeList: [],
+        keyList: [1, 2, 3, 4, 5, 6, 7, 8, 9, "返回", 0, "清除"],
+        loading: false,
+        showMsg: null,
+        wrongCode: false,
+        timeCount: 0,
+        timer: null,
+        returnTimeout: null,
+        actionDataByIdTimer: null,
+        totalQuestionList: [],
+        realQuestionList: [],
+        answerList: [],
+        realQuestionIndex: 0,
+        questionNeedLength: 5,
+        subKey: subkey,
+        securityKey: SecurityKey,
+        actionId: null,
+        qrCodeImage: "",
+        openId: "",
+        MaxWordLength: 40,
+        qrcode: "",
+        errorAnswer: 0,
+        hasSelected: false,
+        showRightAnswer: false,
+        changeBtn: false,
+      },
+      mounted: function () {
+        TweenMax.fromTo(
+          "#heart",
+          0.8,
+          {
+            top: "5%",
+          },
+          {
+            top: "4%",
+            yoyo: true,
+            repeat: -1,
+            ease: Power0.easeNone,
+          }
+        );
+
+        TweenMax.fromTo(
+          "#yoyo",
+          0.8,
+          {
+            top: "37%",
+          },
+          {
+            top: "38%",
+            yoyo: true,
+            repeat: -1,
+            ease: Power0.easeNone,
+          }
+        );
+
+        this.PostPlayerData4ActionQrcode();
+
+        var _this = this;
+        _this.loading = true;
+        $.get(
+          "https://activity.api.troncell.com/api/services/app/SengsingDevice/GetPapersByTags",
+          {
+            Tags: "答题",
+            Subkey: _this.subKey,
+          },
+          function (result) {
+            _this.paperId = result.result.items[0].id;
+            _this.returnToLogicType1();
+            _this.loading = false;
+            console.log("total", result.result.items[0]);
+            _this.totalQuestionList = result.result.items[0].questions
+              .sort(function (a, b) {
+                return a - b;
+              })
+              .filter(function (question) {
+                return question.questionItems.every(function (answer) {
+                  return answer.content.length <= _this.MaxWordLength;
+                });
+              });
+            // console.log("_this.totalQuestionList", _this.totalQuestionList);
+          }
+        );
+      },
+      methods: {
+        rewrite: function () {
+          this.realQuestionList[5].answer = "";
+        },
+
+        continuer: function () {
+          const _this = this;
+          this.clearAndStartTimer();
+
+          const questionNeedLength = this.questionNeedLength;
+          this.realQuestionIndex++;
+          const realQuestionIndex = this.realQuestionIndex;
+          _this.showRightAnswer = false;
+          _this.changeBtn = false;
+        },
+
+        onComplete: function () {
+          // if (!this.realQuestionList[5].answer) {
+          //   return
+          // }
+          this.allRightShowQrcode();
+        },
+
+        // continuer: function () {
+        //   if (
+        //     !this.realQuestionList[this.realQuestionIndex].questionItems.filter(
+        //       function (i) {
+        //         return i.hasSelected;
+        //       }
+        //     )
+        //   ) {
+        //     return;
+        //   }
+        //   this.clearAndStartTimer();
+        //   this.realQuestionIndex++;
+        //   console.log("this.answerListxxxxxxxxxxxx", this.answerList);
+        //   this.nextQuestion();
+        // },
+
+        /* 重新答题按钮 */
+        preQuestion: function () {
+          this.clearAndStartTimer();
+          this.showRightAnswer = false;
+          this.changeBtn = false;
+          this.goAnswerQuestion();
+        },
+
+        clickButton: function () {
+          if (this.logicType == 2) {
+            this.showRightAnswer = false;
+            this.goAnswerQuestion();
+          } else if (logicType.value == 3 || logicType.value == 4) {
+            this.returnToLogicType1();
+          }
+        },
+
+        clickButton1: function () {
+          this.logicType = 2;
+        },
+
+        clickButton2: function () {
+          this.logicType = 3;
+        },
+
+        /* 返回按钮 */
+        returnHome: function () {
+          this.clearAndStartTimer();
+          this.returnToLogicType1();
+        },
+
+        /* 下一题按钮 */
+        nextQuestion: function () {
+          const _this = this;
+          this.clearAndStartTimer();
+          _this.showRightAnswer = true;
+          if (_this.answerList.length != 0) {
+            _this.validateAnswer();
+            _this.answerList = [];
+          } else {
+            _this.showMsg = "请选择答案";
+            setTimeout(function () {
+              _this.showMsg = "";
+            }, 2000);
+          }
+        },
+
+        /* 确认按钮 */
+        notarize: function () {
+          const _this = this;
+          this.clearAndStartTimer();
+          _this.showRightAnswer = true;
+          if (_this.answerList.length != 0) {
+            _this.validateAnswer();
+          } else {
+            _this.showMsg = "请选择答案";
+            setTimeout(function () {
+              _this.showMsg = "";
+            }, 2000);
+          }
+          // this.nextQuestion()
+        },
+
+        /* 判断题目类型 */
+        selectAnswer: function (answer, realQuestionIndex) {
+          console.log("answeranswer", answer);
+          const _this = this;
+
+          if (_this.realQuestionList[realQuestionIndex].type == "Multiple") {
+            const checkIsSelectedIndex = _this.answerList.findIndex(
+              (item) => item.prefix == answer.prefix
+            );
+            if (checkIsSelectedIndex < 0) {
+              answer.hasSelected = true;
+              _this.answerList = [..._this.answerList, answer];
+              console.log("_this.answerListanswerList", _this.answerList);
+            } else if (checkIsSelectedIndex >= 0) {
+              answer.hasSelected = false;
+              _this.answerList.splice(checkIsSelectedIndex, 1);
+            }
+          } else {
+            _this.realQuestionList[realQuestionIndex].questionItems.map(
+              (item) => {
+                item.hasSelected = false;
+              }
+            );
+            answer.hasSelected = true;
+            _this.answerList = [answer];
+          }
+
+          // console.log("_this.answerList", _this.answerList);
+        },
+
+        /* 判断所选答案与正确答案是否一致 */
+        equalArray: function (arrayA, arrayB) {
+          if (arrayA.length !== arrayB.length) {
+            // console.log(" error", 1);
+            return false;
+          }
+          const results = arrayA.map((eleA) => {
+            return arrayB.some((eleB) => eleA == eleB);
+          });
+          if (results.some((ele) => ele == false)) {
+            // console.log(" error", 3);
+            return false;
+          }
+          return true;
+        },
+
+        /* 验证答案 */
+        validateAnswer: function () {
+          const _this = this;
+          // console.log("realQuestionIndex", _this.realQuestionIndex);
+          const answerList = _this.answerList;
+          const realQuestionList = _this.realQuestionList;
+          const realQuestionIndex = _this.realQuestionIndex;
+          const trueAnswerList = realQuestionList[
+            realQuestionIndex
+          ].questionItems.filter((ele) => ele.isAnswer);
+          const result = _this.equalArray(trueAnswerList, answerList);
+          realQuestionList[realQuestionIndex].hasSelected = true;
+          // console.log("result", result);
+          if (result) {
+            if (realQuestionIndex < 4) {
+              // console.log("progress 1");
+              clearInterval(_this.timer);
+              setTimeout(() => {
+                _this.realQuestionIndex++;
+                _this.showRightAnswer = false;
+              }, 2000);
+            } else if (realQuestionIndex === 4 && _this.errorAnswer < 1) {
+              // console.log("progress 2");
+              clearInterval(_this.timer);
+              setTimeout(function () {
+                _this.allRightShowQrcode();
+              }, 2000);
+            } else if (realQuestionIndex === 4 && _this.errorAnswer >= 1) {
+              _this.showMsg =
+                "您已经答错" + _this.errorAnswer + "道题了，无法获得奖品";
+              setTimeout(function () {
+                _this.returnToLogicType1();
+              }, 2000);
+            }
+          } else if (!result) {
+            _this.errorAnswer++;
+            if (realQuestionIndex < 4) {
+              // console.log("progress 3");
+              _this.showMsg =
+                "您已经答错" +
+                _this.errorAnswer +
+                "道题了，继续答题将不会获得奖品，是否继续?";
+              _this.answerList = [];
+              _this.changeBtn = true;
+              setTimeout(function () {
+                _this.showMsg = "";
+              }, 1000);
+            } else if (realQuestionIndex === 4) {
+              // console.log("progress 4");
+              _this.showMsg =
+                "您已经答错" + _this.errorAnswer + "道题了，无法获得奖品";
+              setTimeout(function () {
+                _this.returnToLogicType1();
+              }, 2000);
+            }
+          }
+        },
+        PostPlayerData4ActionQrcode: function () {
+          var _this = this;
+          _this.loading = true;
+          $.post(
+            "https://activity.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode",
+            {
+              QrType: "BeforeGame",
+              SecurityKey: _this.securityKey,
+              IsSendWeChatMsg: false,
+              SnsType: "WeChat",
+              FromType: "mobile",
+            },
+            function (result) {
+              if (result.success) {
+                // console.log(result.result);
+                _this.loading = false;
+                _this.qrcode = result.result.qrCodeImage;
+              }
+            }
+          );
+        },
+
+        //生成二维码
+        allRightShowQrcode: function () {
+          var _this = this;
+          _this.loading = true;
+          $.post(
+            "https://activity.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode",
+            {
+              QrType: "AfterGame",
+              SecurityKey: _this.securityKey,
+              IsSendWeChatMsg: false,
+              SnsType: "WeChat",
+              FromType: "mobile",
+            },
+            function (result) {
+              if (result.success) {
+                // console.log("resultresult", result.result);
+                _this.loading = false;
+                _this.actionId = result.result.actionId;
+                _this.qrCodeImage = result.result.qrCodeImage;
+                _this.clearAndStartTimer(60);
+                _this.ActionDataById();
+              }
+            }
+          );
+        },
+
+        ActionDataById: function () {
+          var _this = this;
+          $.post(
+            "https://activity.api.troncell.com/api/UserAction/ActionDataById",
+            {
+              actionId: _this.actionId,
+            },
+            function (result) {
+              clearTimeout(_this.actionDataByIdTimer);
+              if (!result.result.snsUserInfo) {
+                _this.actionDataByIdTimer = setTimeout(
+                  _this.ActionDataById,
+                  1000
+                );
+                console.log("未扫描");
+              } else {
+                console.log("已扫描");
+                app.logicType = 4;
+                app.clearAndStartTimer(20);
+                // 上传用户数据
+                // _this.postAnswer();
+
+                _this.openId = result.result.snsUserInfo.openid;
+                $.get(
+                  "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction",
+                  {
+                    OpenId: _this.openId,
+                    actionId: _this.actionId,
+                    QrType: "AfterGame",
+                    // SnsType: SnsType,
+                    SecurityKey: _this.securityKey,
+                  },
+                  function (result) {
+                    if (result.result.canNextAward) {
+                      _this.DoLotteryAwardByAction();
+                    } else {
+                      // alert("每天仅可参与一次，请把机会留给其他人");
+                      _this.showMsg = "每天仅可参与一次，请把机会留给其他人";
+                      setTimeout(function () {
+                        app.returnToLogicType1();
+                      }, 3000);
+                    }
+                  }
+                );
+              }
+            }
+          );
+        },
+
+        DoLotteryAwardByAction: function () {
+          var _this = this;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              isNeedSendNotify: false,
+              score: 0,
+              actionId: _this.actionId,
+              securityKey: _this.securityKey,
+            }),
+            success: function (message) {
+              _this.ConfirmUserAwardById(message.result.id);
+              var ticketId =
+                message.result.award.couponUrl.split("ticketId=")[1];
+              console.log("ticketId", ticketId);
+              $.ajax({
+                type: "POST",
+                url: "https://order.api.troncell.com/api/services/app/SensingTicket/TakeTicketForActivity",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                  ticket: ticketId,
+                  actionId: _this.actionId,
+                  securityKey: _this.securityKey,
+                  sendMessage: false,
+                }),
+                success: function (message) {
+                  // console.log("messagemessagemessage", message);
+                  var code = message.result.ticketNo;
+                  _this.checkCode(code);
+                },
+                error: (err) => {
+                  console.log(err);
+                },
+              });
+            },
+          });
+        },
+
+        ConfirmUserAwardById: function (userAwardId) {
+          var _this = this;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              userAwardId: userAwardId,
+              SecurityKey: _this.securityKey,
+            }),
+            success: function (message) {},
+          });
+        },
+
+        returnToLogicType1: function () {
+          clearTimeout(this.returnTimeout);
+          clearTimeout(this.actionDataByIdTimer);
+          clearInterval(this.timer);
+          this.codeList = [];
+          this.logicType = 1;
+          this.showMsg = null;
+          this.GetCargoRoads();
+        },
+
+        clearAndStartTimer: function (time) {
+          var _this = this;
+          clearInterval(_this.timer);
+          _this.timeCount = time ? time : 300;
+          _this.showMsg = null;
+          this.timer = setInterval(function () {
+            _this.timeCount--;
+            if (_this.timeCount <= 0) {
+              clearInterval(_this.timer);
+              _this.returnToLogicType1();
+            }
+          }, 1000);
+        },
+        goAnswerQuestion: function () {
+          var _this = this;
+          _this.errorAnswer = 0;
+          _this.realQuestionIndex = 0;
+          _this.qrCodeImage = "";
+          _this.realQuestionList = JSON.parse(
+            JSON.stringify(_this.totalQuestionList)
+          )
+            .sort(function () {
+              return Math.random() - 0.5;
+            })
+            .slice(0, _this.questionNeedLength)
+            .map(function (item) {
+              // console.log("itemitem", item);
+              return {
+                id: item.id,
+                title: item.title,
+                hasSelected: false,
+                type: item.type,
+                questionItems: item.questionItems.map(function (answer) {
+                  return {
+                    content: answer.content,
+                    isAnswer: answer.isAnswer,
+                    hasSelected: false,
+                    prefix: answer.prefix,
+                  };
+                }),
+              };
+            });
+
+          // console.log("realQuestionList", _this.realQuestionList);
+          _this.clearAndStartTimer();
+          this.logicType = 4;
+        },
+
+        clickKey: function (item) {
+          if (this.loading) return;
+          if (typeof item === "number") {
+            this.codeList.push(item);
+            if (this.codeList.length == 6) {
+              this.checkCode();
+            }
+          } else if (item == "清除") {
+            this.codeList.pop();
+          } else if ((item = "index")) {
+            this.returnToLogicType1();
+          }
+        },
+
+        checkCode: function (code) {
+          var _this = this;
+          this.loading = true;
+          $.get(
+            "https://order.api.troncell.com/api/services/app/SensingTicket/UseTicketByTicketNo",
+            {
+              ticketNo: code ? code : this.codeList.join(""),
+              securityKey: SecurityKey,
+              subKey: _this.subKey,
+            },
+            function (result, status) {
+              _this.loading = false;
+              if (result.success) {
+                // console.log("resultaaaaaaaaaaaa", result);
+                if (result.result.success) {
+                  // playAudio("surprise");
+                  // console.log("result.result", result.result);
+                  mSensingDevice.doDropCargo(result.result.outerId);
+                  // _this.showMsg = result.result.outerId;
+                } else {
+                  _this.wrongCode = true;
+                  setTimeout(function () {
+                    _this.wrongCode = false;
+                  }, 2000);
+                  _this.codeList = [];
+                }
+                // console.log(result.result.errorMessage);
+              }
+            }
+          );
+        },
+
+        GetCargoRoads: function () {
+          var _this = this;
+          $.get(
+            "https://smartdevice.api.troncell.com/api/services/app/SensingDevice/GetCargoRoads",
+            {
+              Subkey: _this.subKey,
+              MaxResultCount: 999,
+              SkipCount: 0,
+            },
+            function (result, status) {
+              console.log("results", result);
+              if (result.success) {
+                var cargoList = result.result.items;
+                console.log("货道列表", cargoList);
+                if (
+                  result.result.items.every(function (item) {
+                    return item.cargoThings[0].stock == 0;
+                  })
+                ) {
+                  _this.showMsg = "缺货中,请联系工作人员补货";
+                }
+              }
+            }
+          );
+        },
+      },
+    });
+
+    function kindId(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      console.log(name, r);
+      if (r != null) {
+        return decodeURI(r[2]);
+      } else {
+        return false;
+      }
+    }
+
+    function htmlCallback() {
+      // app.returnToLogicType1();
+      // app.showMsg = "领取成功";
+
+      // setTimeout(function () {
+      //   app.showMsg = null;
+      // }, 3000)
+
+      app.logicType = 4;
+      app.clearAndStartTimer(20);
+    }
+  </script>
+</html>

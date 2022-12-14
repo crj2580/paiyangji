@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>取货码</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="/js/troncell_wx.js"></script>
+  <script src="/js/qrcodejs/qrcode.min.js" type="text/javascript"></script>
+
+  <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+</head>
+<style>
+  img {
+    pointer-events: none;
+  }
+
+  #app {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+  }
+
+  .container {
+    height: 100vh;
+    background: url(./img/container.png);
+    background-size: 100% 100%;
+    position: relative;
+  }
+
+  .wrapper {
+    position: fixed;
+    width: 90%;
+    left: 5%;
+    bottom: 50%;
+    transform: translateY(55%);
+  }
+
+  .userImage {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 11vw;
+    height: 11vw;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .title {
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    transform: translateX(-50%);
+    width: 40%;
+  }
+
+  .line-wrapper {
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    top: 37%;
+  }
+
+  .code {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 1vw;
+    color: #94673d;
+    font-size: 8vw;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  #qrcode {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    top: 36%;
+  }
+
+  #qrcode img {
+    padding: 1vw !important;
+    border: 1vw solid #ffc889 !important;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div class="basicLoading" v-show="loading">
+      <img src="/img/loading.gif">
+    </div>
+    <div v-show="showMsg" class="basicMsg">
+      <div style="padding:6vw;font-size:3.5vw;">
+        {{showMsg}}
+      </div>
+    </div>
+    <div class="container">
+      <img style="width: 100%; position: fixed; left: 0; top: 5%;" src="./img/title.png">
+
+
+      <div class="wrapper">
+        <img src="./img/wrapper_bg.png" style="width: 100%">
+
+        <img class="userImage" :src="headUserImage">
+
+        <img class="title" v-if="!codeFlag" src="./img/shuzi.png">
+        <img class="title" style="width: 55%;" v-if="codeFlag" src="./img/tupian.png">
+
+        <div class="line-wrapper" v-if="!codeFlag">
+          <img style="width: 100%;" src="./img/line.png">
+          <div class="code">
+            <div v-for="no of ticketNo">{{no}}</div>
+          </div>
+
+        </div>
+
+        <div id="qrcode" v-show="codeFlag">
+        </div>
+
+        <img v-if="!codeFlag" src="./img/light.png" style="position: absolute;bottom: 32%;
+        left: 43%;
+        width: 14%;">
+
+      </div>
+
+      <div @click="handleChange" style="position: absolute; bottom: 1%; width: 100%; text-align: center;">
+        <img v-if="codeFlag" style="width: 50%;" src="./img/number.png">
+        <img v-else style="width: 50%;" src="./img/erweima.png">
+      </div>
+    </div>
+  </div>
+
+</body>
+<script>
+  document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+  }, { passive: false });
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      codeFlag: 0, // 0 是数字 1 是二维码
+      ticketNo: "",
+      qrcodeImg: '',
+      headUserImage: '',
+      loading: false,
+      showMsg: null,
+      beakerIndex: null
+    },
+    mounted: function () {
+      this.actionId = kindId('actionId');
+      if (this.actionId) {
+        this.ActionDataById();
+      } else if (kindId("memberTicketId")) {//点击模板消息查看历史记录
+        $.get('https://o.api.troncell.com/api/services/app/SensingTicket/GetTakedTicketByMemberIdAndTicketId', {
+          memberTicketId: kindId("memberTicketId")
+        }, (result) => {
+          console.log(result);
+          // this.ticketNo = result.result.ticketInfo.name + result.result.ticketNo;
+          this.ticketNo = result.result.ticketNo;
+          if (result.result.used) {
+            this.showMsg = "取货码已核销"
+          }
+          //拿到ticket信息 拼接为8位完整ticketNo
+          $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+            actionId: result.result.actionId
+          }, (result2) => {
+            this.headUserImage = result2.result.snsUserInfo.headimgurl;
+            // setWX(result2, ['hideOptionMenu'])
+          })
+        })
+      }
+    },
+    methods: {
+      ActionDataById: function () {
+        this.loading = true;
+        var _this = this;
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          actionId: _this.actionId
+        }, function (result) {
+          _this.openId = result.result.snsUserInfo.openid;
+          _this.securityKey = result.result.deviceActivityGame.securityKey;
+          _this.headUserImage = result.result.snsUserInfo.headimgurl;
+          _this.beakerIndex = result.result.extensionData;
+          // setWX(result, ['hideOptionMenu'])
+          _this.loading = false;
+          _this.GetAwardsByUserAndAction();
+        })
+      },
+      handleChange: function () {
+        this.codeFlag = !this.codeFlag;
+        if (this.codeFlag) {
+          this.$nextTick(this.makeQrcode)
+        }
+      },
+      GetAwardsByUserAndAction: function () {
+        var _this = this;
+        _this.loading = true;
+        $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction', {
+          OpenId: _this.openId,
+          actionId: _this.actionId,
+          QrType: 'AfterGame',
+          SecurityKey: _this.securityKey
+        }, function (result) {
+          _this.loading = false;
+          if (result.result.canNextAward) {
+            _this.DoLotteryAwardByAction();
+          } else {
+            _this.showMsg = "您已领取过取货码,请勿重复领取";
+            // result.result.awards
+          }
+        })
+      },
+      DoLotteryAwardByAction: function () {
+        var _this = this;
+        _this.loading = true;
+
+
+        $.ajax({
+          type: "POST",
+          url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            "isNeedSendNotify": false,
+            "score": _this.beakerIndex,
+            "actionId": _this.actionId,
+            "securityKey": _this.securityKey,
+          }),
+          success: function (message) {
+            // _this.ConfirmUserAwardById(message.result.id);//todo 看是否由营业员核销
+            var ticketId = message.result.award.couponUrl.split("ticketId=")[1];
+            $.ajax({
+              type: "POST",
+              url: "https://o.api.troncell.com/api/services/app/SensingTicket/TakeTicketForActivity_Jingmei",
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify({
+                "ticket": ticketId,
+                "actionId": _this.actionId,
+                "securityKey": _this.securityKey,
+                "sendMessage": true
+              }),
+              success: function (message) {
+                _this.loading = false;
+                _this.ticketNo = message.result.ticketNo;
+                // _this.showMsg = "全部回答正确，请至大屏输入取货码: " + message.result.ticketNo + " 领取礼品";
+              }
+            })
+
+          }
+        })
+      },
+      ConfirmUserAwardById: function (userAwardId) {
+        var _this = this;
+        $.ajax({
+          type: "POST",
+          url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            userAwardId: userAwardId,
+            SecurityKey: _this.securityKey
+          }),
+          success: function (message) { }
+        })
+      },
+      makeQrcode: function () {
+        var w = window.innerWidth * 0.3;
+        console.log(w);
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+          width: w,
+          height: w,
+        })
+
+        qrcode.clear();
+        qrcode.makeCode(this.ticketNo);
+      }
+
+    },
+  })
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    console.log(name, r);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+</script>
+
+</html>

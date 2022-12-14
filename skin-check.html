@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>皮肤检测</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+
+</head>
+<style>
+  .head {
+    position: relative;
+    display: flex;
+    text-align: center;
+  }
+
+  .head>div {
+    width: 33.3%;
+    position: relative;
+    z-index: 2;
+    margin-top: 12vw;
+  }
+
+  .head>div b {
+    font-size: 5vw;
+    color: #fff;
+  }
+
+  .head>div span {
+    font-size: 3.6vw;
+    color: rgba(255, 255, 255, 0.7);
+    display: block;
+    margin-bottom: 4vw;
+  }
+
+  .head>div span.nickName {
+    margin-top: 1.5vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .neck {
+    border-radius: 5vw;
+    box-shadow: 0px 0px 5vw 0px rgba(177, 21, 61, 0.08);
+    position: absolute;
+    left: 7vw;
+    top: 32vw;
+    width: 86vw;
+    height: 20vw;
+    z-index: 5;
+    background: #fff;
+    display: flex;
+    text-align: center;
+  }
+
+  .neck>div {
+    width: 50%;
+  }
+
+  .neck>div.line {
+    position: absolute;
+    width: 1px;
+    height: 30%;
+    left: 50%;
+    top: 35%;
+    background: #ccc;
+  }
+
+  .neck>div>b {
+    display: block;
+    margin-top: 2.5vw;
+    font-size: 4.8vw;
+  }
+
+  .neck>div>div {
+    line-height: 8vw;
+    font-size: 4vw;
+    opacity: 0.8;
+  }
+
+  .main {
+    display: flex;
+    position: absolute;
+    width: 90%;
+    top: 55vw;
+    flex-wrap: wrap;
+    padding: 0 5%;
+  }
+
+  .main>div {
+    width: 33.3%;
+    height: 15vw;
+    position: relative;
+    margin: 0.6vw 0;
+  }
+
+  .main>div img {
+    position: absolute;
+    right: 50%;
+    width: 45%;
+    top: 10%;
+  }
+
+  .main>div .text {
+    position: absolute;
+    left: 52%;
+    width: 55%;
+    top: 14%;
+    font-size: 3.8vw;
+    line-height: 5.5vw;
+  }
+
+  .main>div .text .line {
+    position: absolute;
+    width: 55%;
+    background: #ccc;
+    height: 1px;
+    top: 51%;
+    left: 0.8vw;
+  }
+
+  .main>div.nowSelected .text {
+    color: #C93436;
+  }
+
+  .main>div.nowSelected .text .line {
+    background: #C93436;
+  }
+
+  .main>div .text .line+div {
+    font-size: 3.4vw;
+    margin-top: 1vw;
+    color: #000;
+  }
+
+  .detail {
+    position: absolute;
+    width: 100%;
+    top: 90vw;
+    /* background: #000; */
+  }
+
+  .faceContainer {
+    position: relative;
+    font-size: 3.6vw;
+  }
+
+  .faceContainer b {
+    font-size: 4.1vw;
+  }
+
+  .progress .circle {
+    border-radius: 50%;
+    width: 2.8vw;
+    height: 2.8vw;
+    background: #E4FDFF;
+    border: 1px solid #D1D0D0;
+    position: relative;
+  }
+
+  .progress .circle span {
+    position: absolute;
+    top: 5vw;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    left: 1.5vw;
+  }
+
+  .progress .circle.red {
+    background: #FF5454;
+    border-color: #FF5454;
+  }
+
+  .progress .circle.red span {
+    color: #FF5454;
+  }
+
+  .progress .line {
+    width: 18vw;
+    height: 2px;
+    background: #D1D0D0;
+    margin: 1.5vw 1.8vw 0;
+  }
+
+  .remark {
+    position: relative;
+    margin-top: 10vw;
+    width: 84%;
+    margin-left: 8%;
+    font-size: 3.8vw;
+  }
+
+  .colorList {
+    justify-content: center;
+    width: 80%;
+    margin: 2vw auto 1vw;
+    display: flex;
+  }
+
+  .colorList>div {
+    width: 4.8vw;
+    height: 4.8vw;
+    border-radius: 50%;
+    margin: 1px;
+  }
+
+  .only2Line {
+    text-overflow: -o-ellipsis-lastline;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+</style>
+
+<body>
+  <div id="app">
+
+    <img src="./img/home.png" v-on:click="goCenter()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;">
+
+    <!-- <img src="./img/mine.png" v-on:click="goMine()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;"> -->
+
+
+    <div v-if="loading" style="position:fixed;width:100%;height:100%;top:0;z-index:999;background: rgba(0,0,0,0.3);">
+      <img src="./img/loading.gif" style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+    </div>
+
+
+    <div class="head">
+      <img src="./img/skin/header.png" style="width:100%;position:absolute;">
+      <div style="margin-top:10vw;">
+        <div style="width:10vw;height:10vw;border:0.8vw solid #fff;border-radius:50%;overflow:hidden;margin:0 auto;">
+          <img :src="headImage" style="width:100%;height:100%;">
+        </div>
+        <span class="nickName">{{nickName}}</span>
+      </div>
+      <div>
+        <span>当前肤质状态</span>
+        <b>{{Data.PfType}}</b>
+      </div>
+      <div>
+        <span>综合得分</span>
+        <b>{{Data.TotalScore}}</b>
+      </div>
+    </div>
+    <div class="neck">
+      <div>
+        <b>{{Data.T}}</b>
+        <div>T区综合评价</div>
+      </div>
+      <div class="line"></div>
+      <div>
+        <b>{{Data.U}}</b>
+        <div>U区综合评价</div>
+      </div>
+    </div>
+
+    <div class="main" v-if="Data.myList">
+      <div v-on:click="changeSelected(1)" :class="nowSelected==1?'nowSelected':''">
+        <img v-if="nowSelected!=1" src="./img/skin/1-0.png">
+        <img v-if="nowSelected==1" src="./img/skin/1-1.png">
+        <div class="text">
+          <div>肤质</div>
+          <div>分布</div>
+        </div>
+      </div>
+      <div v-on:click="changeSelected(2,3)" :class="nowSelected==2?'nowSelected':''">
+        <img v-if="nowSelected!=2" src="./img/skin/2-0.png">
+        <img v-if="nowSelected==2" src="./img/skin/2-1.png">
+        <div class="text">
+          <div>{{Data.myList[3].LevelAbout}}</div>
+          <div class="line"></div>
+          <div>{{Data.myList[3].DimensionDesc}}</div>
+        </div>
+      </div>
+      <div v-on:click="changeSelected(3,2)" :class="nowSelected==3?'nowSelected':''">
+        <img v-if="nowSelected!=3" src="./img/skin/3-0.png">
+        <img v-if="nowSelected==3" src="./img/skin/3-1.png">
+        <div class="text">
+          <div>{{Data.myList[2].LevelAbout}}</div>
+          <div class="line"></div>
+          <div>{{Data.myList[2].DimensionDesc}}</div>
+        </div>
+      </div>
+      <div v-on:click="changeSelected(4,1)" :class="nowSelected==4?'nowSelected':''">
+        <img v-if="nowSelected!=4" src="./img/skin/4-0.png">
+        <img v-if="nowSelected==4" src="./img/skin/4-1.png">
+        <div class="text">
+          <div>{{Data.myList[1].LevelAbout}}</div>
+          <div class="line"></div>
+          <div>{{Data.myList[1].DimensionDesc}}</div>
+        </div>
+      </div>
+      <div v-on:click="changeSelected(5,5)" :class="nowSelected==5?'nowSelected':''">
+        <img v-if="nowSelected!=5" src="./img/skin/5-0.png">
+        <img v-if="nowSelected==5" src="./img/skin/5-1.png">
+        <div class="text">
+          <div>{{Data.myList[5].LevelAbout}}</div>
+          <div class="line"></div>
+          <div>{{Data.myList[5].DimensionDesc}}</div>
+        </div>
+      </div>
+      <div v-on:click="changeSelected(6)" :class="nowSelected==6?'nowSelected':''">
+        <img v-if="nowSelected!=6" src="./img/skin/6-0.png">
+        <img v-if="nowSelected==6" src="./img/skin/6-1.png">
+        <div class="text">
+          <div>商品</div>
+          <div>推荐</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="detail">
+      <!-- 1 -->
+      <div class="faceContainer" v-if="nowSelected==1">
+        <img :src="'./img/skin/face-'+Data.Gender+'.png'" style="width:50%;margin-left:25%;">
+        <img src="./img/skin/arrow.png" style="position:absolute;width:60%;left:21%;top:14vw;">
+        <div style="position:absolute;top:11vw;right:80vw;text-align: right;">
+          <div>额头</div>
+          <div><b>{{Data.newFaceObj['额头']}}</b></div>
+        </div>
+        <div style="position:absolute;top:17vw;left:79.5vw;text-align: left;">
+          <div>鼻子</div>
+          <div><b>{{Data.newFaceObj['鼻区']}}</b></div>
+        </div>
+        <div style="position:absolute;top:41vw;right:80vw;text-align: right;">
+          <div>左脸颊</div>
+          <div><b>{{Data.newFaceObj['左脸颊']}}</b></div>
+        </div>
+        <div style="position:absolute;top:36vw;left:81.5vw;text-align: left;">
+          <div>右脸颊</div>
+          <div><b>{{Data.newFaceObj['右脸颊']}}</b></div>
+        </div>
+        <div style="position:absolute;top:52vw;left:81vw;text-align: left;">
+          <div>下巴</div>
+          <div><b>{{Data.newFaceObj['下巴']}}</b></div>
+        </div>
+      </div>
+
+      <!-- 2~5 -->
+      <div class="progress" v-if="nowSelected>1&&nowSelected<6" style="width:76%;margin:0 auto;display:flex;position: relative;">
+        <div class="circle" :class="nowAbout==level[nowSelected][0]?'red':''">
+          <span>{{level[nowSelected][0]}}</span>
+        </div>
+        <div class="line"></div>
+        <div class="circle" :class="nowAbout==level[nowSelected][1]?'red':''">
+          <span>{{level[nowSelected][1]}}</span>
+        </div>
+        <div class="line"></div>
+        <div class="circle" :class="nowAbout==level[nowSelected][2]?'red':''">
+          <span>{{level[nowSelected][2]}}</span>
+        </div>
+        <div class="line"></div>
+        <div class="circle" :class="nowAbout==level[nowSelected][3]?'red':''">
+          <span>{{level[nowSelected][3]}}</span>
+        </div>
+      </div>
+      <div class="remark" v-if="nowSelected>1&&nowSelected<6">
+        {{remark}}
+      </div>
+
+      <!-- 6 -->
+      <div v-if="nowSelected==6">
+        <div style="display: flex;">
+          <div style="width:40%;display: flex;justify-content: center;">
+            <img src="./img/skin/fuse.png" style="width:8vw;height:8vw;margin:2vw 1vw 1vw;">
+            <div>
+              <div style="font-size:4.6vw;">{{Data.SkinColor}}号</div>
+              <div style="font-size:3.6vw;">肤色</div>
+            </div>
+          </div>
+          <div style="width:60%;display: flex;justify-content: center;">
+            <div style="display:flex;margin-right:10vw;">
+              <img src="./img/skin/left.png" style="width:7vw;height:9vw;margin:1vw;">
+              <div>
+                <div style="font-size:4.6vw;">{{Data.FirstColor}}号</div>
+                <div style="font-size:3.6vw;">左脸</div>
+              </div>
+            </div>
+            <div style="display:flex;">
+              <img src="./img/skin/right.png" style="width:7vw;height:9vw;margin:1vw;">
+              <div>
+                <div style="font-size:4.6vw;">{{Data.SecondColor}}号</div>
+                <div style="font-size:3.6vw;">右脸</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="colorList">
+          <div v-for="(item,index) of Data.Colors" :style="{'background':'#'+item}"></div>
+        </div>
+        <div style="text-align:center;font-size:4vw;color: #aaa;">此色号接近于{{Data.NearColor}}</div>
+
+        <div style="display:flex;margin-top:5vw;">
+          <div v-for="(item,index) of recommends" v-on:click="goRecommend(item.detailUrl)" style="display:flex;width:33.3%;">
+            <div style="width:50%;">
+              <img :src="item.picUrl" style="width:100%;max-height:25vw;">
+            </div>
+
+
+
+            <div style="width:50%;">
+              <div class="only2Line">{{item.title}}</div>
+              <div style="height:2px;background:#B51321;width:50%;margin:2vw 0 1vw;"></div>
+              <div>{{item.price}}</div>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+    <img v-on:click="goTroncell()" src="./img/troncell.png" style="position:fixed;bottom:0;width:100%;z-index:5;">
+
+  </div>
+</body>
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      Data: false,
+      loading: true,
+      nickName: '',
+      headImage: '',
+      // nowSelected: 1,
+      nowSelected: 1,
+      level: [null, null,
+        ['很干燥', '较干燥', '轻微干燥', '不干燥'],
+        ['重度敏感', '中度敏感', '轻度敏感', '不敏感'],
+        ['粗大', '明显', '较好', '细腻'],
+        // ['衰老肌', '渐衰肌', '成熟肌', '年轻肌'], 
+        ['很松弛', '较松弛', '一般', '紧致'],
+        null],
+      nowAbout: '',
+      remark: '',
+      recommends: [],
+      Flows: {}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      changeSelected: function (index, listNumber) {
+        this.nowSelected = index;
+        if (listNumber) {
+          this.nowAbout = this.Data.myList[listNumber].LevelAbout;
+          this.remark = this.Data.myList[listNumber].Remark;
+        }
+      },
+      goRecommend: function (url) {
+        // window.location.href = url;
+      },
+      goMine: function () {
+        window.location.href = "./annual-mine.html?actionId=" + this.actionId
+      },
+      goCenter: function () {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId
+      },
+      goTroncell: function () {
+        window.location.href = "http://www.troncell.com";
+      }
+    },
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': this.actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.Flows = setFlow(result)
+          setWX(result, ['hideOptionMenu'])
+
+          app.loading = false;
+          console.log(result.result, 'ActionDataById')
+          app.nickName = result.result.snsUserInfo.nickname;
+          app.headImage = result.result.snsUserInfo.headimgurl;
+
+          var extensionData = JSON.parse(JSON.parse(result.result.extensionData))
+          console.log(extensionData);
+
+          var DistinguishResultList = extensionData.DistinguishResultList;
+          var myList = [];
+          myList.length = 5;
+          for (var i = 0; i < DistinguishResultList.length; i++) {
+            myList[DistinguishResultList[i].Dimension] = DistinguishResultList[i]
+          }
+          extensionData.myList = myList;
+          var newFaceObj = {};
+          for (var i = 0; i < extensionData.DistinguishDataList2.length; i++) {
+            newFaceObj[extensionData.DistinguishDataList2[i].Position] = extensionData.DistinguishDataList2[i].Oil.LevelAbout;
+          }
+          console.log(newFaceObj)
+
+          extensionData.newFaceObj = newFaceObj;
+
+          app.Data = extensionData;
+
+
+
+          $.get('https://s.api.troncell.com/api/services/app/SensingDevice/GetRecommends?Subkey=' + result.result.device.subKey, {
+          }, function (result, status) {
+            if (result.success) {
+              console.log(result.result.recommends, 'GetRecommends')
+              app.recommends = result.result.recommends;
+            }
+          })
+
+
+
+
+
+
+          // var param = {
+          //   tenantId: result.result.deviceActivityGame.tenantId,
+          //   openId: result.result.snsUserInfo.openid,
+          //   appid: result.result.deviceActivityGame.activity.weChatAppID,
+          //   url: encodeURI(location.href.split('#')[0])
+          // }
+
+          // $.get('https://g.api.troncell.com/WeixinJSSDK/GetWeChatJsViewModel', param, function (result, status) {
+          //   if (result.success) {
+          //     wx.config({
+          //       debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+          //       appId: result.result.appId, // 必填，公众号的唯一标识
+          //       timestamp: result.result.timestamp, // 必填，生成签名的时间戳
+          //       nonceStr: result.result.nonceStr, // 必填，生成签名的随机串
+          //       signature: result.result.signature,// 必填，签名
+          //       jsApiList: [
+          //         'hideOptionMenu'
+          //       ] // 必填，需要使用的JS接口列表
+          //     });
+          //     wx.ready(function () {
+          //       wx.hideOptionMenu();
+          //     });
+          //   }
+          // })
+
+
+
+        }
+      })
+
+
+    }
+  })
+
+
+
+
+</script>
+
+
+
+</html>

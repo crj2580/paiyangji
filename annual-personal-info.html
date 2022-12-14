@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>个人信息</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+
+</head>
+<style>
+  input {
+    border: none;
+    outline: none;
+  }
+
+  textarea {
+    border: none;
+    outline: none;
+  }
+
+  ::-webkit-input-placeholder {
+    /* WebKit browsers */
+    color: #e2e2e2;
+  }
+
+  .button {
+    border-radius: 10px;
+    background-color: rgb(255, 143, 40);
+    position: absolute;
+    width: 60%;
+    bottom: 5vw;
+    height: 10vw;
+    left: 20%;
+    color: #fff;
+    font-size: 4vw;
+    line-height: 10vw;
+    text-align: center;
+  }
+</style>
+
+<body style="background:#F2F2F2;">
+  <div id="app">
+
+    <img src="./img/loading.gif" v-if="loading"
+      style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+
+    <div v-on:click="chooseHead()"
+      style="height:26vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;">
+      <div style="line-height:26vw;">脸部照片</div>
+      <img :src="headLocalId" style="position:absolute;width:20vw;height:20vw;border-radius: 5vw;top:3vw;right:7vw;">
+      <img src="./img/annual/arrow.png" style="position:absolute;right:2vw;top:10vw;height:5vw;">
+    </div>
+    <div v-on:click="showAddress=true;"
+      style="height:25vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;margin-top:3vw;">
+      <div style="line-height:25vw;">姓名</div>
+      <div style="line-height:25vw;position:absolute;right:5vw;top:0;">{{myAddress.name}}</div>
+    </div>
+    <div v-on:click="showAddress=true;"
+      style="height:25vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;margin-top:3vw;">
+      <div style="line-height:25vw;">手机号</div>
+      <div style="line-height:25vw;position:absolute;right:5vw;top:0;">{{myAddress.phone}}</div>
+    </div>
+    <div v-on:click="showAddress=true;"
+      style="height:25vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;margin-top:3vw;">
+      <div style="line-height:25vw;">收货信息</div>
+      <img src="./img/annual/arrow.png" style="position:absolute;right:2vw;top:10vw;height:5vw;">
+    </div>
+
+    <div v-if="showAddress" v-on:click="showAddress=false;getAddress()"
+      style="background:rgba(0,0,0,0.3);position:fixed;z-index:5;width:100%;height:100%;top:0;"></div>
+    <div v-if="showAddress"
+      style="background:#f8f8f8;position:fixed;z-index:6;width:80%;height:60vh;top:20vh;left:10%;border-radius: 5vw;overflow:hidden;">
+      <div style="text-align:center;padding:5% 0;background:#fff;">
+        <img src="./img/plane/address/title.png" style="width:60%;">
+      </div>
+      <img v-on:click="showAddress=false;getAddress();" src="./img/plane/address/close.png"
+        style="width:8%;position:absolute;top:2vw;right:2vw;">
+      <div style="font-size:4vw;padding:1vw 2vw;border-top: 1vw solid #F2F2F2;background:#fff;">
+        <div style="display:flex;padding:3vw;border-bottom:1px solid #f2f2f2;">
+          <div style="width:30%;">收货人</div>
+          <div style="width:70%;"><input v-bind:readonly="isReadOnly" type="text" v-model="myAddress.name"
+              style="width:100%;" placeholder="请输入收货人姓名"></div>
+        </div>
+        <div style="display:flex;padding:3vw;border-bottom:1px solid #f2f2f2;">
+          <div style="width:30%;">手机号</div>
+          <div style="width:70%;"><input v-bind:readonly="isReadOnly" type="number" v-model="myAddress.phone"
+              style="width:100%;" placeholder="请输入收货人手机号"></div>
+        </div>
+        <div style="display:flex;padding:3vw;border-bottom:1px solid #f2f2f2;">
+          <div style="width:30%;">详细地址</div>
+          <div style="width:70%;">
+            <textarea v-bind:readonly="isReadOnly" v-model="myAddress.address" style="width:100%;height:20vw;"
+              placeholder="请输入街道门牌等信息" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="button"
+        v-if="!isReadOnly&&(myAddress.name&&myAddress.phone&&myAddress.address&&myAddress.phone.length==11)"
+        v-on:click="saveAddress()"><b>保存收货地址</b></div>
+      <div class="button" style="background:#ccc;"
+        v-if="!isReadOnly&&!(myAddress.name&&myAddress.phone&&myAddress.address&&myAddress.phone.length==11)">
+        <b>保存收货地址</b></div>
+      <div class="button" v-if="isReadOnly" v-on:click="isReadOnly=false;"><b>编辑</b></div>
+    </div>
+
+
+    <div v-for="child of children" v-on:click="editChild(child)"
+      style="height:26vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;margin-top:3vw;">
+      <div style="line-height:26vw;">{{child.name}}</div>
+      <img :src="child.imageUrl" style="position:absolute;width:20vw;height:20vw;border-radius: 5vw;top:3vw;right:7vw;">
+      <img src="./img/annual/arrow.png" style="position:absolute;right:2vw;top:10vw;height:5vw;">
+    </div>
+
+    <div v-if="showChildEdit" v-on:click="showChildEdit=false;getAddress()"
+      style="background:rgba(0,0,0,0.3);position:fixed;z-index:5;width:100%;height:100%;top:0;"></div>
+    <div v-if="showChildEdit"
+      style="background:#f8f8f8;position:fixed;z-index:6;width:80%;padding-bottom:20vw;top:15vh;left:10%;border-radius: 5vw;overflow:hidden;">
+      <div style="text-align:center;padding:5% 0;background:#fff;">
+        <!-- <img src="./img/plane/address/title.png" style="width:60%;"> -->
+        修改儿童信息
+      </div>
+      <img v-on:click="showChildEdit=false;getAddress();" src="./img/plane/address/close.png"
+        style="width:8%;position:absolute;top:2vw;right:2vw;">
+      <div v-on:click="chooseChildHead(child)"
+        style="height:26vw;background:#fff;position:relative;font-size:5vw;padding-left:6vw;margin-top:3vw;">
+        <img :src="nowChild.imageUrl"
+          style="position:absolute;width:20vw;height:20vw;border-radius: 5vw;top:3vw;left:calc(50% - 10vw);">
+      </div>
+      <div style="font-size:4vw;padding:1vw 2vw;border-top: 1vw solid #F2F2F2;background:#fff;">
+        <div style="display:flex;padding:3vw;border-bottom:1px solid #f2f2f2;">
+          <div style="width:30%;">姓名</div>
+          <div style="width:70%;"><input type="text" v-model="nowChild.name" style="width:100%;"></div>
+        </div>
+      </div>
+      <div style="font-size:4vw;padding:1vw 2vw;border-top: 1vw solid #F2F2F2;background:#fff;">
+        <div style="display:flex;padding:3vw;border-bottom:1px solid #f2f2f2;">
+          <div style="width:30%;">关系</div>
+          <div style="width:70%;"><input type="text" v-model="nowChild.type" style="width:100%;"></div>
+        </div>
+      </div>
+      <div v-if="nowChild.name&&nowChild.type" class="button" v-on:click="saveChild"><b>保存</b></div>
+      <div v-else class="button" style="background:#ccc;"><b>保存</b></div>
+    </div>
+
+
+
+    <div v-if="showTip" style="position:fixed;width:100%;height:100%;top:0;z-index:99999;">
+      <div
+        style="max-width:65vw;position:fixed;z-index:999;padding:5vw;background:#000;top:50%;left:50%;color:#fff;transform:translateX(-50%);border-radius: 2vw;">
+        {{showTip}}
+      </div>
+    </div>
+
+  </div>
+</body>
+
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      securityKey: '',
+      actionId: '',
+      openId: '',
+      loading: true,
+      showAddress: false,
+      myAddress: {
+        name: '',
+        phone: '',
+        address: ''
+      },
+      isReadOnly: false,
+      serverId: '',
+      headLocalId: './img/annual/noFace.png',
+      showTip: false,
+      children: [],
+      nowChild: {},
+      showChildEdit: false
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      editChild: function (child) {
+        this.nowChild = Object.assign({}, child);
+        this.showChildEdit = true;
+      },
+      chooseChildHead: function () {
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: function (res) {
+            var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+            if (localIds.length == 1) {
+              app.nowChild.imageUrl = localIds[0];
+              wx.uploadImage({
+                localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
+                isShowProgressTips: 1, // 默认为1，显示进度提示
+                success: function (res) {
+                  app.nowChild.serverId = res.serverId; // 返回图片的服务器端ID
+                }
+              });
+            }
+          }
+        });
+      },
+      chooseHead: function () {
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: function (res) {
+            var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+            if (localIds.length == 1) {
+              app.headLocalId = localIds[0];
+              wx.uploadImage({
+                localId: localIds[0], // 需要上传的图片的本地ID，由chooseImage接口获得
+                isShowProgressTips: 1, // 默认为1，显示进度提示
+                success: function (res) {
+                  app.serverId = res.serverId; // 返回图片的服务器端ID
+                  app.loading = true;
+
+                  $.ajax({
+                    type: "POST",
+                    url: "https://f.api.troncell.com/api/Face/RegisterFace4Wechat",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                      faceImageWeChatMediaId: app.serverId,
+                      openId: app.openId,
+                      snsType: "WeChat",
+                      securityKey: app.securityKey
+                    }),
+                    success: function (message) {
+                      app.loading = false;
+                      if (message.success) {
+                        app.showTip = '照片上传成功';
+                        setTimeout(() => {
+                          app.showTip = false;
+                        }, 2000)
+                      }
+                    },
+                    error: function (a, b, c) {
+                      app.showTip = '照片过大或无法检测到人脸,请重试';
+                      app.loading = false;
+                      setTimeout(() => {
+                        app.showTip = false;
+                      }, 2000)
+                    }
+                  })
+
+                }
+              });
+            }
+          }
+        });
+      },
+      saveChild: function () {
+        $.ajax({
+          type: "POST",
+          url: "https://f.api.troncell.com/api/Face/RegisterRelativeFace4Wechat",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            faceImageWeChatMediaId: app.nowChild.serverId,
+            openId: app.openId,
+            snsType: "WeChat",
+            securityKey: app.securityKey,
+            name: app.nowChild.name,
+            id: app.nowChild.id,
+            type: app.nowChild.type
+          }),
+          success: function (message) {
+            app.loading = false;
+            if (message.success) {
+              console.log('注册成功')
+              app.showChildEdit = false;
+              app.getAddress();
+            }
+          },
+          error: function (a, b, c) {
+            app.showTip = '请选择一张仅含有该儿童大头贴的照片';
+            app.loading = false;
+            setTimeout(() => {
+              app.showTip = false;
+            }, 2000)
+          }
+        })
+      },
+
+      saveAddress: function () {
+        app.loading = true;
+        console.log(app.myAddress.name)
+        $.ajax({
+          type: "POST",
+          url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/AddOrUpdateMyPersonData",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            OpenId: app.openId,
+            SecurityKey: app.securityKey,
+            SnsType: 'WeChat',
+            name: app.myAddress.name,
+            phone: app.myAddress.phone,
+            address: app.myAddress.address
+          }),
+          success: function (message) {
+            console.log(message)
+            if (message.success) {
+              app.loading = false;
+              app.showAddress = false;
+              app.$options.methods.getAddress();
+              app.showTip = '地址保存成功';
+              setTimeout(() => {
+                app.showTip = false;
+              }, 2000)
+            }
+          },
+          error: function (message) {
+
+          }
+        })
+      },
+      getAddress: function () {
+        //收货地址
+        $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyPersonDataInActivity', {
+          OpenId: app.openId,
+          SecurityKey: app.securityKey,
+          SnsType: 'WeChat',
+        }, function (result) {
+          console.log(result.result, '收货地址');
+          if (result.result) {//已经有收货地址
+            app.headLocalId = result.result.faceUrl;
+            app.myAddress.name = result.result.name;
+            app.myAddress.phone = result.result.phone;
+            app.myAddress.address = result.result.address;
+            app.children = result.result.childrens;
+            // app.children = [
+            //   { id: 1, name: "AAA", imageUrl: './img/annual/noFace.png',type:"父子" },
+            //   { id: 2, name: "BBB", imageUrl: './img/annual/noFace.png',type:"父子" },
+            // ]
+            app.isReadOnly = true;
+          } else {
+            app.isReadOnly = false;
+          }
+        })
+      }
+    },
+
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      var actionId = this.actionId;
+
+      //获取游戏信息
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.loading = false;
+          setWX(result, ['hideOptionMenu', 'chooseImage', 'uploadImage'])
+          console.log(result.result.snsUserInfo)
+          app.openId = result.result.snsUserInfo.openid;
+
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+          app.$options.methods.getAddress();
+        }
+      })
+
+
+
+    }
+  })
+
+</script>
+
+
+
+</html>

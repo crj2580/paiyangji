@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <style>
+        canvas {
+            border: 1px solid red;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body style="touch-action: none;">
+
+</body>
+<script>
+
+var prototype_obj = {
+    obj:{a:18}
+};
+function Person(){
+    this.age = 20;
+}
+
+Person.prototype = prototype_obj;
+var p =new Person();
+console.log(p.obj.a);
+p.obj.a = 20;
+console.log(prototype_obj)
+;
+
+
+</script>
+
+</html>

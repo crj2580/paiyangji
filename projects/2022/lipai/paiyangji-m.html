@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="yes" name="apple-touch-fullscreen" />
+    <meta content="telephone=no,email=no" name="format-detection" />
+    <meta
+      name="viewport"
+      id="viewport"
+      content="width=640,user-scalable=0, target-densitydpi=320"
+    />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>答题</title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/js/vue.min.js" type="text/javascript"></script>
+    <script
+      src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"
+      type="text/javascript"
+    ></script>
+    <script src="/js/troncell_wx2.js"></script>
+    <script src="/js/TweenMax.min.js"></script>
+
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+  </head>
+  <style>
+    @font-face {
+      font-family: "youran";
+      src: url(./fonts/youran.ttf);
+    }
+    @font-face {
+      font-family: "cu";
+      src: url(./fonts/PMZDCuShu.ttf);
+    }
+    body {
+      background-color: #2e30c5;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    .container {
+      position: absolute;
+      width: 100%;
+      left: 8%;
+      top: 18%;
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+    }
+
+    .questionClass {
+      display: flex;
+      flex-direction: row;
+      width: 68%;
+      font-size: 4vw;
+      font-family: "normal";
+      color: #fff;
+      margin-left: 10vw;
+    }
+
+    .questionIndex {
+      padding: 0 1vw;
+      height: 3vh;
+      background: orange;
+      margin-right: 2vw;
+    }
+
+    .answerClass {
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 2vh;
+      font-family: "normal";
+    }
+
+    .answer-container {
+      width: 60vw;
+      text-align: left;
+      margin-bottom: 2vw;
+      margin-left: 10vw;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .answer-content {
+      width: 100%;
+      height: 100%;
+      font-size: 3.6vw;
+    }
+
+    .answer-option {
+      color: #fff;
+      font-size: 5vw;
+      margin-right: 2vw;
+    }
+
+    .rightAnswer {
+      position: absolute;
+      top: 59.7vh;
+      left: 19vw;
+      font-size: 4.4vw;
+      color: #036eb7;
+    }
+
+    .footerBtn {
+      position: fixed;
+      z-index: 10000;
+      top: 7%;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .btnBg {
+      position: absolute;
+      font-size: 3.5vw;
+      font-family: "normal";
+      color: #fff;
+      top: 0.4vh;
+      left: 2vw;
+      z-index: 2;
+    }
+
+    .selected {
+      opacity: 0.5;
+    }
+
+    .tigan {
+      color: #251475;
+      text-align: center;
+      position: relative;
+      top: 27.2%;
+      font-weight: 700;
+      font-size: 4.5vw;
+    }
+
+    .questiontitle {
+      box-sizing: border-box;
+      position: absolute;
+      width: 36.4vw;
+      height: 5.1vh;
+      left: 32.3vw;
+      top: 13vh;
+      text-align: center;
+      font-family: "youran";
+      font-size: 7vw;
+      padding-bottom: 50px;
+      color: #ffffff;
+      z-index: 2;
+    }
+
+    .questionwrapper {
+      box-sizing: border-box;
+      padding: 2vh 4vw 2vh 4vw;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      left: 17.5vw;
+      top: 23.9vh;
+      width: 65.46vw;
+      height: 17.5vh;
+      font-family: "youran";
+      line-height: 5.2vw;
+      font-size: 5.2vw;
+      color: #214d9a;
+      z-index: 1;
+    }
+  </style>
+
+  <body>
+    <div id="app">
+      <div class="basicLoading" v-show="loading">
+        <!-- <img src="/img/loading.gif"> -->
+      </div>
+      <div v-show="showMsg" class="basicMsg">
+        <div style="padding: 6vw; font-size: 3.5vw">{{showMsg}}</div>
+      </div>
+
+      <img
+        src="./imgs/bg-above4.png"
+        style="
+          position: absolute;
+          width: 100%;
+          height: 100vh;
+          z-index: 1;
+          pointer-events: none;
+        "
+      />
+
+      <div class="container">
+        <template v-if="realQuestionList.length">
+          <div class="questionClass">
+            <!-- 题号 -->
+            <div class="questionIndex">{{realQuestionIndex+1}}</div>
+            <!-- 题目 -->
+            <div>{{realQuestionList[realQuestionIndex].title}}</div>
+          </div>
+
+          <div class="answerClass">
+            <div
+              v-for="(answer,answerIndex) of realQuestionList[realQuestionIndex].questionItems"
+              @click="selectAnswer(answer,realQuestionIndex)"
+              class="answer-container"
+              :class="answer.hasSelected ? 'selected' : ''"
+            >
+              <img
+                v-if="realQuestionList[realQuestionIndex].hasSelected && !answer.isAnswer "
+                :src="!(realQuestionList[realQuestionIndex].hasSelected && !answer.isAnswer)||'./imgs/wrong_red.gif'"
+                style="width: 10%; position: absolute; z-index: 2"
+              />
+
+              <img
+                v-if="realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer && realQuestionIndex!=4"
+                :src="!(realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer) || './imgs/right_red.gif'"
+                style="width: 10%; position: absolute; z-index: 2"
+              />
+
+              <img
+                v-if="realQuestionIndex == 4 && answer.hasSelected"
+                src="./imgs/right_red.gif"
+                style="width: 10%; position: absolute; z-index: 2"
+              />
+
+              <div class="answer-option">
+                <div v-show="answerIndex==0">A</div>
+                <div v-show="answerIndex==1">B</div>
+                <div v-show="answerIndex==2">C</div>
+                <div v-show="answerIndex==3">D</div>
+              </div>
+
+              <div class="answer-content">{{answer.content}}</div>
+            </div>
+
+            <div class="rightAnswer" style="display: flex; flex-direction: row">
+              正确答案：
+              <div
+                v-for="(prefix,prefixIndex) of realQuestionList[realQuestionIndex].questionItems"
+                v-show="prefix.isAnswer && showRightAnswer"
+              >
+                {{prefix.prefix}}
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- 上一题&下一题按钮 -->
+      <div class="footerBtn">
+        <!-- 返回首页 -->
+        <!-- <div
+          v-show="realQuestionIndex == 0 && errorAnswer == 0"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 10%"
+          @click="returnHome()"
+        >
+          <img src="./imgs/return.png" style="width: 100%" />
+        </div> -->
+        <!-- 重新答题按钮 -->
+        <div
+          v-show="errorAnswer != 0"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 10%"
+          @click="preQuestion"
+        >
+          <div class="btnBg">重新答题</div>
+          <img src="./imgs/btnBg.png" style="width: 100%" />
+        </div>
+        <!-- 下一题按钮 -->
+        <div
+          v-show="realQuestionIndex!=4 && !changeBtn"
+          class="btn"
+          style="width: 18vw; height: 5vh; position: absolute; left: 66%"
+          @click="nextQuestion"
+        >
+          <img src="./imgs/next.png" style="width: 100%" />
+        </div>
+        <!-- 继续答题按钮 -->
+        <div
+          v-show="realQuestionIndex!=4 && errorAnswer != 0 && changeBtn"
+          class="btn"
+          style="width: 18vw; position: absolute; left: 66%"
+          @click="continuer"
+        >
+          <div class="btnBg">继续答题</div>
+          <img src="./imgs/btnBg.png" style="width: 100%" />
+        </div>
+        <!-- 确认按钮 -->
+        <div
+          v-show="realQuestionIndex==4"
+          class="btn"
+          style="width: 18vw; height: 5vh; position: absolute; left: 66%"
+          @click="notarize"
+        >
+          <img src="./imgs/notarize.png" style="width: 100%" />
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    // var subkey = kindId('subkey') || 'fffe14d7ec86496abd13a17092a8b3b5';
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        loading: false,
+        showMsg: "",
+        realQuestionList: [],
+        realQuestionIndex: 0,
+        questionNeedLength: 5,
+        openId: "",
+        actionId: "",
+        securityKey: "",
+        MaxWordLength: 40,
+        subKey: "",
+        errorAnswer: 0,
+        hasSelected: false,
+        showRightAnswer: false,
+        answerList: [],
+        changeBtn: false,
+      },
+      computed: {
+        chooseRight: function () {
+          if (this.realQuestionList[this.realQuestionIndex]) {
+            return this.realQuestionList[
+              this.realQuestionIndex
+            ].questionItems.find(function (item) {
+              return item.isAnswer;
+            }).hasSelected;
+          }
+        },
+        questionTitle: function () {
+          switch (this.realQuestionIndex) {
+            case 0:
+              return "一";
+            case 1:
+              return "二";
+            case 2:
+              return "三";
+            case 3:
+              return "四";
+            case 4:
+              return "五";
+            case 5:
+              return "六";
+            case 6:
+              return "七";
+            case 7:
+              return "八";
+            default:
+              break;
+          }
+        },
+      },
+      mounted: function () {
+        var _this = this;
+        // _this.subKey = subkey;
+        _this.actionId = kindId("actionId");
+        _this.ActionDataById();
+      },
+      methods: {
+        continuer: function () {
+          const _this = this;
+          const realQuestionIndex = this.realQuestionIndex;
+          const questionNeedLength = this.questionNeedLength;
+          this.realQuestionIndex++;
+          _this.showRightAnswer = false;
+          _this.changeBtn = false;
+        },
+        restart: function () {
+          this.loading = false;
+          this.showMsg = "";
+          this.realQuestionList = [];
+          this.realQuestionIndex = 0;
+          this.errorAnswer = 0;
+          this.ActionDataById();
+          // this.GetPapersByTags();
+        },
+        ActionDataById: function () {
+          var _this = this;
+          $.post(
+            "https://activity.api.troncell.com/api/UserAction/ActionDataById",
+            {
+              actionId: _this.actionId,
+            },
+            function (result) {
+              _this.openId = result.result.snsUserInfo.openid;
+              _this.securityKey = result.result.deviceActivityGame.securityKey;
+              // setWX(result, ['hideOptionMenu'])
+              _this.subKey = result.result.device.subKey;
+              _this.GetPapersByTags();
+            }
+          );
+        },
+        GetPapersByTags: function () {
+          var _this = this;
+          _this.loading = true;
+          $.get(
+            "https://activity.api.troncell.com/api/services/app/SengsingDevice/GetPapersByTags",
+            {
+              Tags: "答题",
+              Subkey: _this.subKey,
+            },
+            (result) => {
+              _this.loading = false;
+              console.log(result);
+              _this.realQuestionList = result.result.items[0].questions
+                .filter(function (question) {
+                  return question.questionItems.every(function (answer) {
+                    return answer.content.length <= _this.MaxWordLength;
+                  });
+                })
+                .sort(function () {
+                  return Math.random() - 0.5;
+                })
+                .slice(0, _this.questionNeedLength)
+                .map(function (item) {
+                  return {
+                    id: item.id,
+                    title: item.title,
+                    hasSelected: false,
+                    type: item.type,
+                    questionItems: item.questionItems.map(function (answer) {
+                      return {
+                        content: answer.content,
+                        isAnswer: answer.isAnswer,
+                        hasSelected: false,
+                        prefix: answer.prefix,
+                      };
+                    }),
+                  };
+                });
+              console.log("_this.realQuestionList", _this.realQuestionList);
+
+              // _this.realQuestionList.push({
+              //   id: 99,
+              //   title: "您对海通证券的评价？",
+              //   hasSelected: false,
+              //   questionItems: [
+              //     { content: "非常满意", isAnswer: true, hasSelected: false },
+              //     { content: "满意", isAnswer: true, hasSelected: false },
+              //     { content: "基本满意", isAnswer: true, hasSelected: false },
+              //     { content: "不满意", isAnswer: true, hasSelected: false },
+              //   ],
+              // });
+            }
+          );
+        },
+        GetAwardsByUserAndAction: function () {
+          var _this = this;
+          _this.loading = true;
+          $.get(
+            "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction",
+            {
+              OpenId: _this.openId,
+              actionId: _this.actionId,
+              QrType: "BeforeGame",
+              // SnsType: SnsType,
+              SecurityKey: _this.securityKey,
+            },
+            function (result) {
+              _this.loading = false;
+
+              if (result.result.canNextAward) {
+                _this.DoLotteryAwardByAction();
+              } else {
+                _this.showMsg = "每天仅可参与一次，请把机会留给其他人";
+              }
+            }
+          );
+        },
+        DoLotteryAwardByAction: function () {
+          var _this = this;
+          _this.loading = true;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              isNeedSendNotify: false,
+              score: 0,
+              actionId: _this.actionId,
+              securityKey: _this.securityKey,
+            }),
+            success: function (message) {
+              _this.ConfirmUserAwardById(message.result.id);
+              var ticketId =
+                message.result.award.couponUrl.split("ticketId=")[1];
+              console.log(ticketId);
+              $.ajax({
+                type: "POST",
+                url: "https://order.api.troncell.com/api/services/app/SensingTicket/TakeTicketForActivity",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                  ticket: ticketId,
+                  actionId: _this.actionId,
+                  securityKey: _this.securityKey,
+                  sendMessage: false,
+                }),
+                success: function (message) {
+                  _this.loading = false;
+                  _this.showMsg =
+                    "请至大屏输入取货码: " +
+                    message.result.ticketNo +
+                    " 领取礼品";
+                },
+              });
+            },
+          });
+        },
+        ConfirmUserAwardById: function (userAwardId) {
+          var _this = this;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              userAwardId: userAwardId,
+              SecurityKey: _this.securityKey,
+            }),
+            success: function (message) {},
+          });
+        },
+
+        preQuestion: function () {
+          this.loading = false;
+          this.showMsg = "";
+          this.realQuestionList = [];
+          this.realQuestionIndex = 0;
+          this.errorAnswer = 0;
+          this.showRightAnswer = false;
+          this.changeBtn = false;
+          this.ActionDataById();
+        },
+
+        nextQuestion: function () {
+          const _this = this;
+          _this.showRightAnswer = true;
+          if (_this.answerList.length != 0) {
+            _this.validateAnswer();
+            _this.answerList = [];
+          } else {
+            _this.showMsg = "请选择答案";
+            setTimeout(function () {
+              _this.showMsg = "";
+            }, 2000);
+          }
+        },
+
+        notarize: function () {
+          const _this = this;
+          _this.showRightAnswer = true;
+          if (_this.answerList.length != 0) {
+            _this.validateAnswer();
+          } else {
+            _this.showMsg = "请选择答案";
+            setTimeout(function () {
+              _this.showMsg = "";
+            }, 2000);
+          }
+        },
+
+        selectAnswer: function (answer, realQuestionIndex) {
+          console.log("answeranswer", answer);
+          const _this = this;
+          if (_this.realQuestionList[realQuestionIndex].type == "Multiple") {
+            const checkIsSelectedIndex = _this.answerList.findIndex(
+              (item) => item.prefix == answer.prefix
+            );
+
+            if (checkIsSelectedIndex < 0) {
+              answer.hasSelected = true;
+              _this.answerList = [..._this.answerList, answer];
+              console.log("_this.answerListanswerList", _this.answerList);
+            } else if (checkIsSelectedIndex >= 0) {
+              answer.hasSelected = false;
+              _this.answerList.splice(checkIsSelectedIndex, 1);
+            }
+          } else {
+            _this.realQuestionList[realQuestionIndex].questionItems.map(
+              (item) => {
+                item.hasSelected = false;
+              }
+            );
+            answer.hasSelected = true;
+            _this.answerList = [answer];
+          }
+
+          // console.log("_this.answerList", _this.answerList);
+        },
+
+        equalArray: function (arrayA, arrayB) {
+          if (arrayA.length !== arrayB.length) {
+            // console.log(" error", 1);
+            return false;
+          }
+          const results = arrayA.map((eleA) => {
+            return arrayB.some((eleB) => eleA == eleB);
+          });
+          if (results.some((ele) => ele == false)) {
+            // console.log(" error", 3);
+            return false;
+          }
+          return true;
+        },
+
+        validateAnswer: function () {
+          const _this = this;
+          // console.log("realQuestionIndex", _this.realQuestionIndex);
+          const answerList = _this.answerList;
+          const realQuestionList = _this.realQuestionList;
+          const realQuestionIndex = _this.realQuestionIndex;
+          const trueAnswerList = realQuestionList[
+            realQuestionIndex
+          ].questionItems.filter((ele) => ele.isAnswer);
+          const result = _this.equalArray(trueAnswerList, answerList);
+          realQuestionList[realQuestionIndex].hasSelected = true;
+          // console.log("result", result);
+          if (result) {
+            if (realQuestionIndex < 4) {
+              // console.log("progress 1");
+              setTimeout(() => {
+                _this.realQuestionIndex++;
+                _this.showRightAnswer = false;
+              }, 2000);
+            } else if (realQuestionIndex === 4 && _this.errorAnswer < 1) {
+              // console.log("progress 2");
+              _this.GetAwardsByUserAndAction();
+            } else if (realQuestionIndex === 4 && _this.errorAnswer >= 1) {
+              _this.showMsg =
+                "您已经答错" + _this.errorAnswer + "道题了，无法获得奖品";
+            }
+          } else if (!result) {
+            _this.errorAnswer++;
+            if (realQuestionIndex < 4) {
+              // console.log("progress 3");
+              _this.showMsg =
+                "您已经答错" +
+                _this.errorAnswer +
+                "道题了，继续答题将不会获得奖品，是否继续?";
+              _this.answerList = [];
+              _this.changeBtn = true;
+              setTimeout(function () {
+                _this.showMsg = "";
+              }, 1000);
+            } else if (realQuestionIndex === 4) {
+              // console.log("progress 4");
+              _this.showMsg =
+                "您已经答错" + _this.errorAnswer + "道题了，无法获得奖品";
+            }
+          }
+        },
+      },
+    });
+
+    function kindId(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      console.log("window.location", window.location);
+      var r = window.location.search.substr(1).match(reg);
+      console.log(name, r);
+      if (r != null) {
+        return decodeURI(r[2]);
+      } else {
+        return false;
+      }
+    }
+  </script>
+</html>

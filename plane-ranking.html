@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>排行榜</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <script src="./js/troncell_wx.js"></script>
+</head>
+<style>
+  .mine {
+    width: 100%;
+    margin: 15px 0 5px;
+    position: relative;
+    display: flex;
+    text-align: center;
+    color: #2156A2;
+  }
+
+  .list {
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0.14px 3.998px 21px 0px rgba(209, 209, 255, 0.79);
+    margin-left: 7.5%;
+    width: 85%;
+    padding-top: 4vw;
+    color: #2156A2;
+    min-height: 60vh;
+    position: relative;
+  }
+
+  .item {
+    display: flex;
+    font-size: 4.5vw;
+    font-weight: bold;
+    padding: 10px 0;
+    text-align: center;
+    border-bottom: 1px solid #E2E2E2;
+    margin: 0 5%;
+  }
+
+  .relTop {
+    position: relative;
+    top: 6vw;
+  }
+
+  .relTop2 {
+    position: relative;
+    top: 4vw;
+  }
+</style>
+
+<body style="background: url(./img/plane/ranking/bg.png);background-size: 100%;">
+  <div id="app">
+    <img src="./img/home.png" v-if="Flows.activityCenter" v-on:click="goCenter()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;">
+
+    <img src="./img/mine.png" v-if="!Flows.activityCenter" v-on:click="goMine()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;z-index:9;">
+
+    <img v-if="securityKey=='da4e335581084497a9faae269727fa45'" src="./img/plane/rule.png" v-on:click="goRule()" style="position:fixed;width:10vw;top:1vw;right:1vw;z-index:9;">
+    <div class="mine">
+      <div style="width:8%;"></div>
+      <div style="width:25%;padding-top:5vw;font-size:4.5vw;" v-if="userType!='black'">
+        <b v-if="myRank&&myRank<=10" style="color:#E93C2D;font-size:6vw;">{{myRank}}</b>
+        <b v-if="!myRank" style="font-size:5.5vw;color:#74adff;">暂无</b>
+        <br>
+        <b v-if="!myRank||myRank<=10" style="color:#74adff;">我的排行</b>
+        <b v-if="myRank&&myRank>10" style="position:relative;top:-5vw;font-size:4vw;">击败了 {{rankRate}} 的对手</b>
+      </div>
+      <div style="width:25%;padding-top:5vw;font-size:4.5vw;" v-if="userType=='black'">
+        <img src="./img/plane/ranking/emmm.png" style="width:60%;">
+      </div>
+      <div style="width:35%;">
+        <div style="border:1vw solid #2156A2;width:15vw;height:15vw;border-radius:50%;overflow:hidden;margin:0 auto;">
+          <img v-bind:src="avatar" v-if="avatar" style="width:100%;height:100%;">
+        </div>
+        <div v-if="!activityEnd">
+          <div v-if="score!=0" style="color:#FFA200;font-size:3.5vw;"><b>本次游戏得分</b></div>
+          <div v-if="score!=0" style="color:#E93C2D;font-size:5.5vw;"><b>{{score}}分</b></div>
+          <!-- <div v-if="score==0" style="color:#E93C2D;font-size:4vw;"><b>尚未开始游戏哦!</b></div> -->
+        </div>
+        <div v-if="activityEnd">
+          <div v-if="myAward" style="color:#FFA200;font-size:3.5vw;"><b>本次游戏奖品</b></div>
+          <div v-if="myAward" style="color:#E93C2D;font-size:4.2vw;"><b>{{myAward.name}}</b></div>
+          <div v-if="!myAward" style="color:#E93C2D;font-size:4vw;"><b>未能获奖,再接再厉</b></div>
+        </div>
+      </div>
+
+      <div style="width:32%;padding-top:6.5vw;color:#74adff;">
+        <b style="font-size:4vw;">{{nickName}}</b>
+        <div style="font-size:3.5vw;" v-if="highestScore">
+          <b>历史最高</b>
+          <b>{{highestScore}}分</b>
+        </div>
+      </div>
+
+    </div>
+    <div class="list">
+      <img v-if="!activityEnd" src="./img/plane/ranking/title.png" style="width:84%;margin-left:5%;">
+      <img v-if="activityEnd" src="./img/plane/ranking/title-award.png" style="width:84%;margin-left:5%;">
+      <img v-if="!activityEnd&&!score" v-on:click="reStartGame()" src="./img/plane/ranking/start.png" style="position:absolute;width:25%;right:4%;top:4.5vw;z-index: 9;">
+      <img v-if="!activityEnd&&score" v-on:click="reStartGame()" src="./img/plane/ranking/again.png" style="position:absolute;width:25%;right:4%;top:4.5vw;z-index: 9;">
+
+      <div class="item" v-for="(item,index) of rankList" v-if="rankList.length>0">
+        <div v-if="index==0" class="relTop" style="width:10%;font-size:5vw;color:#FFA200;">{{1}}</div>
+        <div v-if="index==1" class="relTop" style="width:10%;font-size:5vw;color:#BDC1C5;">{{2}}</div>
+        <div v-if="index==2" class="relTop" style="width:10%;font-size:5vw;color:#AE5C00;">{{3}}</div>
+        <div v-if="index>2" class="relTop2" style="width:10%;font-size:5vw;">{{index+1}}</div>
+
+        <div style="width:25%;position:relative;">
+          <img v-if="index<=2" v-bind:src="'./img/plane/ranking/con-'+(index+1)+'.png'" style="width:13vw;">
+          <img v-if="index<=2" v-bind:src="item.snsUserInfo.headimgurl" style="position:absolute;width:62%;bottom:12.5%;left:19%;border-radius: 50%;height: 68%;">
+
+          <div v-if="index>2" style="border:3px solid #2156A2;border-radius: 50%;width:12vw;height:12vw;margin:0 auto;">
+            <img v-bind:src="item.snsUserInfo.headimgurl" style="width:100%;height:100%;border-radius: 50%;">
+          </div>
+        </div>
+        <div style="width:35%;position: relative;">
+          <span style="position:absolute;top:50%;width:100%;left:0;transform:translateY(-50%);overflow:hidden;">
+            {{item.snsUserInfo.nickname}}
+          </span>
+        </div>
+        <div v-if="index<=2" class="relTop" style="width:33%">{{item.score}}<span v-if="item.score">分</span></div>
+        <div v-if="index>2" class="relTop2" style="width:33%;">{{item.score}}<span v-if="item.score">分</span></div>
+      </div>
+
+
+
+
+      <div class="item" v-for="(item,index) of lotteryList" v-if="lotteryList.length>0">
+        <div v-if="index==0" class="relTop" style="width:10%;font-size:5vw;color:#FFA200;">{{1}}</div>
+        <div v-if="index==1" class="relTop" style="width:10%;font-size:5vw;color:#BDC1C5;">{{2}}</div>
+        <div v-if="index==2" class="relTop" style="width:10%;font-size:5vw;color:#AE5C00;">{{3}}</div>
+        <div v-if="index>2" class="relTop2" style="width:10%;font-size:5vw;">{{index+1}}</div>
+
+        <div style="width:25%;position:relative;">
+          <img v-if="index<=2" v-bind:src="'./img/plane/ranking/con-'+(index+1)+'.png'" style="width:13vw;">
+          <img v-if="index<=2" v-bind:src="item.snsUserInfo.headimgurl" style="position:absolute;width:62%;bottom:12.5%;left:19%;border-radius: 50%;height: 68%;">
+
+          <div v-if="index>2" style="border:3px solid #2156A2;border-radius: 50%;width:12vw;height:12vw;margin:0 auto;">
+            <img v-bind:src="item.snsUserInfo.headimgurl" style="width:100%;height:100%;border-radius: 50%;">
+          </div>
+        </div>
+        <div style="width:35%;position: relative;text-align:left;">
+          <span style="position:absolute;top:32%;width:100%;left:0;transform:translateY(-50%);overflow:hidden;">
+            {{item.snsUserInfo.nickname}}
+          </span>
+          <span style="position:absolute;top:75%;width:100%;left:0;transform:translateY(-50%);overflow:hidden;color:#FFA200;">
+            {{item.userAction.score}}<span v-if="item.userAction.score">分</span>
+          </span>
+        </div>
+        <div v-if="index<=2" class="relTop" style="width:33%;top:2vw;color:rgb(233, 60, 45);text-align: left;">{{item.award.name}}</div>
+        <div v-if="index>2" class="relTop2" style="width:33%;top:1vw;color:rgb(233, 60, 45);text-align: left;">{{item.award.name}}</div>
+      </div>
+
+
+
+
+    </div>
+
+    <div style="color:#ccc;text-align:center;line-height:30px;height:30px;">
+      <!-- 内部人员不参与排行 -->
+    </div>
+
+
+
+
+    <img src="./img/loading.gif" v-if="loading" style="position:absolute;top:90vw;left:50vw;transform:translateX(-50%);width:10vw;z-index:999;">
+
+
+    <div v-if="showSurprise" style="width:100%;height:100%;background:rgba(0,0,0,0.4);position: fixed;top:0;z-index:10;"></div>
+    <div v-if="showSurprise" style="width:80%;height:80%;background:#fff;position: fixed;top:10%;left:10%;z-index:20;">
+      <img v-on:click="showSurprise=false;" src="./img/plane/close.png" style="position: absolute;top:2vw;right:2vw;z-index:5;width:8vw;">
+
+      <img src="./img/plane/ranking/surprise-bg.png" style="width:100%;height:100%;position:absolute;">
+      <img src="./img/plane/ranking/surprise-title.png" style="width:100%;position:absolute;top:3vw;z-index: 2;">
+      <div style="position:relative;">
+        <img src="./img/plane/ranking/main.png" style="width:100%;margin-top:23vh;width:82%;margin-left:9%;">
+        <div style="position:absolute;width:100%;text-align: center;bottom:6%;font-size: 4vw;color: #2156A2;line-height: 7vw;">
+          <img :src="myAward.awardImagePath" style="width:50%;font-size:4.5vw;">
+          <div>恭喜您</div>
+          <div>获得<span style="color:#E93C2D;">{{myAward.name}}</span></div>
+          <img v-on:click="goMine()" src="./img/plane/ranking/goAddress.png" style="width:60%;font-size:4.5vw;margin-top:2vw;">
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+
+  </div>
+</body>
+
+<script>
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      avatar: '',
+      securityKey: '',
+      actionId: '',
+      openId: '',
+      nickName: '',
+      score: '',
+
+
+      rankList: [],
+
+      highestScore: '',
+      myRank: '',
+      rankRate: '',
+      loading: true,
+      actionShare: {},
+      userType: '',
+
+      activityEnd: false,
+      lotteryList: [],
+      myAward: false,
+      showSurprise: false,
+      Flows: {}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goRule: function () {
+        if (!this.score) {
+          window.location.href = "./plane-start.html?actionId=" + this.actionId;
+        } else {
+          window.location.href = "./plane-start.html";
+        }
+      },
+      goMine() {
+        window.location.href = "./annual-mine.html?actionId=" + this.actionId;
+      },
+      goCenter() {
+        window.location.href = app.Flows.activityCenter + "?actionId=" + this.actionId;
+      },
+      // startGame: function () {
+      //   window.location.href = "https://m.sensingstore.com/airwarriors?actionId=" + this.actionId;
+
+      // },
+      reStartGame: function () {
+        var input = {
+          QrType: 'AfterGame',
+          IsSendWeChatMsg: true,//必须要
+          SecurityKey: app.securityKey,
+          SnsType: "WeChat",
+          IsTransferred: true,
+          Params: "skip=true&noTicket=true",
+          FromType:'mobile'
+
+        }
+
+
+        //生成二维码
+        $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', input, function (result) {
+          if (result.success) {
+            console.log(result.result)
+            window.location.href = result.result.qrCodeUrl
+          }
+        })
+
+      }
+    },
+
+    mounted: function () {
+      this.actionId = this.$options.methods.kindId('actionId');
+      var actionId = this.actionId;
+      this.activityEnd = this.$options.methods.kindId('activityEnd');
+      console.log(this.activityEnd)
+
+      //获取游戏信息
+      $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+        'actionId': actionId
+      }, function (result, status) {
+        if (result.success) {
+          app.Flows = setFlow(result)
+          // setWX(result, undefined, {
+          //   link: '?actionId=' + app.actionId
+          // })
+
+          setWX(result)
+
+
+          document.title = result.result.deviceActivityGame.name + '排行榜';
+
+          app.actionShare = result.result.deviceActivityGame.actionShare;
+          app.avatar = result.result.snsUserInfo.headimgurl;
+          app.nickName = result.result.snsUserInfo.nickname;
+          app.score = result.result.score;//意味着本次已经有分数,再点击应该是再次游戏
+          app.openId = result.result.snsUserInfo.openid;
+          app.securityKey = result.result.deviceActivityGame.securityKey;
+
+
+          if (app.activityEnd) {
+            //1.获奖排名
+            $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetWinUserAwards', {
+              SecurityKey: app.securityKey,
+              Sorting: 'Award.AwardSeq',
+              MaxResultCount: 20,
+              IsGameLevel: true
+            }, function (result) {
+              console.log(result.result.items, 'GetWinUserAwards')
+              app.lotteryList = result.result.items;
+            })
+            app.loading = false;
+            //2.个人得奖
+            $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyAwardsInActivity', {
+              OpenId: app.openId,
+              SecurityKey: app.securityKey,
+              SnsType: 'WeChat',
+              MaxResultCount: 99,
+              SkipCount: 0,
+            }, function (result) {
+
+              console.log(result.result.items, 'GetMyAwardsInActivity')
+              if (result.result.items.length > 0) {
+                app.myAward = result.result.items[0].award;
+                if (!window.localStorage[app.securityKey]) {//storage
+                  app.showSurprise = true;
+                  window.localStorage[app.securityKey] = true;
+                }
+              }
+            })
+          } else {
+            //得分排名
+            $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetRankedUsersWithActionByActivity', {
+              RankColumn: 'Score',
+              SecurityKey: app.securityKey,
+              MaxResultCount: 10,
+              SkipCount: 0,
+              Sorting: 'score DESC',
+              IsGameLevel: true
+            }, function (result) {
+              console.log(result.result.items)
+              app.rankList = result.result.items;
+              app.loading = false;
+            })
+          }
+
+
+
+          //我的记录
+          $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetMyRankInActivity', {
+            OpenId: app.openId,
+            SecurityKey: app.securityKey,
+            SnsType: 'WeChat',
+            RankColumn: 'Score',
+            IsGameLevel: true
+          }, function (result) {
+            console.log(result.result, 'GetMyRankInActivity')
+            app.myRank = result.result.rank;
+            app.rankRate = parseInt(result.result.rankRate * 100) + '%';
+            app.highestScore = result.result.score;
+            app.userType = result.result.userType;
+          })
+
+
+
+
+        }
+      })
+
+    }
+  })
+
+</script>
+
+
+
+</html>

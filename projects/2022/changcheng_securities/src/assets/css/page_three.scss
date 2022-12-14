@@ -1,0 +1,109 @@
+#pagethree{
+  width: 100vw;
+  height: 100vh;
+  .question-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    z-index: 2;
+    left: 275px;
+    top: 634px;
+    width: 530px;
+    height: 226px;
+    font-family: '思源黑体';
+    font-size: 36px;
+    line-height: 60px;
+    background-image: url('../../static//pg3//pg3-question-border.png');
+    background-repeat: no-repeat;
+    background-size: contain;
+    .question{
+      padding: 0 36px 0 42px;
+    };
+  };
+  .answer-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    position: absolute;
+    z-index: 2;
+    top: 886px;
+    left: 289px;
+    width: 490px;
+    height: 594px;
+    .answer{
+      width: 484px;
+      height: 132px;
+      font-size: 30px;
+      color: #424242;
+      font-family: '思源黑体';
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .answer-text{
+        padding-bottom: 22px;
+        padding-left: 50px
+      };
+      .answer-check-gif{
+        width: 75px;
+        height: 75px;
+        pointer-events: none;
+        right: 2vw
+      }
+    };
+    .a0,.a1,.a2,.a3{
+      background-repeat: no-repeat;
+      background-size: contain;
+    };
+    .a0{
+      background-image: url('../../static/pg3/pg3-answer-a.png');
+    };
+    .a1{
+      background-image: url('../../static/pg3/pg3-answer-b.png');
+    };
+    .a2{
+      background-image: url('../../static/pg3/pg3-answer-c.png');
+    };
+    .a3{
+      background-image: url('../../static/pg3/pg3-answer-d.png');
+    };
+  }
+  .continue,.restart{
+    width: 32.1vw;
+    height: 5.58vh;
+  };
+  .continue{
+    bottom: 38vh;
+    left: 12vw;
+  };
+  .restart{
+    bottom: 38vh;
+    right: 12vw;
+  }
+  .restart-over{
+    width: 32.1vw;
+    height: 5.58vh;
+    bottom: 38vh;
+    right: 33vw;
+  }
+  .wrong-modal{
+    box-sizing: border-box;
+    position: absolute;
+    top: 40vh;
+    left: 10vw;
+    width: 80vw;
+    height: 20vh;
+    border-radius: 30px;
+    border: solid 20px rgb(97, 166, 187);
+    background-color: rgb(74, 115, 139);
+    font-size: 50px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    z-index: 2;
+    padding:4vh 2vw;
+  }
+}

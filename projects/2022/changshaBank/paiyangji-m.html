@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="yes" name="apple-touch-fullscreen" />
+    <meta content="telephone=no,email=no" name="format-detection" />
+    <meta
+      name="viewport"
+      id="viewport"
+      content="width=640,user-scalable=0, target-densitydpi=320"
+    />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>答题</title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/js/vue.min.js" type="text/javascript"></script>
+    <script
+      src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"
+      type="text/javascript"
+    ></script>
+    <script src="/js/troncell_wx.js"></script>
+    <script src="/js/TweenMax.min.js"></script>
+
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+  </head>
+  <style>
+    body {
+      background-color: #2e30c5;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+    }
+
+    .container {
+      position: absolute;
+      width: 100vw;
+      height: 97.66vh;
+      top: 2.44vh;
+      /* background-image: url(./img/wrapper.png); */
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    .tigan {
+      color: #251475;
+      text-align: center;
+      position: relative;
+      top: 27.2%;
+      font-weight: 700;
+      font-size: 4.5vw;
+    }
+
+    .selected {
+      filter: grayscale(100%) !important;
+    }
+
+    .textarea {
+      border: 1vw solid #f6ac4e;
+      background-color: #fef8ea;
+      width: 68%;
+      height: 50vw;
+      border-radius: 5vw;
+      padding: 3vw;
+      box-sizing: border-box;
+      font-size: 5vw;
+      left: 16%;
+      position: absolute;
+      outline: none;
+    }
+
+    .bf {
+      font-size: 12px;
+    }
+    .sf {
+      font-size: 16px;
+    }
+  </style>
+
+  <body>
+    <div id="app">
+      <div class="basicLoading" v-show="loading">
+        <img src="/img/loading.gif" />
+      </div>
+      <div v-show="showMsg" class="basicMsg">
+        <div style="padding: 6vw; font-size: 3.5vw">{{showMsg}}</div>
+      </div>
+
+      <img
+        style="position: absolute; z-index: 2; width: 40vw; top: 4.3%; left: 2%"
+        src="./img/paiyangji/logo.png"
+        alt=""
+      />
+
+      <img
+        src="./img/bg-above3.png"
+        style="
+          position: absolute;
+          width: 100%;
+          height: 100vh;
+          z-index: 1;
+          pointer-events: none;
+        "
+      />
+      <div
+        style="
+          background-size: contain;
+          width: 100%;
+          height: 100vh;
+          position: absolute;
+          z-index: 2;
+        "
+      >
+        <img src="./img/frontBg.png" style="width: 100%; height: 100%" alt="" />
+      </div>
+
+      <div class="container">
+        <template v-if="realQuestionList.length">
+          <div
+            class="questionClass"
+            style="
+              box-sizing: border-box;
+              padding: 1vh 4vw 3vh 4vw;
+              position: absolute;
+              display: flex;
+              align-items: center;
+              left: 15.28vw;
+              top: 18.68vh;
+              width: 69.81vw;
+              /* height: 14.43vh; */
+              font-family: 'ziyou';
+              line-height: 4.5vw;
+              font-size: 4.5vw;
+              color: rgba(0, 0, 0, 1);
+              z-index: 1;
+            "
+          >
+            <p style="vertical-align: middle; display: table-cell">
+              {{realQuestionList[realQuestionIndex].title}}
+            </p>
+          </div>
+          <div
+            class="answerClass"
+            style="
+              color: #3a3a3a;
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              position: absolute;
+              width: 100vw;
+              top: 25vh;
+              padding: 0 16vw;
+              box-sizing: border-box;
+              margin-top: 30px;
+            "
+          >
+            <div
+              v-for="(answer,answerIndex) of realQuestionList[realQuestionIndex].questionItems"
+              @click="selectAnswer(answer)"
+              style="
+                width: 130px;
+                height: 30px;
+                line-height: 30px;
+                margin-bottom: 17px;
+                position: relative;
+				text-align:center;
+                z-index: 3;
+              "
+              :class="answer.hasSelected ? 'selected' : ''"
+            >
+              <div
+                :class="realQuestionList[realQuestionIndex].questionItems.length >= 6 ? 'bf' : 'sf' "
+                style="
+                  font-family: 'ziyou';
+                  color: #4c6ea5;
+                  position: absolute;
+                  
+                  text-align: center;
+                  left: 50%;
+				  top: 0;
+				  transform:translateX(-50%);
+                "
+              >
+                {{answer.content}}
+              </div>
+              <img
+                src="./img/answer_white.png"
+                style="width: 100%; height: 100%"
+              />
+              <div
+                :class="realQuestionList[realQuestionIndex].questionItems.length >= 6 ? 'bf' : 'sf' "
+                style="
+                  font-family: 'ziyou';
+                  color: #4c6ea5;
+                  position: absolute;
+                  left: 17%;
+                  width: 9%;
+                  top: 0.2vh;
+                  line-height: 30px;
+                  text-align: center;
+                  
+                "
+              >
+                <span v-show="answerIndex==0">A</span>
+                <span v-show="answerIndex==1">B</span>
+                <span v-show="answerIndex==2">C</span>
+                <span v-show="answerIndex==3">D</span>
+                <span v-show="answerIndex==4">E</span>
+                <span v-show="answerIndex==5">F</span>
+                <span v-show="answerIndex==6">G</span>
+                <span v-show="answerIndex==7">H</span>
+                <span v-show="answerIndex==8">I</span>
+                <span v-show="answerIndex==9">J</span>
+                <span v-show="answerIndex==10">K</span>
+              </div>
+            </div>
+
+            <textarea
+              v-model="realQuestionList[5].answer"
+              class="textarea"
+              v-show="realQuestionIndex==5"
+            ></textarea>
+          </div>
+        </template>
+      </div>
+
+      <div
+        style="
+          position: fixed;
+          z-index: 111;
+          bottom: 3%;
+          width: 100%;
+          display: flex;
+          justify-content: space-around;
+        "
+      >
+        <div
+          v-show="realQuestionIndex > 0 && realQuestionIndex < 5"
+          class="btn"
+          @click="preQuestion"
+          style="width: 150px; height: 20px; position: absolute; bottom: 184px"
+        >
+          <img src="./img/pre.png" style="width: 100%" />
+        </div>
+        <div
+          v-show="realQuestionIndex!=5"
+          class="btn"
+          @click="continuer"
+          style="width: 150px; height: 20px; position: absolute; bottom: 140px"
+        >
+          <img src="./img/next.png" style="width: 100%" />
+        </div>
+
+        <div
+          v-show="realQuestionIndex==5&&!flag"
+          class="btn"
+          style="width: 150px; height: 20px; position: absolute; bottom: 184px"
+          @click="rewrite"
+        >
+          <img src="./img/restart.png" style="width: 100%" />
+        </div>
+        <div
+          v-show="realQuestionIndex==5&&!flag"
+          class="btn"
+          style="width: 150px; height: 20px; position: absolute; bottom: 140px"
+          @click="onComplete"
+        >
+          <img src="./img/complete.png" style="width: 100%" />
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    // var subkey = kindId('subkey') || 'fffe14d7ec86496abd13a17092a8b3b5';
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        loading: false,
+        showMsg: "",
+        realQuestionList: [],
+        realQuestionIndex: 0,
+        questionNeedLength: 5,
+        openId: "",
+        actionId: "",
+        securityKey: "",
+        MaxWordLength: 10,
+        subKey: "",
+        errorAnswer: 0,
+        paperId: "",
+        flag: false,
+      },
+      mounted: function () {
+        var _this = this;
+        _this.actionId = kindId("actionId");
+        _this.ActionDataById();
+      },
+      methods: {
+        rewrite: function () {
+          this.realQuestionList[5].answer = "";
+        },
+        onComplete: function () {
+          this.flag = true;
+          this.postAnswer();
+          this.GetAwardsByUserAndAction();
+        },
+
+        preQuestion: function () {
+          this.realQuestionIndex--;
+        },
+        continuer: function () {
+          this.realQuestionIndex++;
+        },
+
+        ActionDataById: function () {
+          var _this = this;
+          $.post(
+            "https://activity.api.troncell.com/api/UserAction/ActionDataById",
+            {
+              actionId: _this.actionId,
+            },
+            function (result) {
+              _this.openId = result.result.snsUserInfo.openid;
+              _this.securityKey = result.result.deviceActivityGame.securityKey;
+              setWX(result, ["hideOptionMenu"]);
+              _this.subKey = result.result.device.subKey;
+              _this.GetPapersByTags();
+            }
+          );
+        },
+        GetPapersByTags: function () {
+          var _this = this;
+          _this.loading = true;
+          $.get(
+            "https://activity.api.troncell.com/api/services/app/SengsingDevice/GetPapersByTags",
+            {
+              Tags: "答题",
+              Subkey: _this.subKey,
+            },
+            (result) => {
+              _this.loading = false;
+              _this.paperId = result.result.items[0].id;
+              _this.realQuestionList = result.result.items[0].questions
+                .sort((a, b) => a.id - b.id)
+                .filter(function (question) {
+                  return question.questionItems.every(function (answer) {
+                    return answer.content.length <= _this.MaxWordLength;
+                  });
+                });
+            }
+          );
+        },
+        GetAwardsByUserAndAction: function () {
+          var _this = this;
+          _this.loading = true;
+          $.get(
+            "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction",
+            {
+              OpenId: _this.openId,
+              actionId: _this.actionId,
+              QrType: "BeforeGame",
+              // SnsType: SnsType,
+              SecurityKey: _this.securityKey,
+            },
+            function (result) {
+              _this.loading = false;
+
+              if (result.result.canNextAward) {
+                _this.DoLotteryAwardByAction();
+              } else {
+                _this.showMsg = "每天仅可参与一次，请把机会留给其他人";
+              }
+            }
+          );
+        },
+        DoLotteryAwardByAction: function () {
+          var _this = this;
+          _this.loading = true;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/DoLotteryAwardByAction",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              isNeedSendNotify: false,
+              score: 0,
+              actionId: _this.actionId,
+              securityKey: _this.securityKey,
+            }),
+            success: function (message) {
+              _this.ConfirmUserAwardById(message.result.id);
+              var ticketId =
+                message.result.award.couponUrl.split("ticketId=")[1];
+              console.log(ticketId);
+              $.ajax({
+                type: "POST",
+                url: "https://order.api.troncell.com/api/services/app/SensingTicket/TakeTicketForActivity",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                  ticket: ticketId,
+                  actionId: _this.actionId,
+                  securityKey: _this.securityKey,
+                  sendMessage: false,
+                }),
+                success: function (message) {
+                  _this.loading = false;
+                  _this.showMsg =
+                    "请至大屏输入取货码: " +
+                    message.result.ticketNo +
+                    " 领取礼品";
+                },
+              });
+            },
+          });
+        },
+
+        // 答题上传接口
+        postAnswer: function () {
+          var _this = this;
+          // totalQuestionList
+          var answerList = this.realQuestionList.map((item) => {
+            return {
+              questionId: item.id,
+              answer: item.answer,
+              comments: item.comments,
+              questionItemIds: item.questionItems
+                .filter((i) => i.hasSelected)
+                .map((i) => i.id),
+            };
+          });
+          $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "https://activity.api.troncell.com/api/services/app/SengsingDevice/AddUserPaper",
+            data: JSON.stringify({
+              subkey: _this.subKey,
+              paperId: _this.paperId,
+              trainingId: 213,
+              userActionId: _this.actionId,
+              examStartTime: "",
+              examEndTime: "",
+              answeredQuestionCount: 0,
+              correctCount: 0,
+              totalScore: 0,
+              opinion: "",
+              examResult: "NoneOk",
+              paperQuestions: answerList,
+            }),
+            success: function (res) {},
+          });
+        },
+        ConfirmUserAwardById: function (userAwardId) {
+          var _this = this;
+          $.ajax({
+            type: "POST",
+            url: "https://activity.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              userAwardId: userAwardId,
+              SecurityKey: _this.securityKey,
+            }),
+            success: function (message) {},
+          });
+        },
+        selectAnswer: function (answer) {
+          if (this.realQuestionIndex == 1) {
+            answer.hasSelected = !answer.hasSelected;
+            this.$forceUpdate();
+            return;
+          }
+          this.realQuestionList[this.realQuestionIndex].questionItems.forEach(
+            (i) => {
+              i.hasSelected = false;
+            }
+          );
+          answer.hasSelected = !answer.hasSelected;
+          this.$forceUpdate();
+        },
+      },
+    });
+
+    function kindId(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      console.log(name, r);
+      if (r != null) {
+        return decodeURI(r[2]);
+      } else {
+        return 503665;
+      }
+    }
+  </script>
+</html>

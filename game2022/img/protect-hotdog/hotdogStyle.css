@@ -1,0 +1,80 @@
+#app .floor {
+  margin-top: 50px;
+  width: 100vw;
+}
+
+#app .row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+#app .row .item {
+  outline: 1px solid #000;
+  position: relative;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+  flex-grow: 0;
+}
+
+#app .row .item.wall {
+  background-color: red !important;
+}
+
+#app .row .item.start {
+  background-color: blue !important;
+}
+
+#app .row .item.end {
+  background-color: yellow !important;
+}
+
+#app .row .item.elevator {
+  border-radius: 50%;
+  border: 5px solid purple;
+}
+
+#app .row .item.escalator {
+  border-radius: 25%;
+  border: 5px solid pink;
+}
+
+/* #app .row .item.open {
+  background-color: rgba(0, 255, 0, 0.5);
+}
+
+#app .row .item.close {
+  background-color: brown;
+}
+
+#app .row .item.isLastRoute {
+  background: gold;
+} */
+
+#app .row .item .name {
+  text-align: center;
+}
+
+#app .row .item .F {
+  position: absolute;
+  left: 5%;
+  top: 5%;
+}
+
+#app .row .item .G {
+  position: absolute;
+  left: 5%;
+  bottom: 5%;
+}
+
+#app .row .item .H {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+}

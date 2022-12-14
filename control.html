@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>摇杆</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+  <!-- <script src="./js/troncell_wx.js"></script> -->
+  <script src="./js/signalr.min.js" type="text/javascript"></script>
+
+</head>
+<style>
+  body {
+    background: url(./img/control/bg.png);
+    background-size: cover;
+  }
+
+  #targetCointainer {
+    height: 46vw;
+    width: 46vw;
+    background: url(./img/control/target-bg.png);
+    background-size: cover;
+    position: fixed;
+    left: 15vw;
+    top: 20vw;
+    border-radius: 50%;
+  }
+
+  #myTarget {
+    height: 22vw;
+    width: 22vw;
+    background-size: cover;
+    border-radius: 50%;
+    position: absolute;
+    opacity: 0.5;
+  }
+
+  #attack {
+    position: fixed;
+    background: red;
+    width: 16vw;
+    height: 16vw;
+    border-radius: 50%;
+    top: calc(75vh - 8vw);
+    left: 45vw;
+    text-align: center;
+    line-height: 16vw;
+    font-size: 8vw;
+    transform: rotate(90deg)
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div id="targetCointainer">
+      <div id="myTarget" v-on:touchstart="touchStart($event)" v-on:touchmove="touchMove($event)" v-on:touchend="touchEnd($event)"
+        v-bind:style="{left:(targetLeft+'px'),top:(targetTop+'px')}">
+        <img src="./img/control/target.png" style="width:100%;height:100%;opacity:0.9;">
+      </div>
+    </div>
+
+    <!-- <div id="attack" v-on:touchStart="attack($event)">
+      {{attackCount}}
+      {{nowStatus}}
+    </div> -->
+
+    <div v-if="nowStatus!=1" style="position:fixed;width:100%;height:100%;z-index:999;">
+      <img src="./img/loading.gif" style="position:absolute;top:50vh;left:50vw;transform:translate(-50%,-50%);width:10vw;">
+    </div>
+  </div>
+
+
+
+
+</body>
+
+<script>
+
+  //阻止微信下拉刷新
+  document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault()
+  }, { passive: false })
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      targetLeft: 0,
+      targetTop: 0,
+      fromLeft: 0,//touchStart时触点和左上角的距离
+      fromTop: 0,
+      containerR: 0,//容器半径
+      targetR: 0,//摇杆半径
+      attackCount: 0,
+
+      openId: '',
+      nickName: '',
+      actionId: '',
+      nowStatus: 0,//0:Wait 1:AllReady -1:UnConnected
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      touchStart: function (e) {
+        // if (this.nowStatus != 1) { return }
+        $('#myTarget img').prop('src', './img/control/target-active.png');
+        console.log('start', e.changedTouches[0])
+        var touchPosition = {
+          left: e.changedTouches[0].clientX,
+          top: e.changedTouches[0].clientY
+        }
+        console.log(touchPosition);
+
+        this.fromLeft = touchPosition.left - this.targetLeft;
+        this.fromTop = touchPosition.top - this.targetTop;
+      },
+      touchMove: function (e) {
+        // if (this.nowStatus != 1) { return }
+        console.log('move', e.changedTouches[0])
+        var newTouchPosition = {
+          left: e.changedTouches[0].clientX,
+          top: e.changedTouches[0].clientY
+        }
+        console.log(newTouchPosition)
+
+        var targetLeft = newTouchPosition.left - this.fromLeft;
+        var targetTop = newTouchPosition.top - this.fromTop;
+
+        var myTarget = $('#myTarget');
+        //目标摇杆圆心位置
+        var targetCenter = {
+          left: targetLeft + this.targetR,
+          top: targetTop + this.targetR
+        }
+        //两个圆心的相对坐标差
+        var distanceW = targetCenter.left - this.containerR;
+        var distanceH = targetCenter.top - this.containerR;
+
+        var distanceZ = Math.sqrt(Math.pow(distanceW, 2) + Math.pow(distanceH, 2));
+
+        // if (distanceZ > this.containerR - this.targetR) {
+        if (distanceZ > this.containerR) {//已超出范围
+          //计算目标正/余弦
+          var sin = distanceW / distanceZ;
+          var cos = distanceH / distanceZ;
+          console.log(sin, cos);
+          var newDistanceW = sin * this.containerR;
+          var newDistanceH = cos * this.containerR;
+          this.targetLeft = this.containerR - this.targetR + newDistanceW;
+          this.targetTop = this.containerR - this.targetR + newDistanceH;
+        } else {
+          this.targetLeft = targetLeft;
+          this.targetTop = targetTop;
+        }
+
+        var X = (this.targetLeft + this.targetR - this.containerR) / this.containerR;
+        var Y = (this.targetTop + this.targetR - this.containerR) / this.containerR;
+        // console.warn({
+        //   sin: X,
+        //   strength: Math.min(distanceZ / this.containerR, 1),
+        // });
+        // this.signalRequest = { X: X, Y: Math.sqrt(1 - Math.pow(X, 2)) };
+        this.connection.invoke("Move", { X: Y, Y: X });
+        console.warn(X, Y);
+      },
+      touchEnd: function () {
+        $('#myTarget img').prop('src', './img/control/target.png');
+        var targetCointainer = $('#targetCointainer')[0];
+        var myTarget = $('#myTarget')[0];
+        this.targetLeft = (targetCointainer.offsetWidth - myTarget.offsetWidth) / 2;
+        this.targetTop = (targetCointainer.offsetWidth - myTarget.offsetWidth) / 2;
+        // this.signalRequest = { X: 0, Y: 0 };
+
+        this.connection.invoke("Move", { X: 0, Y: 0 });
+
+      },
+      attack: function () {
+        this.attackCount = this.attackCount + 1;
+      },
+      actionDataById: function () {
+        var _this = this;
+        _this.actionId = _this.kindId('actionId');
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          'actionId': _this.actionId
+        }, function (result, status) {
+          if (result.success) {
+            _this.openId = result.result.snsUserInfo.openid;
+            _this.nickName = result.result.snsUserInfo.nickname;
+            // _this.enterRoom();
+            _this.$options.methods.enterRoom.bind(_this)();
+          }
+        })
+      },
+      enterRoom: function () {
+        var _this = this;
+        var connection = new signalR.HubConnectionBuilder().withUrl("https://g.api.troncell.com/game").build();
+        this.connection = connection;
+        connection.start().then(function () {
+          connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName }).then(function (d) {
+            if (d.code == 0) {
+              connection.invoke("Ready");
+              connection.on("OnAllReady", (msg) => {
+                _this.nowStatus = 1;
+              });
+            }
+            else {
+              alert(JSON.stringify(d.msg));
+              _this.nowStatus = 1;
+            }
+          });
+        })
+
+        connection.onclose(function () {
+          _this.nowStatus = -1;
+          reConnection();
+          function reConnection() {
+            connection.start().then(function () {
+              connection.invoke("EnterRoom", _this.actionId, false, { "UUID": _this.openId, "Name": _this.nickName }).then(function (d) {
+                if (d.code == 0) {
+                  _this.nowStatus = 1;
+                }
+                else {
+                  alert(JSON.stringify(d.msg));
+                }
+              });
+            }).catch(function () {
+              setTimeout(function () { reConnection() }, 2000);
+            })
+          }
+        });
+
+        connection.on("OnCloseRoom", (msg) => {//游戏结束 取图
+          window.location.href = './template0.html?screenType=width&actionId=' + _this.actionId;
+        });
+
+      }
+    },
+    mounted: function () {
+      var targetCointainer = $('#targetCointainer')[0];
+      var myTarget = $('#myTarget')[0];
+
+      //初始化,定位到中间
+      this.targetLeft = (targetCointainer.offsetWidth - myTarget.offsetWidth) / 2;
+      this.targetTop = (targetCointainer.offsetWidth - myTarget.offsetWidth) / 2;
+
+      //获取容器和摇杆半径
+      this.containerR = targetCointainer.offsetWidth / 2;
+      this.targetR = myTarget.offsetWidth / 2;
+
+
+
+      this.$options.methods.actionDataById.bind(this)();
+    }
+  })
+
+
+
+
+
+</script>
+
+</html>

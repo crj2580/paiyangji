@@ -1,0 +1,27 @@
+{
+  "name": "ceping",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "start": "vue-cli-service serve"
+  },
+  "dependencies": {
+    "@vue/compat": "^3.2.31",
+    "@vue/compiler-sfc": "^3.2.31",
+    "axios": "^0.26.1",
+    "eruda": "^2.4.1",
+    "gsap": "^3.9.1",
+    "html2canvas": "^1.4.1",
+    "jquery": "^3.6.0",
+    "less": "^4.1.2",
+    "less-loader": "^10.2.0",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.14",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^5.0.4",
+    "@vue/cli-service": "^5.0.4"
+  }
+}

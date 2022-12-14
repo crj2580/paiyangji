@@ -1,0 +1,59 @@
+.avatar {
+  width: 5.5vh;
+  height: 5.5vh;
+  border-radius: 50%;
+  position: absolute;
+  top: 2%;
+  left: 5%;
+  z-index: 20;
+}
+.description {
+  position: absolute;
+  font-size: 4.5vw;
+  color: #DE5A28;
+  top: 2.5vh;
+  left: 10vh;
+  font-weight: bold;
+}
+.like {
+  text-align: center;
+  background: #8c8c8c;
+  color: #fff;
+  height: 4.5vh;
+  position: absolute;
+  top: 2.5%;
+  right: 5%;
+  line-height: 4.5vh;
+  padding: 0 3vw;
+  border-radius: 20%;
+  font-size: 13px;
+}
+.main {
+  margin-top: 9vh;
+  position: relative;
+}
+.statistic {
+  margin-left: 5vw;
+  font-size: 4vw;
+  line-height: 5vw;
+  margin-top: 2vw;
+}
+.statistic span {
+  position: relative;
+  top: -2px;
+}
+.statistic img {
+  width: 4vw;
+  margin-left: 6px;
+}
+.bottom {
+  margin-top: 3vw;
+  text-align: center;
+}
+.bottom .center {
+  background: #eee;
+  display: inline-block;
+  padding: 5px 15vw;
+  font-weight: bold;
+  border-radius: 10px;
+}

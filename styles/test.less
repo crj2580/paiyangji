@@ -1,0 +1,44 @@
+.red(@color, @content, @before, @font: 50px) {
+  color: @color;
+
+  li {
+    font-size: @font;
+
+    // &:before{
+    &@{before} {
+      content: @content
+    }
+  }
+}
+
+.red {
+  background-color: yellow;
+}
+
+#big {
+  color: yellow;
+}
+
+body {
+  opacity: 0.5;
+  .red(red, "hello world", ~":before");
+  #big();
+}
+
+
+@min768: ~"(min-width: 768px)";
+@header: ~"&:header";
+@test: ~".test>li";
+@a:~"50px";
+
+.element {
+  @media @min768 {
+    font-size: 1.2rem;
+  }
+  @{header}{
+    content:"hello world"
+  }
+  @{test}{
+    height:@a;
+  }
+}

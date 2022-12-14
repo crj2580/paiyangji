@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>二维码核销</title>
+  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+
+  <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script> -->
+</head>
+<style>
+  img {
+    pointer-events: none;
+  }
+
+  #app {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+  }
+
+  .container {
+    height: 100vh;
+    background: url(./img/container.png);
+    background-size: 100% 100%;
+    position: relative;
+  }
+
+  .wrapper {
+    position: fixed;
+    width: 90%;
+    left: 5%;
+    bottom: 50%;
+    transform: translateY(55%);
+  }
+
+  .userImage {
+    position: absolute;
+    top: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 11vw;
+    height: 11vw;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div class="basicLoading" v-show="loading">
+      <img src="/img/loading.gif">
+    </div>
+    <div v-show="showMsg" class="basicMsg">
+      <div style="padding:6vw;font-size:3.5vw;">
+        {{showMsg}}
+      </div>
+    </div>
+    <div class="container">
+      <img style="width: 100%; position: fixed; left: 0; top: 5%;" src="./img/title.png">
+
+
+      <div class="wrapper">
+        <img src="./img/wrapper_bg1.png" style="width: 100%">
+
+        <img v-if="headUserImage" class="userImage" :src="headUserImage">
+
+      </div>
+
+
+    </div>
+  </div>
+
+</body>
+<script>
+  document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+  }, { passive: false });
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      ticketNo: "",
+      headUserImage: '',
+      loading: false,
+      showMsg: null,
+      securityKey: null,
+      subKey: null,
+    },
+    mounted: function () {
+      this.actionId = kindId('actionId');
+      this.ticketNo = kindId('ticketNo');
+      this.ActionDataById();
+    },
+    methods: {
+      ActionDataById: function () {
+        this.loading = true;
+        var _this = this;
+        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+          actionId: _this.actionId
+        }, function (result) {
+          _this.openId = result.result.snsUserInfo.openid;
+          _this.securityKey = result.result.deviceActivityGame.securityKey;
+          _this.headUserImage = result.result.snsUserInfo.headimgurl;
+          _this.subKey = result.result.device.subKey;
+          // setWX(result, ['hideOptionMenu'])
+          _this.loading = false;
+          _this.checkCode();
+        })
+      },
+      checkCode: function () {
+        this.loading = true;
+        var _this = this;
+        $.get("https://o.api.troncell.com/api/services/app/SensingTicket/CheckTicketNo?ticketNo=" + this.ticketNo + "&securityKey=" + this.securityKey + "&subkey=" + this.subKey,
+          function (res) {
+            _this.loading = false;
+            if (res.result.success) {
+              this.UseTicket();
+            } else {
+              _this.showMsg = "该专属产品码已核销过,请重新获取新的产品码";
+            }
+          })
+      },
+      UseTicket: function () {
+        this.loading = true;
+        var _this = this;
+        $.get('https://o.api.troncell.com/api/services/app/SensingTicket/UseTicketByTicketNo', {
+          'ticketNo': _this.ticketNo,
+          'securityKey': _this.securityKey,
+          'subKey': _this.subKey
+        }, function (result, status) {
+          _this.loading = false;
+          _this.showMsg = _this.ticketNo + "核销成功";
+        })
+      }
+    },
+  })
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    console.log(name, r);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+</script>
+
+</html>

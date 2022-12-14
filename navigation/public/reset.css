@@ -1,0 +1,269 @@
+/*
+* @Author: Marte
+* @Date:   2018-01-26 10:12:31
+* @Last Modified by:   Marte
+* @Last Modified time: 2018-01-26 10:37:43
+*/
+
+/** 清除内外边距 **/
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, /* structural elements 结构元素 */
+dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
+pre, /* text formatting elements 文本格式元素 */
+form, fieldset, legend, button, input, textarea, /* form elements 表单元素 */
+th, td /* table elements 表格元素 */ {
+  margin: 0;
+  padding: 0;
+}
+
+/** 设置默认字体 **/
+body,
+button, input, select, textarea /* for ie */ {
+  font: 14px/1.5 tahoma, \5b8b\4f53, sans-serif;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 100%;
+  font-weight: normal;
+}
+address,
+cite,
+dfn,
+em,
+var {
+  font-style: normal;
+} /* 将斜体扶正 */
+code,
+kbd,
+pre,
+samp {
+  font-family: courier new, courier, monospace;
+} /* 统一等宽字体 */
+small {
+  font-size: 12px;
+} /* 小于 12px 的中文很难阅读, 让 small 正常化 */
+
+/** 重置列表元素 **/
+ul,
+ol,
+li {
+  list-style: none;
+}
+
+/** 重置文本格式元素 **/
+a {
+  text-decoration: none;
+  outline: none;
+}
+a:focus {
+  outline: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+sup {
+  vertical-align: text-top;
+} /* 重置, 减少对行高的影响 */
+sub {
+  vertical-align: text-bottom;
+}
+
+/** 重置表单元素 **/
+legend {
+  color: #000;
+} /* for ie6 */
+fieldset,
+img {
+  border: 0;
+} /* img 搭车：让链接里的 img 无边框 */
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+} /* 使得表单元素在 ie 下能继承字体大小 */
+/* 注：optgroup 无法扶正 */
+
+/** 重置表格元素 **/
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 重置 HTML5 元素 */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+mark {
+  background: #ff0;
+}
+/*input的自带样式*/
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  outline: none;
+}
+input:focus {
+  outline: none;
+}
+
+/* loading Gif */
+.basicLoading {
+  z-index: 9999;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1);
+  top: 0;
+  left: 0;
+}
+.basicLoading > img {
+  width: 12%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.basicLoading > img + div {
+  position: absolute;
+  top: 50%;
+  margin-top: 9vw;
+  width: 100%;
+  text-align: center;
+  color: #eee;
+}
+
+/* 彩虹loading */
+.rainbowLoading > div {
+  position: absolute;
+  width: 15vw;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rainbowLoading > div:before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+}
+
+.rainbowLoading > div > svg {
+  animation: rainbowRotate 2s linear infinite;
+  height: 100%;
+  transform-origin: center center;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.rainbowLoading > div > svg > circle {
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  animation: rainbowDash 1.5s ease-in-out infinite,
+    rainbowColor 6s ease-in-out infinite;
+  stroke-linecap: round;
+}
+
+@keyframes rainbowRotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rainbowDash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}
+
+@keyframes rainbowColor {
+  100%,
+  0% {
+    stroke: #d62d20;
+  }
+  40% {
+    stroke: #0057e7;
+  }
+  66% {
+    stroke: #008744;
+  }
+  80%,
+  90% {
+    stroke: #ffa700;
+  }
+}
+
+.rainbowLoading {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: #fff;
+}
+
+/* <div v-if="loading" class="rainbowLoading">
+  <div>
+    <svg viewBox="25 25 50 50">
+      <circle cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
+    </svg>
+  </div>
+</div> */
+
+.basicMsg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+.basicMsg > div {
+  position: absolute;
+  width: 60vw;
+  background: rgba(0, 0, 0, 0.7);
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 5vw;
+  color: #fff;
+  padding: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}

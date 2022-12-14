@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>手撸vue</title>
+</head>
+
+<body>
+  <div id="app">
+    name:<div>{{name}}</div>
+    name:<div v-text="name"></div>
+    obj.age:<div>{{obj.age}}</div>
+    obj.age+obj.age2:<div>{{obj.age+obj.age2}}</div>
+    html:<div v-html="html"></div>
+    text:<input type="text" v-model="text">
+  </div>
+
+</body>
+<script>
+  //每一个依赖都对应一个Watcher,确保了每个依赖在数据改变时都能得到更新,用于实现数据响应化
+  class Watcher {
+    callback
+    constructor(vm, exp, callback) {
+      this.callback = callback;
+      Dep.target = this; //把Watcher赋值给Dep.target
+      new Function("vm", `with(vm){return ${exp}}`)(vm);//触发get
+      Dep.target = null;
+    }
+    update() { //dep.notify()通知更新最终入口
+      //内存 --> 视图，也是双向数据绑定中的另一方向
+      this.callback(); //更新显示
+    }
+    //收集依赖
+    addDep(dep) {//此处省略了判断是否已被收集 如已收集则不重复添加
+      dep.depWatchers.push(this);
+    }
+  }
+
+  class Vue {
+    constructor(options) {
+      this.$el = document.querySelector(options.el);
+      if (!this.checkDom(this.$el)) throw "不存在该元素"
+
+      this.$options = options;
+      this.$data = options.data;
+      //劫持数据让vm.key代理vm.$data.key
+      this.hijackData(this.$data);
+
+      //实现Observer观察
+      this.hijackData2(this.$data);
+      //编译模版
+      this.compile(this.$el);
+
+    }
+    hijackData(data) {
+      Object.keys(data).forEach(key => {
+        this.proxyData(key);
+      });
+    }
+    //对data中所有属性深层实现一个观察者
+    hijackData2(data) {
+      if (!data || typeof data !== 'object') return
+      Object.keys(data).forEach(key => {
+        this.hijackData2(data[key]);
+        Observer(data, key);
+      });
+    }
+    proxyData(key) {//数据代理
+      Object.defineProperty(this, key, {
+        enumerable: true, //可枚举
+        configurable: false, //不能再配置
+        get() {
+          return this.$data[key];
+        },
+        set(newVal) {
+          this.$data[key] = newVal;
+        }
+      });
+    }
+    compile(el) {
+      //将this.$el中的子节点转移到内存中,document --> fragment(内存)
+      this.$fragment = this.node2Fragment(this.$el);
+      //编译
+      this.compileElements(this.$fragment);
+      //内存 --> document
+      this.$el.appendChild(this.$fragment);
+    }
+    node2Fragment(node) {
+      let child = null;
+      let fragment = document.createDocumentFragment();
+      //createDocumentFragment创建的虚拟节点需要插入子元素
+      while (child = node.firstChild) {
+        //节点有且只有一个父节点，所以是转移，不是复制，不会出现两份，
+        //因此下一次while循环时child=node.firstChild为null,循环结束
+        fragment.appendChild(child);
+      }
+      return fragment;
+    }
+
+    compileElements(vNode) {
+      let text = '';
+      //正则表达式，用于匹配大括号表达式
+      const reg = /\{\{(.*)\}\}/;
+      //转为真数组并遍历所有节点
+      Array.from(vNode.childNodes).forEach(node => {
+        text = node.textContent;
+        if (this.isElementNode(node)) { //元素节点，解析所有的指令属性
+          let exp = ''; //表达式
+          let dir = ''; //指令
+          let attrName = '';
+          let attrs = node.attributes;
+          //取出所有属性，转为数组并遍历
+          Array.from(attrs).forEach(attr => {
+            exp = attr.value;
+            attrName = attr.name;
+            // 普通指令v-text,v-html，v-model等
+            if (this.isDirective(attrName)) {
+              dir = attrName.substring(2);
+              this.update(node, exp, dir);
+              node.removeAttribute(attrName);
+              //事件指令@click等
+            } else if (this.isEvent(attrName)) {
+              dir = attrName.substring(1);
+              this.eventHandler(node, exp, dir);
+              node.removeAttribute(attrName);
+            }
+          });
+        } else if (this.isTextNode(node) && reg.test(text)) { //文本节点，大括号表达式
+          this.update(node, RegExp.$1.trim(), 'text');//其实RegExp这个对象会在我们调用了正则表达式的方法后, 自动将最近一次的结果保存在里面, 所以如果我们在使用正则表达式时, 有用到分组, 那么就可以直接在调用完以后直接使用RegExp.$xx来使用捕获到的分组内容
+        }
+        //递归遍历所有层次的节点
+        if (node.hasChildNodes()) {
+          this.compileElements(node);
+        }
+      });
+    }
+    //判断是否为元素节点
+    checkDom(dom) {
+      if (typeof HTMLElement === 'object') {
+        return dom instanceof HTMLElement;
+      } else {//nodeType 1元素 2属性 3元素/属性中的字符串
+        return dom && typeof dom === 'object' && dom.nodeType === 1
+      }
+    }
+    //事件处理器
+    eventHandler(node, exp, eType) {
+      const callback = this.$options.methods && this.$options.methods[exp];
+      callback && node.addEventListener(eType, callback.bind(this));
+    }
+    //更新视图，依赖的统一入口，每个引用过data中数据的依赖都会进来这里
+    update(node, exp, dir) {
+      //拿到相对应的更新函数
+      const fn = this[dir + 'Updater'];
+      //初始化更新显示，这里需要指定调用的实例this,即vue实例
+      fn && fn.call(this, this, node, exp);
+      //变化更新显示
+      new Watcher(this, exp, () => {
+        fn && fn.call(this, this, node, exp);
+      });
+    }
+    textUpdater(vm, node, exp) {
+      node.textContent = new Function("vm", `with(vm){return ${exp}}`)(vm);
+    }
+    htmlUpdater(vm, node, exp) {
+      node.innerHTML = new Function("vm", `with(vm){return ${exp}}`)(vm);
+
+    }
+    modelUpdater(vm, node, exp) {
+      node.value = new Function("vm", `with(vm){return ${exp}}`)(vm);
+      //添加input事件监听
+      //v-model双向数据绑定的其中一个方向，即：视图 --> 内存
+      node.addEventListener('input', e => {
+        // vm[exp] = e.target.value;
+        eval(`vm.${exp} = e.target.value`);
+      });
+    }
+    //判断是否为v-指令
+    isDirective(node) {
+      return node.startsWith("v-");
+    }
+    //判断是否为@事件
+    isEvent(node) {
+      return node.startsWith("@")
+    }
+    //判断是否为元素节点
+    isElementNode(node) {
+      return (node.nodeType === 1);
+    }
+    //判断是否为文本节点
+    isTextNode(node) {
+      return (node.nodeType === 3);
+    }
+  }
+
+  //通过Observer将data下所有属性深层遍历改为get/set模式而非value模式
+  function Observer(data, key) {
+    let val = data[key];
+    //每一个数据对应一个Dep容器，存放所有依赖于该数据的依赖项
+    const dep = new Dep();
+    Object.defineProperty(data, key, {
+      enumerable: true, //可枚举
+      configurable: false,//不能再配置
+      get() {
+        dep.depend();//收集依赖
+        return val;
+      },
+      set(newVal) {
+        if (newVal === val) return
+        val = newVal;
+        dep.notify(); //当数据发生变化时，通知所有的依赖进行更新显示
+      }
+    });
+  }
+
+  class Dep {
+    static target//当前正在计算的watcher
+    constructor() {
+      this.depWatchers = []; //所有的依赖将存放在该数组中
+    }
+    //收集依赖
+    depend() {
+      if (Dep.target) {//Dep.target存放具体的依赖，在编译阶段检测到依赖后被赋值
+        Dep.target.addDep(this);
+      }
+    }
+    //通知更新
+    notify() {
+      this.depWatchers.forEach(depWatcher => {
+        depWatcher.update();
+      });
+    }
+  }
+  var vm = new Vue({
+    el: "#app",
+    data: {
+      name: "hello",
+      obj: {
+        age: 18,
+        age2: 20
+      },
+      html: `<p>this is p</p>`,
+      text: "hello"
+    }
+  });
+  vm.obj.age = 30;
+  vm.name = "Vue";
+  vm.text+=" world";
+  ;
+</script>
+
+
+
+</html>

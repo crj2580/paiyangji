@@ -1,0 +1,104 @@
+{
+  "time_used": 332,
+  "face_rectangle": {
+    "width": 228,
+    "top": 90,
+    "height": 229,
+    "left": 92
+  },
+  "warning": [],
+  "result": {
+    "pores_left_cheek": {
+      "confidence": 0.9998807,
+      "value": 0
+    },
+    "nasolabial_fold": {
+      "confidence": 0.23738182,
+      "value": 0
+    },
+    "eye_pouch": {
+      "confidence": 0.9999999,
+      "value": 0
+    },
+    "forehead_wrinkle": {
+      "confidence": 0.0017648435,
+      "value": 0
+    },
+    "skin_spot": {
+      "confidence": 0.03027047,
+      "value": 0
+    },
+    "acne": {
+      "confidence": 0.017986922,
+      "value": 0
+    },
+    "pores_forehead": {
+      "confidence": 0.99875665,
+      "value": 0
+    },
+    "pores_jaw": {
+      "confidence": 0.99318767,
+      "value": 0
+    },
+    "left_eyelids": {
+      "confidence": 0.99828416,
+      "value": 0
+    },
+    "eye_finelines": {
+      "confidence": 0.016382974,
+      "value": 0
+    },
+    "dark_circle": {
+      "confidence": 0.88637364,
+      "value": 1
+    },
+    "crows_feet": {
+      "confidence": 9.859373e-05,
+      "value": 0
+    },
+    "pores_right_cheek": {
+      "confidence": 0.99999917,
+      "value": 0
+    },
+    "blackhead": {
+      "confidence": 5.3434942e-05,
+      "value": 0
+    },
+    "glabella_wrinkle": {
+      "confidence": 0.007911554,
+      "value": 0
+    },
+    "mole": {
+      "confidence": 0.986465,
+      "value": 1
+    },
+    "skin_type": {
+      "details": {
+        "0": {
+          "confidence": 0.026172215,
+          "value": 0
+        },
+        "1": {
+          "confidence": 0.0017294144,
+          "value": 0
+        },
+        "2": {
+          "confidence": 0.7528501,
+          "value": 1
+        },
+        "3": {
+          "confidence": 0.21924827,
+          "value": 0
+        }
+      },
+      "skin_type": 2
+    },
+    "right_eyelids": {
+      "confidence": 0.9991721,
+      "value": 0
+    }
+  },
+  "request_id": "1608690154,abb13b0f-0ef2-4670-a9e7-3da6b5d64749"
+}
+
+

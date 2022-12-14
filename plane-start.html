@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="yes" name="apple-touch-fullscreen">
+  <meta content="telephone=no,email=no" name="format-detection">
+  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>玩飞机大战,赢现金卡券</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
+
+</head>
+<style>
+  body {
+    opacity: 0;
+  }
+
+  .start {
+    animation-fill-mode: both;
+    animation: start 0.7s infinite;
+  }
+
+  @keyframes start {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.1);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
+
+<body>
+  <div id="app" style="width:100vw;overflow-x: hidden;">
+    <img src="./img/plane/start/title.png" style="width:88%;margin-left:5%;">
+    <img src="./img/plane/start/ranking.png" v-on:click="goRanking()" style="position:fixed;width:12%;right:1%;top:4vw;">
+    <div style="position:absolute;top:25vw;left:51%;font-size:3.2vw;color:rgb(100,100,100);letter-spacing:-0.5px;">
+      <div>活动截至日期 : 2019年1月6日</div>
+    </div>
+    <!-- <img src="./img/plane/start/main.png" style="width:90%;margin-left:5%;position: relative;top:-5vw;"> -->
+    <div style="text-align:center;">
+      <img src="./img/plane/start/main.png" style="height:62vh;position: relative;top:-3vw;">
+    </div>
+
+    <img src="./img/plane/start/startbg.png" style="width:70%;margin-left:15%;margin-top:1vh;position:absolute;">
+    <img class="start" src="./img/plane/start/start.png" v-on:click="startGame()" style="width:40%;margin-left:30%;margin-top:1vh;position: relative;">
+
+    <img src="./img/mine.png" v-on:click="goMine()" style="position:fixed;width:10vw;bottom:8vw;right:3vw;">
+    <img src="./img/plane/bottom.png" style="width:100%;position: fixed;bottom:0;left:0;">
+
+  </div>
+</body>
+
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      actionId: '',
+      actionShare: {}
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      goRanking() {
+        window.location.href = "./plane-ranking.html?actionId=" + this.actionId;
+      },
+      startGame(actionId) {
+        if (actionId) {
+          window.location.href = "https://m.sensingstore.com/airwarriors?actionId=" + actionId;
+        } else {
+          window.location.href = "https://m.sensingstore.com/airwarriors?actionId=" + this.actionId;
+        }
+      },
+      goMine() {
+        window.location.href = "./annual-mine.html?actionId=" + this.actionId;
+      }
+    },
+    mounted: function () {
+
+      this.actionId = this.$options.methods.kindId('actionId');
+      var actionId = this.actionId;
+
+      if (actionId) {
+
+
+        //获取游戏信息
+        function getDataByActionId(resolve, reject) {
+          $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+            'actionId': actionId
+          }, function (result, status) {
+            if (result.success) {
+
+              var endDate = result.result.deviceActivityGame.activity.endDate;
+              if (endDate && Date.parse(endDate) < Date.parse(new Date())) {
+                window.location.href = "./plane-ranking.html?activityEnd=true&actionId=" + actionId;
+                return
+              } else if (app.$options.methods.kindId('skip')) {
+                app.$options.methods.startGame(actionId);
+                return
+              }
+              $('body').css('opacity', '1')
+
+
+              console.log(result.result)
+              // app.transferActionUrl = result.result.transferActionUrl + '&isShared=True';
+
+              app.actionShare = result.result.deviceActivityGame.actionShare;
+
+              var openId = result.result.snsUserInfo.openid;
+
+              resolve({
+                tenantId: result.result.deviceActivityGame.tenantId,
+                openId: openId,
+                appid: result.result.deviceActivityGame.activity.weChatAppID,
+                url: encodeURI(location.href.split('#')[0])
+              })
+            } else {
+              // Tida.toast("网络故障,请重试.");
+            }
+          })
+        }
+
+        new Promise(getDataByActionId).then(function (param) {
+          $.get('https://g.api.troncell.com/WeixinJSSDK/GetWeChatJsViewModel', param, function (result, status) {
+            if (result.success) {
+              wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: result.result.appId, // 必填，公众号的唯一标识
+                timestamp: result.result.timestamp, // 必填，生成签名的时间戳
+                nonceStr: result.result.nonceStr, // 必填，生成签名的随机串
+                signature: result.result.signature,// 必填，签名
+                jsApiList: [
+                  'onMenuShareTimeline',
+                  'onMenuShareAppMessage',
+                ] // 必填，需要使用的JS接口列表
+              });
+              wx.ready(function () {
+                wx.onMenuShareTimeline({
+                  title: app.actionShare.title,
+                  link: app.actionShare.link + '?actionId=' + actionId,
+                  imgUrl: app.actionShare.imageLink,
+                  success: function () {
+                    // 用户点击了分享后执行的回调函数
+                  }
+                });
+                wx.onMenuShareAppMessage({
+                  title: app.actionShare.title,
+                  desc: app.actionShare.description,
+                  link: app.actionShare.link + '?actionId=' + actionId,
+                  imgUrl: app.actionShare.imageLink,
+                  success: function () {
+                    // 用户点击了分享后执行的回调函数
+                  }
+                });
+              });
+            }
+
+          })
+        });
+
+
+      } else {
+
+        var input = {
+          QrType: 'AfterGame',
+          IsSendWeChatMsg: true,//必须要
+          // SecurityKey: '581388e95b2144c3a74d6afe5ffec631',//marktest
+          // SecurityKey: '34f923a3bb054615a2df69d5bcee7d76',//创思show
+          SecurityKey: 'da4e335581084497a9faae269727fa45',//new创思show
+          SnsType: "WeChat",
+          IsTransferred: true,
+          FromType:'mobile',
+          FromType:'mobile'
+
+
+        }
+
+        //生成二维码
+        $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', input, function (result) {
+          if (result.success) {
+            console.log(result.result)
+            window.location.href = result.result.qrCodeUrl
+          }
+        })
+
+      }
+
+    }
+  })
+
+</script>
+
+</html>

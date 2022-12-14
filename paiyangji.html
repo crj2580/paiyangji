@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>活动</title>
+  <link href="./styles/reset.css" rel="stylesheet" type="text/css">
+  <script src="./js/jquery.min.js" type="text/javascript"></script>
+  <script src="./js/qrcodejs/qrcode.min.js" type="text/javascript"></script>
+  <script src="./js/vue.min.js" type="text/javascript"></script>
+  <script src="./js/Quorra/Quorra.js" type="text/javascript"></script>
+</head>
+<style>
+  .body {
+    background: url(img/paiyangji/bg.png?d=1.2);
+    background-size: cover;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #main {
+    width: 44%;
+    height: 44vw;
+    top: 48.5vh;
+    position: fixed;
+    left: 28%;
+    transform: perspective(500px) rotatey(0deg);
+  }
+
+  #qrcode {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+
+  #qrcode #before {
+    width: 100%;
+    position: absolute;
+    transform: translate3d(0px, 0, 1px);
+    backface-visibility: hidden;
+    /* background: #fff; */
+  }
+
+  #qrcode #before img {
+    /* width: 86%; */
+    /* margin: 7%; */
+    width: 100%;
+    border-radius: 4%;
+  }
+
+  #qrcode .back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform: translate3d(0px, 0, 0px) rotateY(180deg);
+    /* z-index: 1; */
+
+    text-align: center;
+    font-size: 8vw;
+    font-weight: bold;
+    color: #fff;
+
+    opacity: 0;
+  }
+
+  #qrcode .back .head {
+    width: 22vw;
+    height: 22vw;
+    margin: 0 auto;
+    border-radius: 50%;
+    position: relative;
+    top: 7vw;
+  }
+
+  #qrcode .back .headContainer {
+    position: absolute;
+    width: 30vw;
+    /* height: 22vw; */
+    /* margin: 0 auto; */
+    /* border-radius: 50%; */
+    left: 5.2vw;
+    top: 0vw;
+  }
+
+  #qrcode .back .purple {
+    position: absolute;
+    width: 44vw;
+    top: 13vw;
+    left: -2vw;
+    /* height: 35vw; */
+  }
+
+
+  #qrcode .back .tipCount {
+    text-align: center;
+    position: absolute;
+    width: 40vw;
+    top: 27.5vw;
+    left: 2vw;
+    font-size: 5vw;
+  }
+
+
+  #qrcode .back .tips {
+    line-height: 9vw;
+  }
+
+  .qrcodeAnimate {
+    -webkit-animation-name: qrcode;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+  }
+
+  .qrcodeAnimate2 {
+    -webkit-animation-name: qrcode2;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+  }
+
+  @-webkit-keyframes qrcode {
+    from {
+      transform: rotatey(0deg);
+    }
+
+    to {
+      transform: rotatey(180deg);
+    }
+  }
+
+  @-webkit-keyframes qrcode2 {
+    from {
+      transform: rotatey(180deg);
+    }
+
+    to {
+      transform: rotatey(0deg);
+    }
+  }
+
+  canvas {
+    opacity: 0;
+  }
+
+  #xiaochuang {
+    position: absolute;
+    top: 81%;
+    right: -5%;
+    width: 11%;
+    -webkit-animation-fill-mode: both;
+    -webkit-animation: xiaochuang 10s infinite;
+  }
+
+  @-webkit-keyframes xiaochuang {
+    0% {
+      right: -5%;
+    }
+
+    15% {
+      right: 0%;
+    }
+
+    75% {
+      right: 0%;
+    }
+
+    85% {
+      right: -5%;
+    }
+
+    100% {
+      right: -5%;
+    }
+  }
+
+  #tip {
+    position: absolute;
+    top: 85%;
+    width: 50%;
+    left: 36%;
+    /* -webkit-animation-fill-mode: both; */
+    /* -webkit-animation: tip 10s infinite; */
+
+    display: none;
+  }
+
+  /* @-webkit-keyframes tip {
+    0% {
+      opacity: 0;
+    }
+
+    15% {
+      opacity: 1;
+    }
+
+    75% {
+      opacity: 1;
+    }
+
+    85% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  } */
+
+  #eye-0 {
+    position: absolute;
+    top: 71.5%;
+    width: 13%;
+    left: 71%;
+  }
+
+  #eye-1 {
+    position: absolute;
+    top: 71.5%;
+    width: 13%;
+    left: 71%;
+    -webkit-animation-fill-mode: both;
+    -webkit-animation: eye 4s infinite;
+  }
+
+  @-webkit-keyframes eye {
+    0% {
+      opacity: 0;
+    }
+
+    10% {
+      opacity: 1;
+    }
+
+    80% {
+      opacity: 1;
+    }
+
+    95% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .light {
+    position: absolute;
+    top: 41%;
+    width: 10%;
+    -webkit-animation-fill-mode: both;
+    -webkit-animation: light 5s infinite;
+  }
+
+  @-webkit-keyframes light {
+    0% {
+      opacity: 0.1;
+    }
+
+    30% {
+      opacity: 1;
+    }
+
+    70% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0.1;
+    }
+  }
+
+  .fontsContainer1 {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    top: 5vh;
+  }
+
+  .fonts1 {
+    width: 6.5%;
+    margin: 0 1.2%;
+  }
+
+  .fontsContainer2 {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    top: 12vh;
+  }
+
+  .fonts2 {
+    width: 10%;
+    margin: 0 1.6%;
+    position: relative;
+    -webkit-animation-fill-mode: both;
+  }
+
+  .fonts2:nth-child(1) {
+    -webkit-animation: fonts1 4s infinite;
+  }
+
+  .fonts2:nth-child(2) {
+    -webkit-animation: fonts2 4s infinite;
+  }
+
+  .fonts2:nth-child(3) {
+    -webkit-animation: fonts3 4s infinite;
+  }
+
+  .fonts2:nth-child(4) {
+    -webkit-animation: fonts4 4s infinite;
+  }
+
+  .fonts2:nth-child(5) {
+    -webkit-animation: fonts5 4s infinite;
+  }
+
+  @-webkit-keyframes fonts1 {
+    0% {
+      top: 0;
+    }
+
+    15% {
+      top: -3vw;
+    }
+
+    25% {
+      top: 0;
+    }
+
+    100% {
+      top: 0;
+    }
+  }
+
+  @-webkit-keyframes fonts2 {
+    0% {
+      top: 0;
+    }
+
+    15% {
+      top: 0;
+    }
+
+    30% {
+      top: -3vw;
+    }
+
+    40% {
+      top: 0;
+    }
+
+    100% {
+      top: 0;
+    }
+  }
+
+  @-webkit-keyframes fonts3 {
+    0% {
+      top: 0;
+    }
+
+    30% {
+      top: 0;
+    }
+
+    45% {
+      top: -3vw;
+    }
+
+    55% {
+      top: 0;
+    }
+
+    100% {
+      top: 0;
+    }
+  }
+
+  @-webkit-keyframes fonts4 {
+    0% {
+      top: 0;
+    }
+
+    45% {
+      top: 0;
+    }
+
+    60% {
+      top: -3vw;
+    }
+
+    70% {
+      top: 0;
+    }
+
+    100% {
+      top: 0;
+    }
+  }
+
+  @-webkit-keyframes fonts5 {
+    0% {
+      top: 0;
+    }
+
+    60% {
+      top: 0;
+    }
+
+    75% {
+      top: -3vw;
+    }
+
+    85% {
+      top: 0;
+    }
+
+    100% {
+      top: 0;
+    }
+  }
+
+  .boy {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 30vw;
+  }
+</style>
+
+<body>
+  <div class="body">
+    <div id="main">
+      <div id="qrcode">
+        <div id="before">
+          <img src="">
+        </div>
+        <div class="back">
+          <img class="headContainer" src="img/paiyangji/main/headContainer.png">
+          <img class="head" src="">
+          <img class="purple" src="img/paiyangji/main/参与中.png">
+          <div class="tips">
+            <!-- 参与中 -->
+          </div>
+          <div class="tipCount">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <img id="xiaochuang" src="img/paiyangji/xiaochuang.png">
+    <img id="tip" src="img/paiyangji/tip.png">
+    <img id="eye-0" src="img/paiyangji/eye-0.png">
+    <img id="eye-1" src="img/paiyangji/eye-1.png">
+    <img class="light" src="img/paiyangji/light.png" style="left:17%;">
+    <img class="light" src="img/paiyangji/light.png" style="right:17.8%;">
+
+    <div class="fontsContainer1">
+      <img class="fonts1" src="img/paiyangji/fonts/快.png">
+      <img class="fonts1" src="img/paiyangji/fonts/来.png">
+      <img class="fonts1" src="img/paiyangji/fonts/试.png">
+      <img class="fonts1" src="img/paiyangji/fonts/试.png">
+      <img class="fonts1" src="img/paiyangji/fonts/吧.png">
+    </div>
+    <div class="fontsContainer2">
+      <img class="fonts2" src="img/paiyangji/fonts/扫.png">
+      <img class="fonts2" src="img/paiyangji/fonts/码.png">
+      <img class="fonts2" src="img/paiyangji/fonts/有.png">
+      <img class="fonts2" src="img/paiyangji/fonts/惊.png">
+      <img class="fonts2" src="img/paiyangji/fonts/喜.png">
+    </div>
+
+    <img class="boy" src="img/paiyangji/boy/boy.gif">
+
+    <!-- <p>
+      <xmp id="show">
+      </xmp>
+    </p> -->
+  </div>
+
+
+
+</body>
+
+<script>
+
+
+  $.ajaxSetup({
+    timeout: 3000,
+    error: function (jqXHR, textStatus, errorThrown) {
+      switch (jqXHR.status) {
+        case (500):
+          console.log("服务器系统内部错误");
+          break;
+        case (401):
+          console.log("未登录");
+          break;
+        case (403):
+          console.log("无权限执行此操作");
+          break;
+        case (408):
+          console.log("请求超时");
+          break;
+        default:
+          console.log("未知错误");
+      }
+      window.location.reload();
+    },
+    success: function (data) {
+      console.log("操作成功");
+    }
+  });
+
+
+
+  setTimeout(function () {
+    $('#qrcode .back').css('opacity', 1)
+  }, 1000)
+
+
+  // var SecurityKey = kindId('SecurityKey') || 'ef66ac6bac3747adbe7a52f417a1d05f';//banzhiwu的淘宝流程
+  // var SecurityKey = kindId('SecurityKey') || '5c07e10a87744896a915aaf161396291';//marktest的测试流程
+  var SecurityKey = '6c3109c2164a4549a6e214402be13cf8';//派样机(设备名)
+  var subkey = kindId('subkey') || 'ab4e2e79b25c4801863fe208df58ddae';
+  var actionId;
+  var cargoList;
+  var OpenId;
+  var userAwardId;
+  var timeCount = 0;
+
+  var cargoRoadName;
+  var cargoRoadId;
+
+
+  var SnsType = "WeChat";
+  // var SnsType = "Taobao";
+
+  var awardLength;
+
+  function kindId(name) {
+    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+      return decodeURI(r[2]);
+    } else {
+      return false;
+    };
+  }
+
+  start();
+  function start(fromInit) {
+    var input = {
+      QrType: 'AfterGame',
+      SecurityKey: SecurityKey,
+      IsSendWeChatMsg: true,
+      SnsType: SnsType,
+      FromType: 'mobile'
+
+    }
+    if (SnsType == 'Taobao') {//现在淘宝也可以走sdk了
+      // input.TargetUrl = 'https://nodetest.ews.m.jaeapp.com/paiyangji-m';
+      input.IsTransferred = false;
+    }
+
+
+    //生成二维码
+    $.post('https://g.api.troncell.com/api/UserAction/PostPlayerData4ActionQrcode', input, function (result) {
+      if (result.success) {
+        console.log(result.result)
+        console.log(result.result.actionId);
+        actionId = result.result.actionId;
+        // qrCodeUrl = result.result.qrCodeUrl;
+        qrCodeUrl = result.result.qrCodeImage || result.result.qrCodeUrl;
+
+
+        // if (SnsType == 'Taobao') return
+
+
+
+        if (fromInit) {//等待新的二维码加载完成,并转回二维码
+          // newQrcode.makeCode(qrCodeUrl)
+          $('#before img').prop('src', qrCodeUrl)
+          setTimeout(function () {
+            $("#qrcode").attr("class", "qrcodeAnimate2");
+            setTimeout(function () {//等转完再换
+              // $('.tips').text('参与中');
+              $('.purple').prop('src', 'img/paiyangji/main/参与中.png')
+
+              $('.tipCount').css('opacity', 1)
+            }, 400)
+          }, 1000)
+        } else {//第一次生成二维码
+          // newQrcode = new QRCode(document.getElementById("before"), qrCodeUrl);
+          $('#before img').prop('src', qrCodeUrl)
+        }
+
+        timer();
+      }
+    })
+
+    //获取货道列表
+    $.get('https://e.api.troncell.com/api/services/app/SensingDevice/GetCargoRoads', {
+      'Subkey': subkey,
+      'MaxResultCount': 999,
+      'SkipCount': 0
+    }, function (result, status) {
+      if (result.success) {
+        console.log('货道列表', result.result.items);
+        cargoList = result.result.items;
+      }
+    })
+
+  }
+
+
+  //轮询1 等待用户扫码
+  function timer() {
+    $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
+      actionId: actionId
+    }, function (result) {
+      if (result.success) {
+        if (!result.result.snsUserInfo) {
+          setTimeout(timer, 1500);
+          console.log('未扫描');
+        } else {
+          console.log('用户已扫描');
+          OpenId = result.result.snsUserInfo.openid;
+          // userAwardId = result.result.id;
+          $("#qrcode .back .head").prop("src", result.result.snsUserInfo.headimgurl.replace('http:', 'https:'));//注入用户头像
+          $("#qrcode").attr("class", "qrcodeAnimate");
+          playAudio('scan');
+          timer2()
+        }
+      }
+    })
+
+  }
+
+
+  //轮询2 等待用户抽奖
+  function timer2() {
+    timeCount++;
+    $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByUserAndAction', {
+      OpenId: OpenId,
+      actionId: actionId,
+      QrType: 'BeforeGame',
+      SnsType: SnsType,
+      SecurityKey: SecurityKey
+    }, function (result) {
+      if (result.success) {
+        console.log(result.result, 'GetAwardsByUserAndAction')
+        if (result.result.canNextAward) {//还能抽 说明用户还没抽过,继续轮询
+
+          if (timeCount <= 25) {
+            setTimeout(timer2, 1000);
+            console.log('可以抽')
+
+            $('.tipCount').text(25 - timeCount)
+
+
+          } else {//25s没人操作,重置页面
+            // reload();
+            init();
+          }
+        } else {
+          console.log('不能抽了')//已经抽过,未领取或已领取
+          // var nowAward = result.result.awards[0];
+          var nowAward = result.result.awards[result.result.awards.length - 1];//允许重复中奖时获取最新一次奖品
+          userAwardId = nowAward.id;
+          console.log(nowAward)
+          if (nowAward.isConfirmed) {//已经领取
+            // $('.tips').text('已参与过活动')
+            $('.purple').prop('src', 'img/paiyangji/main/已参与过活动.png')
+            $('.tipCount').css('opacity', 0)
+
+            // reload(5000);
+            init(5000);
+          } else {//尚未领取
+
+            // for (var i = 0; i < cargoList.length; i++) {
+            //   if (cargoList[i]['cargoThings'][0]['thingId'] == nowAward.award.id) {
+
+            //     var nowCargo = cargoList[i];//当前货道
+            //     console.log(nowCargo,i)
+            //     // var cargoRoadName = nowCargo['name']
+            //     cargoRoadName = nowCargo['outerId']
+            //     cargoRoadId = nowCargo['id']
+            //   }
+            // }
+
+            // if (nowCargo && nowCargo['cargoThings'][0].stock > 0) {//有奖品且有库存
+            //   playAudio('surprise');
+
+            //   console.log('货道名为:', cargoRoadName)
+
+            //   doDropCargo(cargoRoadName)
+
+            // } else {
+            //   playAudio('sorry');
+
+            //   if (nowAward.award.type == 2) {
+            //     // $('.tips').text('谢谢参与')
+            //     $('.purple').prop('src', 'img/paiyangji/main/谢谢参与.png')
+            //     $('.tipCount').css('opacity', 0)
+
+            //     init(5000);
+            //   } else if (nowAward.award.type == 1) {//没货了
+            //     // $('.tips').text('缺货中')
+            //     $('.purple').prop('src', 'img/paiyangji/main/缺货中.png')
+            //     $('.tipCount').css('opacity', 0)
+
+            //     // reload(30000);
+            //     init(30000);
+            //   }
+            // }
+
+
+            for (var i = 0; i < cargoList.length; i++) {
+              if (cargoList[i]['cargoThings'][0]['thingId'] == nowAward.award.id) {
+
+                if (cargoList[i]['cargoThings'][0].stock > 0) {//如果stock为0则保留为之前有货的货道
+                  var nowCargo = cargoList[i];//当前货道
+                  console.log(nowCargo, i)
+                  // var cargoRoadName = nowCargo['name']
+                  cargoRoadName = nowCargo['outerId']
+                  cargoRoadId = nowCargo['id']
+                }
+
+              }
+            }
+
+            if (nowCargo) {//有奖品且有库存
+              playAudio('surprise');
+
+              console.log('货道名为:', cargoRoadName)
+
+              doDropCargo(cargoRoadName)
+
+            } else {
+              playAudio('sorry');
+
+              if (nowAward.award.type == 2) {
+                // $('.tips').text('谢谢参与')
+                $('.purple').prop('src', 'img/paiyangji/main/谢谢参与.png')
+                $('.tipCount').css('opacity', 0)
+
+                init(5000);
+              } else if (nowAward.award.type == 1) {//没货了
+                // $('.tips').text('缺货中')
+                $('.purple').prop('src', 'img/paiyangji/main/缺货中.png')
+                $('.tipCount').css('opacity', 0)
+
+                // reload(30000);
+                init(30000);
+              }
+            }
+
+
+
+          }
+
+        }
+      }
+    })
+  }
+
+
+  function htmlCallback() {
+    $.ajax({
+      type: "POST",
+      url: "https://e.api.troncell.com/api/services/app/SensingDevice/DropCargo",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        'subkey': subkey,
+        'cargoRoadId': cargoRoadId
+      }),
+      success: function (message) {
+        if (message.success) {
+          $.ajax({
+            type: "POST",
+            url: "https://g.api.troncell.com/api/services/app/SensingDeviceActivity/ConfirmUserAwardById",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+              userAwardId: userAwardId,
+              SecurityKey: SecurityKey
+            }),
+            success: function (message) {
+              console.log('发放成功')
+              // $('.tips').text('发放成功')
+              $('.purple').prop('src', 'img/paiyangji/main/发放成功.png')
+              $('.tipCount').css('opacity', 0)
+
+              init(5000)
+            }
+          })
+
+        }
+      }
+    })
+  }
+
+  function reload(time) {
+    var time = time || 100;
+    setTimeout(function () {
+      window.location.reload();
+    }, time)
+  }
+
+
+
+  function init(time) {
+    var time = time || 100;
+    setTimeout(function () {
+      //重置页面
+      actionId = undefined;
+      cargoList = undefined;
+      OpenId = undefined;
+      userAwardId = undefined;
+      timeCount = 0;
+      cargoRoadName = undefined;
+      cargoRoadId = undefined;
+      start(true);
+    }, time)
+  }
+
+  //点击互动
+  var showTip = false;
+  $('#xiaochuang').click(xiaochuang)
+  function xiaochuang() {
+    if (showTip) return//文字已出现
+    showTip = true;
+    $('#tip').fadeIn(1000);
+    setTimeout(function () {
+      $('#tip').fadeOut(1000);
+      setTimeout(function () {
+        showTip = false;
+      })
+    }, 3500)
+  }
+
+
+  var clickCount = 0;
+  //暗门
+  $('.boy').click(function () {
+    console.log(clickCount)
+    clickCount++
+    if (clickCount >= 3) {
+      window.location.href = "./paiyangji-c.html?SecurityKey=" + SecurityKey + '&subkey=' + subkey
+    }
+
+    //背景音乐
+    // var audio = document.getElementById('musicAudio');
+    // audio.play();
+  })
+
+
+
+
+  // //获取活动下奖品
+  // $.get('https://g.api.troncell.com/api/services/app/SensingDeviceActivity/GetAwardsByActivity', {
+  //   SecurityKey
+  // }, function (result) {
+  //   if (result.success) {
+  //     console.log(result.result)
+  //   }
+  // })
+  //获取设备下的商品
+  // $.get('https://s.api.troncell.com/api/services/app/SensingDevice/GetProducts', {
+  //   'Subkey': subkey,
+  //   'MaxResultCount': 20,
+  //   'SkipCount': 0
+  // }, function (result, status) {
+  //   if (result.success) {
+  //     console.log(result.result.items)
+  //   }
+  // })
+
+
+
+
+
+
+</script>
+
+</html>
