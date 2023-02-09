@@ -245,8 +245,10 @@ const PostPlayerData4ActionQrcode = () => {
     }
   }).then((result) => {
     // console.log(result.data.result.qrCodeImage);
-    loading.value = false;
-    qrcode.value = result.data.result.qrCodeImage;
+    if (result.status == 200) {
+      loading.value = false;
+      qrcode.value = result.data.result.qrCodeImage;
+    }
   })
 };
 
@@ -512,12 +514,12 @@ onMounted(() => {
     <!-- <GoAnswerButtonView :logicType="logicType" :clickButton1="clickButton1" :clickButton2="clickButton2" /> -->
 
     <!-- 去答题按钮 -->
-    <div v-show="logicType==1" @click="clickButton1" class="buttonContainer" style="width: 42vw; top: 60%; left: 28vw">
+    <div v-show="logicType == 1" @click="clickButton1" class="buttonContainer" style="width: 42vw; top: 60%; left: 28vw">
       <img src="./assets/imgs/startBtn.png" style="width: 100%" />
     </div>
 
     <!-- 去输入验证码按钮 -->
-    <div v-show="logicType==1" @click="clickButton2" class="buttonContainer"
+    <div v-show="logicType == 1" @click="clickButton2" class="buttonContainer"
       style="width: 42vw; top: 68.2%; left: 28vw;">
       <img src="./assets/imgs/goIndex.png" style="width: 100%" />
     </div>
@@ -589,10 +591,10 @@ onMounted(() => {
             <!-- 选项内容 -->
             <img src="./assets/imgs/answer_white.png" style="width: 100%" />
 
-            <img v-if="answer.hasSelected && !answer.isAnswer" :src="!(answer.hasSelected&&!answer.isAnswer)|| wrongRed"
+            <img v-if="answer.hasSelected && !answer.isAnswer" :src="!(answer.hasSelected && !answer.isAnswer) || wrongRed"
               class="answerSelected">
 
-            <img v-if="realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer && realQuestionIndex!=4"
+            <img v-if="realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer && realQuestionIndex != 4"
               :src="!(realQuestionList[realQuestionIndex].hasSelected && answer.isAnswer) || rightRed"
               class="answerSelected" />
 
@@ -618,23 +620,23 @@ onMounted(() => {
     <div class="footerBtn">
       <!-- 继续答题按钮 -->
       <div v-show="
-          logicType == 2 &&
-          realQuestionList.length &&
-          realQuestionList[realQuestionIndex].hasSelected &&
-          !chooseRight &&
-          realQuestionIndex != 4 &&
-          !qrCodeImage &&
-          realQuestionIndex != 5
+        logicType == 2 &&
+        realQuestionList.length &&
+        realQuestionList[realQuestionIndex].hasSelected &&
+        !chooseRight &&
+        realQuestionIndex != 4 &&
+        !qrCodeImage &&
+        realQuestionIndex != 5
       " class="continuerBtn" @click="continuer()">
         <img src="./assets/imgs/continue.png" style="width: 100%" />
       </div>
       <!-- 重新答题按钮 -->
       <div v-show="
-          logicType == 2 && 
-          realQuestionList.length &&
-          realQuestionList[realQuestionIndex].hasSelected &&
-          !qrCodeImage &&
-          !chooseRight && errorAnswer >= 3
+        logicType == 2 &&
+        realQuestionList.length &&
+        realQuestionList[realQuestionIndex].hasSelected &&
+        !qrCodeImage &&
+        !chooseRight && errorAnswer >= 3
       " class="restartBtn" @click="goAnswerQuestion()">
         <img src="./assets/imgs/restart.png" style="width: 100%" />
       </div>

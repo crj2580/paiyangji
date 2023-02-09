@@ -1,182 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="yes" name="apple-touch-fullscreen" />
+    <meta content="telephone=no,email=no" name="format-detection" />
+    <meta
+      name="viewport"
+      id="viewport"
+      content="width=640,user-scalable=0, target-densitydpi=320"
+    />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title></title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script src="/js/vue.min.js" type="text/javascript"></script>
+    <script
+      src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js"
+      type="text/javascript"
+    ></script>
+    <script src="/js/troncell_wx.js"></script>
+    <script src="/js/TweenMax.min.js"></script>
+    <script src="/js/qrcodejs/qrcode.min.js" type="text/javascript"></script>
 
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta content="yes" name="apple-mobile-web-app-capable">
-  <meta content="yes" name="apple-touch-fullscreen">
-  <meta content="telephone=no,email=no" name="format-detection">
-  <meta name="viewport" id="viewport" content="width=640,user-scalable=0, target-densitydpi=320">
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-  <title></title>
-  <link href="/styles/reset.css" rel="stylesheet" type="text/css">
-  <script src="/js/jquery.min.js" type="text/javascript"></script>
-  <script src="/js/vue.min.js" type="text/javascript"></script>
-  <script src="https://res.wx.qq.com/open/js/jweixin-1.4.0.js" type="text/javascript"></script>
-  <script src="/js/troncell_wx.js"></script>
-  <script src="/js/TweenMax.min.js"></script>
-  <script src="/js/qrcodejs/qrcode.min.js" type="text/javascript"></script>
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script> -->
+    <!-- <script>eruda.init();</script> -->
+  </head>
+  <style>
+    img {
+      pointer-events: none;
+    }
 
-  <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script> -->
-  <!-- <script>eruda.init();</script> -->
-</head>
-<style>
-  img {
-    pointer-events: none;
-  }
+    #app {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+    }
 
-  #app {
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-  }
+    .container {
+      height: 100vh;
+      background: url(./img/container.png);
+      background-size: 100% 100%;
+      position: relative;
+    }
 
-  .container {
-    height: 100vh;
-    background: url(./img/container.png);
-    background-size: 100% 100%;
-    position: relative;
-  }
+    .wrapper {
+      position: fixed;
+      width: 90%;
+      left: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
 
-  .wrapper {
-    position: fixed;
-    width: 90%;
-    left: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+    .userImage {
+      position: absolute;
+      top: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 11vw;
+      height: 11vw;
+      border-radius: 50%;
+      overflow: hidden;
+    }
 
-  .userImage {
-    position: absolute;
-    top: 6%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 11vw;
-    height: 11vw;
-    border-radius: 50%;
-    overflow: hidden;
-  }
+    .title {
+      position: absolute;
+      left: 50%;
+      top: 25%;
+      transform: translateX(-50%);
+      width: 40%;
+    }
 
-  .title {
-    position: absolute;
-    left: 50%;
-    top: 25%;
-    transform: translateX(-50%);
-    width: 40%;
-  }
+    .line-wrapper {
+      position: absolute;
+      width: 80%;
+      left: 10%;
+      top: 37%;
+    }
 
-  .line-wrapper {
-    position: absolute;
-    width: 80%;
-    left: 10%;
-    top: 37%;
-  }
+    .code {
+      position: absolute;
+      left: 4%;
+      top: 1vw;
+      letter-spacing: 4.5vw;
+      color: #94673d;
+      font-size: 8vw;
+    }
 
-  .code {
-    position: absolute;
-    left: 4%;
-    top: 1vw;
-    letter-spacing: 4.5vw;
-    color: #94673d;
-    font-size: 8vw;
-  }
+    #qrcode {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      top: 36%;
+    }
 
-  #qrcode {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    top: 36%;
-  }
+    #qrcode img {
+      border: 1vw solid #ffc889 !important;
+    }
+  </style>
 
-  #qrcode img {
-    border: 1vw solid #ffc889 !important;
-  }
-</style>
+  <body>
+    <div id="app">
+      <div class="basicLoading" v-show="loading">
+        <img src="/img/loading.gif" />
+      </div>
+      <div class="container">
+        <img
+          style="width: 100%; position: fixed; left: 0; top: 5%"
+          src="./img/title.png"
+          alt=""
+        />
 
-<body>
-  <div id="app">
-    <div class="basicLoading" v-show="loading">
-      <img src="/img/loading.gif">
-    </div>
-    <div class="container">
-      <img style="width: 100%; position: fixed; left: 0; top: 5%;" src="./img/title.png" alt="">
+        <div class="wrapper">
+          <img src="./img/wrapper_bg.png" style="width: 100%" alt="" />
 
-
-      <div class="wrapper">
-        <img src="./img/wrapper_bg.png" style="width: 100%" alt="">
-
-        <img class="userImage" :src="headUserImage" alt="">
-
-        <div style="background: #fff;
-        position: absolute;
-        width: 70%;
-        height: 30vw;
-        bottom: 10%;
-        left: 15%;"></div>
-
-        <div style="position: absolute;
-        width: 70%;
-        text-align: center;font-size: 4.2vw;font-weight: bold;
-        bottom: 45%;
-        left: 15%;">
-          扫码成功，请在大屏上DIY您的专属方案
+          <img class="userImage" :src="headUserImage" alt="" />
         </div>
 
+        <div
+          style="
+            background: #fff;
+            position: absolute;
+            width: 70%;
+            height: 30vw;
+            bottom: 50%;
+            left: 15%;
+          "
+        ></div>
+
+        <div
+          style="
+            position: absolute;
+            width: 70%;
+            text-align: center;
+            font-size: 4.2vw;
+            font-weight: bold;
+            bottom: 50%;
+            left: 15%;
+          "
+        >
+          扫码成功，请在大屏上DIY您的专属方案
+        </div>
       </div>
-
-
     </div>
-  </div>
-
-</body>
-<script>
-  document.body.addEventListener('touchmove', function (e) {
-    e.preventDefault();
-  }, { passive: false });
-
-
-  var app = new Vue({
-    el: '#app',
-    data: {
-      actionId: '',
-      headUserImage: '',
-      loading: false
-    },
-    mounted: function () {
-      this.loading = true;
-      this.actionId = kindId('actionId');
-      // this.makeQrcode();
-      this.ActionDataById();
-    },
-    methods: {
-      ActionDataById: function () {
-        var _this = this;
-        $.post('https://g.api.troncell.com/api/UserAction/ActionDataById', {
-          actionId: _this.actionId
-        }, function (result) {
-          _this.openId = result.result.snsUserInfo.openid;
-          _this.securityKey = result.result.deviceActivityGame.securityKey;
-          _this.headUserImage = result.result.snsUserInfo.headimgurl;
-          setWX(result, ['hideOptionMenu'])
-          _this.loading = false;
-        })
+  </body>
+  <script>
+    document.body.addEventListener(
+      "touchmove",
+      function (e) {
+        e.preventDefault();
       },
+      { passive: false }
+    );
 
-    },
-  })
+    var app = new Vue({
+      el: "#app",
+      data: {
+        actionId: "",
+        headUserImage: "",
+        loading: false,
+      },
+      mounted: function () {
+        this.loading = true;
+        this.actionId = kindId("actionId");
+        // this.makeQrcode();
+        this.ActionDataById();
+      },
+      methods: {
+        ActionDataById: function () {
+          var _this = this;
+          $.post(
+            "https://g.api.troncell.com/api/UserAction/ActionDataById",
+            {
+              actionId: _this.actionId,
+            },
+            function (result) {
+              _this.openId = result.result.snsUserInfo.openid;
+              _this.securityKey = result.result.deviceActivityGame.securityKey;
+              _this.headUserImage = result.result.snsUserInfo.headimgurl;
+              setWX(result, ["hideOptionMenu"]);
+              _this.loading = false;
+            }
+          );
+        },
+      },
+    });
 
-  function kindId(name) {
-    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
-    var r = window.location.search.substr(1).match(reg);
-    console.log(name, r);
-    if (r != null) {
-      return decodeURI(r[2]);
-    } else {
-      return false;
-    };
-  }
-</script>
-
+    function kindId(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      console.log(name, r);
+      if (r != null) {
+        return decodeURI(r[2]);
+      } else {
+        return false;
+      }
+    }
+  </script>
 </html>

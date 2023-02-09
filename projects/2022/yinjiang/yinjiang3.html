@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <meta name="Generator" content="Cocoa HTML Writer" />
+    <meta name="CocoaVersion" content="1504.76" />
+    <script src="./js/sensing-sample-sdk-quorra-1.0.js"></script>
+  </head>
+
+  <style>
+    .landscape {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .landscape .img {
+      height: 100%;
+      margin-right: 0.05rem;
+    }
+
+    .landscape .right-detail {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .landscape .right {
+      height: 100%;
+    }
+
+    .landscape .img-detailClone {
+      margin-top: 0.2rem;
+    }
+
+    .bigScreen {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .bigScreen .img {
+      height: 100%;
+      margin-bottom: 0.3rem;
+    }
+
+    .bigScreen .right-detail {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .bigScreen .right {
+      /* height: 100%; */
+    }
+
+    .bigScreen .img-detailClone {
+      margin-top: 0.2rem;
+    }
+  </style>
+
+  <script type="text/javascript">
+    var isChangeClass = document.getElementById("isChangeClass");
+    var rightDetail = document.getElementById("rightDetail");
+    var imgDetail = document.getElementById("imgDetail");
+    var imgDetailClone = document.getElementById("imgDetailClone");
+    var mSensingDevice = SensingDevice.getInstance();
+
+    function getScreenSize() {
+      var screenWidth = document.documentElement.clientWidth;
+      var screenHeight = document.documentElement.clientHeight;
+      if (screenWidth < screenHeight) {
+        isChangeClass.className = "bigScreen w-100 flex-col";
+      } else {
+        isChangeClass.className = "landscape w-100 flex-row";
+      }
+    }
+
+    window.addEventListener("resize", this.getScreenSize);
+
+    function jsCallbackByAndroid(action, jsonData) {
+      alert(
+        "Js收到消息：" +
+          "action=" +
+          action +
+          ",success:" +
+          jsonData.success +
+          " result:" +
+          jsonData.result +
+          " error:" +
+          jsonData.error
+      );
+      showElement(
+        "Js收到消息-->方法jsCallbackByAndroid被调用 , 参数1:" +
+          action +
+          "  参数2:" +
+          JSON.stringify(jsonData)
+      );
+      return "ok";
+    }
+
+    function showElement(msg) {
+      var div = document.getElementById("div_box"); //获取div
+      var ele = document.createElement("h6"); //创建h2元素节点
+      ele.innerHTML = msg; //设置h2节点的内容
+      div.appendChild(ele); //添加子节点ele
+    }
+
+    function getSubKey() {
+      var subkey = mSensingDevice.getSubKey();
+      alert(subkey);
+    }
+  </script>
+
+  <body>
+    <div id="isChangeClass" class="landscape w-100 flex-row pos-re">
+      <img src="./img/22.jpg" class="img" alt="" />
+
+      <div id="rightDetail" class="right-detail">
+        <div class="right">
+          <img id="imgDetail" src="./img/22.jpg" class="img-detail" alt="" />
+          <img
+            id="imgDetailClone"
+            src="./img/22.jpg"
+            class="img-detailClone"
+            alt=""
+          />
+        </div>
+      </div>
+
+      <p>
+        <input
+          type="button"
+          id="subKey"
+          value="获取设备的SubKey"
+          onclick="getSubKey();"
+        />
+      </p>
+    </div>
+    <div
+      id="div_box"
+      style="
+        width: 100%;
+        min-height: 30%;
+        position: absolute;
+        background: lightblue;
+        margin-bottom: -50px;
+        margin: 0px;
+      "
+    ></div>
+  </body>
+</html>

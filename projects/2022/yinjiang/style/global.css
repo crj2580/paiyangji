@@ -1,0 +1,48 @@
+.app {
+  --gray: rgb(122, 122, 122);
+  --primary: #00a0e9;
+  --light: #6dadff;
+  --dark: rgb(14, 91, 255);
+  --lottieContent: rgba(11, 6, 90, 1);
+  --backgroundColor: rgba(255, 255, 255, 1);
+  --lLink: rgba(207, 234, 255, 1);
+  --fMade: rgba(0, 160, 233, 1);
+  --fCompany: rgba(157, 157, 157, 1);
+  --fIcp: rgba(109, 173, 255, 1);
+  --mediaHead: rgba(36, 36, 36, 1);
+  --mediaContent: rgba(80, 77, 129, 1);
+  --mediaFooterBack: rgba(169, 169, 171, 0);
+  --mediaFooterColor: rgba(122, 122, 122, 1);
+  --w: #ffffff;
+  --b: #000000;
+}
+
+@font-face {
+  font-family: "black";
+  src: url("../fonts/HarmonyOS_Sans_SC_Black.ttf");
+}
+
+@font-face {
+  font-family: "bold";
+  src: url("../fonts/HarmonyOS_Sans_SC_Bold.ttf");
+}
+
+@font-face {
+  font-family: "light";
+  src: url("../fonts/HarmonyOS_Sans_SC_Light.ttf");
+}
+
+@font-face {
+  font-family: "medium";
+  src: url("../fonts/HarmonyOS_Sans_SC_Medium.ttf");
+}
+
+@font-face {
+  font-family: "regular";
+  src: url("../fonts/HarmonyOS_Sans_SC_Regular.ttf");
+}
+
+@font-face {
+  font-family: "thin";
+  src: url("../fonts/HarmonyOS_Sans_SC_Thin.ttf");
+}

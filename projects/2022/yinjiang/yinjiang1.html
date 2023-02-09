@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="Generator" content="Cocoa HTML Writer" />
+    <meta name="CocoaVersion" content="1504.76" />
+    <title>答题</title>
+    <link href="/styles/reset.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="./style/common.css" />
+    <link rel="stylesheet" href="./style/normalize.css" />
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <!-- <script src="/js/vue.min.js" type="text/javascript"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+
+    <!-- <script src="./js/Quorra.js" type="text/javascript"></script> -->
+    <script src="./js/sensing-sample-sdk-quorra-1.0.js"></script>
+    <!-- <script src="/js/TweenMax.min.js" type="text/javascript"></script> -->
+    <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+    <script>
+      eruda.init();
+    </script>
+
+    <style>
+      .landscape {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .landscape .img {
+        height: 100%;
+        margin-right: 0.05rem;
+      }
+
+      .landscape .right-detail {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .landscape .right {
+        height: 100%;
+      }
+
+      .landscape .img-detailClone {
+        margin-top: 0.2rem;
+      }
+
+      .bigScreen {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .bigScreen .img {
+        height: 100%;
+        margin-bottom: 0.3rem;
+      }
+
+      .bigScreen .right-detail {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* .bigScreen .right { */
+        /* height: 100%; */
+      /* } */
+
+      .bigScreen .img-detailClone {
+        margin-top: 0.2rem;
+      }
+    </style>
+
+    <script type="text/javascript">
+      var isChangeClass = document.getElementById("isChangeClass");
+      var rightDetail = document.getElementById("rightDetail");
+      var imgDetail = document.getElementById("imgDetail");
+      var imgDetailClone = document.getElementById("imgDetailClone");
+      var mSensingDevice = SensingDevice.getInstance();
+
+      var app = new Vue({
+        el: "#app",
+        data: {
+          subkey: null,
+          isChangeClass: "",
+          screenWidth: "",
+          screenHeight: "",
+          speed: 10,
+          MyMar: "",
+        },
+        mounted: function () {
+          // this.getScreenSize();
+          // this.jsCallBackByAndroid();
+          // this.screenWidth = document.documentElement.clientWidth;
+          // this.screenHeight = document.documentElement.clientHeight;
+
+          // if (this.screenWidth < this.screenHeight) {
+          //   isChangeClass.className = "bigScreen w-100 flex-col";
+          // } else {
+          //   isChangeClass.className = "landscape w-100 flex-row";
+          // }
+          // this.MyMar = setInterval(this.MarQuee, this.speed);
+          // window.addEventListener("resize", this.getScreenSize);
+        },
+        methods: {
+          getSubKey: function () {
+            this.subkey = SensingDevice.getSubKey();
+            alert(this.subkey);
+          },
+
+          showElement: function (msg) {
+            var div = document.getElementById("div_box"); //获取div
+            var ele = document.createElement("h6"); //创建h2元素节点
+            ele.innerHTML = msg; //设置h2节点的内容
+            div.appendChild(ele); //添加子节点ele
+          },
+
+          // getScreenSize: function () {
+          //   this.screenWidth = document.documentElement.clientWidth;
+          //   this.screenHeight = document.documentElement.clientHeight;
+          //   if (this.screenWidth < this.screenHeight) {
+          //     isChangeClass.className = "bigScreen w-100 flex-col";
+          //   } else {
+          //     isChangeClass.className = "landscape w-100 flex-row";
+          //   }
+          // },
+          /* 长图滚动 */
+          // MarQuee: function () {
+          //   if (imgDetailClone.offsetHeight) {
+          //     if (imgDetailClone.offsetHeight - rightDetail.scrollTop < 4) {
+          //       rightDetail.scrollTop -= imgDetail.offsetHeight;
+          //     } else {
+          //       rightDetail.scrollTop++;
+          //     }
+          //   }
+          // },
+        },
+      });
+
+      function jsCallBackByAndroid(action, jsonData) {
+        // alert("action = " + action + ",jsonData = " + jsonData);
+        alert(
+          "Js收到消息：" +
+            "action=" +
+            action +
+            ",success:" +
+            jsonData.success +
+            " result:" +
+            jsonData.result +
+            " error:" +
+            jsonData.error
+        );
+        showElement(
+          "Js收到消息-->方法jsCallbackByAndroid被调用 , 参数1:" +
+            action +
+            "  参数2:" +
+            JSON.stringify(jsonData)
+        );
+        return "ok";
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="isChangeClass" class="landscape w-100 flex-row pos-re">
+      <img src="./img/22.jpg" class="img" alt="" />
+
+      <div id="rightDetail" class="right-detail">
+        <div class="right">
+          <img id="imgDetail" src="./img/22.jpg" class="img-detail" alt="" />
+          <img
+            id="imgDetailClone"
+            src="./img/22.jpg"
+            class="img-detailClone"
+            alt=""
+          />
+        </div>
+      </div>
+    </div>
+    <p>
+      <input
+        type="button"
+        id="subKey"
+        value="获取设备的SubKey"
+        onclick="getSubKey();"
+      />
+    </p>
+    <div
+      id="div_box"
+      style="
+        width: 100%;
+        min-height: 30%;
+        position: absolute;
+        background: lightblue;
+        margin-bottom: 0px;
+        margin: 0px;
+      "
+    ></div>
+  </body>
+</html>

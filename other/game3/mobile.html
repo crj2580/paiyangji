@@ -74,8 +74,8 @@
     font-weight: bold;
     color: #966A41;
     text-align: center;
-    transform: translateY(-50%);
-    margin-top: 3vw;
+    transform:translateY(-50%);
+    margin-top:3vw;
   }
 
   .line-wrapper {
@@ -144,20 +144,20 @@
 
         <div id="qrcode" v-show="codeFlag">
         </div>
-        <template v-if="!showMsg">
-          <img v-show="!codeFlag" src="./img/light.png" style="position: absolute;bottom: 32%;left: 43%;width: 14%;">
+        <template v-if="!showMsg&&!codeFlag">
+          <img src="./img/light.png" style="position: absolute;bottom: 32%;left: 43%;width: 14%;">
           <div style="width:100%;font-size:4.4vw;text-align:center;position:absolute;top:71%;">
-            <div>扫码成功，请凭借{{ codeFlag == 1 ? '二维码' : '产品专属码' }}</div>
-            <div>至前台小姐姐处确认</div>
-            <div>并领取您的定制产品</div>
+            <div>扫码成功，请截图保存</div>
+            <div>请至前台小姐姐处</div>
+            <div>领取您的定制产品</div>
           </div>
         </template>
 
       </div>
 
       <div @click="handleChange" style="position: absolute; bottom: 1%; width: 100%; text-align: center;">
-        <img v-if="codeFlag == 1" style="width: 50%;" src="./img/number1.png">
-        <img v-if="codeFlag == 0" style="width: 50%;" src="./img/erweima1.png">
+        <img v-if="codeFlag" style="width: 50%;" src="./img/number1.png">
+        <img v-else style="width: 50%;" src="./img/erweima1.png">
       </div>
     </div>
   </div>
@@ -173,7 +173,7 @@
     el: '#app',
     data: {
       actionId: '',
-      codeFlag: 1, // 0 是数字 1 是二维码
+      codeFlag: 0, // 0 是数字 1 是二维码
       ticketNo: "",
       qrcodeImg: '',
       headUserImage: '',
@@ -185,7 +185,6 @@
       qrcodeId: null
     },
     mounted: function () {
-      var _this = this;
       this.actionId = kindId('actionId');
       if (this.actionId) {
         this.ActionDataById();
@@ -196,7 +195,6 @@
           console.log(result);
           // this.ticketNo = result.result.ticketInfo.name + result.result.ticketNo;
           this.ticketNo = result.result.ticketNo;
-          _this.makeQrcode();
           if (result.result.used) {
             this.showMsg = "取货码已核销"
           }
@@ -229,26 +227,22 @@
           // setWX(result, ['hideOptionMenu'])
           _this.loading = false;
 
-          // 同一个二维码 的 qrcodeid 存储取货码，保证扫同一个二维码不会出现重复的取货码
           var lastQrcodeTicket = window.localStorage["jingmeiTicketNoOfQrcodeId" + _this.qrcodeId];
-
           if (lastQrcodeTicket) {
             _this.ticketNo = lastQrcodeTicket;
-            _this.makeQrcode();
           } else if (_this.ownerOpenId == _this.openId) {
             _this.GetAwardsByUserAndAction();
           } else {
             _this.showMsg = "请您定制自己的专属产品";
           }
 
-
         })
       },
       handleChange: function () {
         this.codeFlag = !this.codeFlag;
-        // if (this.codeFlag) {
-        //   this.$nextTick(this.makeQrcode)
-        // }
+        if (this.codeFlag) {
+          this.$nextTick(this.makeQrcode)
+        }
       },
       GetAwardsByUserAndAction: function () {
         var _this = this;
@@ -298,7 +292,6 @@
                 _this.loading = false;
                 _this.ticketNo = message.result.ticketNo;
                 window.localStorage["jingmeiTicketNoOfQrcodeId" + _this.qrcodeId] = _this.ticketNo;
-                _this.makeQrcode();
               }
             })
 

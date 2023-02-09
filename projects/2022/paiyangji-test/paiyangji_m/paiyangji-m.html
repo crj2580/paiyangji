@@ -25,6 +25,7 @@
     ></script>
     <script src="/js/troncell_wx2.js"></script>
     <script src="/js/TweenMax.min.js"></script>
+    <script src="./assets/js/data.js"></script>
 
     <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
   <script>eruda.init();</script> -->
@@ -88,8 +89,8 @@
     }
 
     .container {
-      width: 80vw;
-      height: 67vh;
+      /* width: 80vw; */
+      /* height: 67vh; */
       position: absolute;
       /* background-image: url(./img/wrapper.png); */
       background-size: 100% 100%;
@@ -101,7 +102,7 @@
     .questionClass {
       display: flex;
       flex-direction: row;
-      width: 70%;
+      /* width: 70%; */
       font-size: 4vw;
       color: #fff;
       line-height: 3vh;
@@ -140,8 +141,8 @@
       align-items: center;
       position: absolute;
       z-index: 2;
-      top: 0.2vh;
-      letter-spacing: 1vw;
+      /* top: 0.2vh; */
+      /* letter-spacing: 1vw; */
     }
 
     .answer-option {
@@ -205,28 +206,48 @@
       </div>
 
       <!-- 首页背景 -->
-      <img src="./assets/imgs/bg.png" class="video" alt="背景图">
+      <img
+        :src="data.bg.img"
+        :style="{width:`${data.bg.w}vw`,height:`${data.bg.h}vh`}"
+        alt="背景图"
+      />
 
       <!-- 题目 -->
-      <div class="container">
+      <div
+        :style="{width:`${data.container.w}vw`,left:`${data.container.x}vw`,top:`${data.container.y}vh`}"
+        class="container"
+      >
         <template v-if="realQuestionList.length">
           <!-- 题号&题目 -->
-          <div class="questionClass">
+          <div
+            :style="{width:`${data.questionClass.w}vw`,height:`${data.questionClass.h}vh`,fontSize:`${data.questionClass.fontSize}vw`,
+            color:`${data.questionClass.color}`,lineHeight:`${data.questionClass.lineHeight}vh`,
+            letterSpacing:`${data.questionClass.letterSpacing}vw`,marginTop:`${data.questionClass.margin.top}vh`,
+            marginLeft:`${data.questionClass.margin.left}vw`,}"
+            class="questionClass"
+          >
             <div>
               {{realQuestionIndex+1}}.{{realQuestionList[realQuestionIndex].title}}
             </div>
           </div>
 
-          <div class="questionAnswer">
+          <div
+            :style="{width: `${data.questionAnswer.w}vw`,height:`${data.questionAnswer.h}`,color:`${data.questionAnswer.color}`,
+            left:`${data.questionAnswer.x}vw`,top:`${data.questionAnswer.y}vh`}"
+            class="questionAnswer"
+          >
             <div
               v-for="(answer,answerIndex) of realQuestionList[realQuestionIndex].questionItems"
               @click="selectAnswer(answer)"
+              :style="{width:`${data.questionAnswer.questionOption.w}%`, height:`${data.questionAnswer.questionOption.h}vh`,
+              lineHeight:`${data.questionAnswer.questionOption.lineHeight}vh`,
+              marginBottom:`${data.questionAnswer.questionOption.margin.bottom}vh`,}"
               class="questionOption"
             >
               <!-- 选项框 -->
               <img
-                src="./assets/imgs/answer_white-m.png"
-                style="width: 100%; height: 100%"
+                :src="data.answer_white_m"
+                style="width: 100%; height: 100%; position: absolute"
               />
 
               <!-- 回答错误时gif -->
@@ -251,8 +272,15 @@
               />
 
               <!-- 选项&内容 -->
-              <div class="answer">
-                <div class="answer-option">
+              <div
+                :style="{letterSpacing:`${data.questionAnswer.questionOption.answer.letterSpacing}vw`}"
+                class="answer"
+              >
+                <div
+                  :style="{fontSize: `${data.questionAnswer.questionOption.answerOption.fontSize}vw`, 
+                  color:`${data.questionAnswer.questionOption.answerOption.color}`}"
+                  class="answer-option"
+                >
                   <span v-show="answerIndex==0">A.</span>
                   <span v-show="answerIndex==1">B.</span>
                   <span v-show="answerIndex==2">C.</span>
@@ -261,7 +289,15 @@
                 </div>
 
                 <!-- 选项内容 -->
-                <div class="answer-content">{{answer.content}}</div>
+                <div
+                  :style="{fontSize:`${data.questionAnswer.questionOption.answerContent.fontSize}vw`,
+                    color:`${data.questionAnswer.questionOption.answerContent.color}`,
+                    marginLeft:`${data.questionAnswer.questionOption.answerContent.margin.left}vw`
+                  }"
+                  class="answer-content"
+                >
+                  {{answer.content}}
+                </div>
               </div>
             </div>
           </div>
@@ -269,23 +305,29 @@
       </div>
 
       <!-- 继续答题&重新答题按钮 -->
-      <div class="footerBtn">
+      <div
+        :style="{width:`${data.footerBtn.w}%`,height:`${data.footerBtn.h}%`,
+          bottom:`${data.footerBtn.y}%`,left:`${data.footerBtn.x}%`}"
+        class="footerBtn"
+      >
         <!-- 继续答题 -->
         <div
           v-show="realQuestionList.length&&realQuestionList[realQuestionIndex].hasSelected&&!chooseRight&&realQuestionIndex!=4"
+          :style="{width:`${data.footerBtn.continuerBtn.w}%`,marginRight:`${data.footerBtn.continuerBtn.margin.right}vw`}"
           class="continuerBtn"
           @click="continuer"
         >
-          <img src="./assets/imgs/continue-m.png" style="width: 100%" />
+          <img :src="data.footerBtn.continuerBtn.img" style="width: 100%" />
         </div>
 
         <!-- 重新答题 -->
         <div
           v-show="realQuestionList.length&&(realQuestionList[realQuestionIndex].hasSelected&&(!chooseRight&&realQuestionIndex!=4||errorAnswer>=3&&realQuestionIndex==4))"
-          class="continuerBtn"
+          :style="{width:`${data.footerBtn.restartBtn.w}%`}"
+          class="restartBtn"
           @click="restart"
         >
-          <img src="./assets/imgs/restart-m.png" style="width: 100%" />
+          <img :src="data.footerBtn.restartBtn.img" style="width: 100%" />
         </div>
       </div>
     </div>
@@ -307,6 +349,7 @@
         MaxWordLength: 12,
         subKey: "",
         errorAnswer: 0,
+        data,
       },
       computed: {
         chooseRight: function () {
