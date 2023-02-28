@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <title></title>
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script src="/js/vue.min.js" type="text/javascript"></script> -->
+    <link rel="stylesheet" href="./style/common.css" />
+    <link rel="stylesheet" href="./style/global.css" />
+    <link rel="stylesheet" href="./style/normalize.css" />
+    <meta name="Generator" content="Cocoa HTML Writer" />
+    <meta name="CocoaVersion" content="1504.76" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1 user-scalable=no"
+    />
+    <style type="text/css">
+      .landscape {
+        height: 100%;
+        overflow: hidden;
+        margin: 0 auto;
+      }
+
+      .landscape .img {
+        height: 100%;
+        flex-basis: 300px;
+        flex-grow: 1;
+        object-fit: contain;
+        /* margin-right: 0.05rem; */
+      }
+
+      .landscape .right-detail {
+        height: 100%;
+        flex-basis: 468px;
+        flex-grow: 1;
+        overflow: hidden;
+      }
+
+      .landscape .right {
+        height: 100%;
+      }
+
+      .landscape .right .img-detail img {
+        width: 100%;
+      }
+
+      .landscape .img-detailClone {
+        margin-top: 0.2rem;
+      }
+
+      .bigScreen {
+        height: 100%;
+        overflow: hidden;
+        margin: 0 auto;
+      }
+
+      .bigScreen .img {
+        height: 50vh;
+        object-fit: cover;
+      }
+
+      .bigScreen .right-detail {
+        height: 100%;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* .bigScreen .right {
+            height: 100%;
+          } */
+
+      .bigScreen .right .img-detail img {
+        width: 100%;
+      }
+
+      .bigScreen .img-detailClone {
+        margin-top: 0.2rem;
+      }
+    </style>
+    <script src="./js/sensing-sample-sdk-quorra-1.0.js"></script>
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+    <script>
+      eruda.init();
+    </script> -->
+  </head>
+
+  <body>
+    <div id="app">
+      <button @click="showDetail('22290054')">22290054</button>
+      <!-- <button @click="showDetail('2225027A')">2225027A</button> -->
+      <div v-show="isshowVideo" style="width: 100vw; height: 100vh">
+        <video
+          style="width: 100%; height: 100%; object-fit: cover"
+          :src="videoUrl"
+          autoplay
+          loop
+          muted
+        ></video>
+      </div>
+      <div
+        v-show="!isshowVideo"
+        id="isChangeClass"
+        class="landscape w-100 flex-row pos-re"
+      >
+        <img :src="information?.picUrl" class="img" alt="" />
+        <div id="rightDetail" class="right-detail">
+          <div class="right" style="width: 100%">
+            <div id="imgDetail" class="img-detail" v-html="imageSrc"></div>
+            <div
+              id="imgDetailClone"
+              class="img-detailClone"
+              v-html="imageSrc"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <!--<div
+        id="div_box"
+        style="
+          width: 100%;
+          min-height: 30%;
+          position: absolute;
+          background: lightblue;
+          margin-bottom: -50px;
+          margin: 0px;
+        "
+      ></div>-->
+    </div>
+  </body>
+  <script type="text/javascript">
+    // 0431737994b9476eb7817295d4cbb721
+    const actionMap = new Map();
+    var mSensingDevice = SensingDevice.getInstance();
+    var subkey = mSensingDevice.getSubKey()
+      ? mSensingDevice.getSubKey()
+      : "5a4a46500011451bbcbc79fe239c18bb";
+    var tenantId = mSensingDevice.getTenantId()
+      ? mSensingDevice.getTenantId()
+      : "8260";
+    var deviceId = mSensingDevice.getDeviceId()
+      ? mSensingDevice.getDeviceId()
+      : "85167";
+    var app = new Vue({
+      el: "#app",
+      data() {
+        return {
+          mSensingDevice: mSensingDevice,
+          type: "subkey",
+          subkey: subkey,
+          tenantId: tenantId,
+          deviceId: deviceId,
+          screenWidth: null,
+          screenHeight: null,
+          information: null,
+          imageSrc: null,
+          isshowVideo: true,
+          videoUrl: null,
+          rfidCode: null,
+          timers: null,
+          speed: 8,
+          MyMar: null,
+          currentResult: null,
+          products: null,
+        };
+      },
+
+      mounted() {
+        var app = document.getElementById("app");
+        var isChangeClass = document.getElementById("isChangeClass");
+        var rightDetail = document.getElementById("rightDetail");
+        var imgDetail = document.getElementById("imgDetail");
+        var imgDetailClone = document.getElementById("imgDetailClone");
+
+        this.getScreenSize();
+        // this.getProductDetail();
+        this.getAds();
+
+        this.screenWidth = document.documentElement.clientWidth;
+        this.screenHeight = document.documentElement.clientHeight;
+
+        if (this.screenWidth < this.screenHeight) {
+          isChangeClass.className = "bigScreen w-100 flex-col";
+        } else {
+          isChangeClass.className = "landscape w-100 flex-row";
+        }
+        let cancalDebounce = this.debounce(this.getScreenSize, 50);
+        this.MyMar = setInterval(this.MarQuee, this.speed);
+        window.addEventListener("resize", cancalDebounce);
+      },
+      methods: {
+        /* 获取触发信号展示商品 */
+        showDetail(id) {
+          const that = this;
+          //that.information = null;
+          //that.imageSrc = null;
+          clearTimeout(that.timers);
+          that.getProductDetail(id);
+          // if (that.products) {
+          //   that.products.map((product) => {
+          //     if (product.skus[0].rfidCode == id) {
+          //       that.information = product;
+          //     }
+          //   });
+          //   that.imageSrc = that.information.description
+          //     .replace("<p>", "")
+          //     .replace("</p>", "");
+          //   this.isshowVideo = false;
+          // }
+          console.log("product", that.information);
+        },
+
+        /* 防抖 */
+        debounce(fn, delay) {
+          let timer;
+          return function () {
+            if (timer) {
+              clearTimeout(timer);
+            }
+            timer = setTimeout(() => {
+              fn();
+            }, delay);
+          };
+        },
+
+        /* 修改DOM样式 */
+        getScreenSize() {
+          this.screenWidth = document.documentElement.clientWidth;
+          this.screenHeight = document.documentElement.clientHeight;
+          if (this.screenWidth < this.screenHeight) {
+            isChangeClass.className = "bigScreen w-100 flex-col";
+          } else {
+            isChangeClass.className = "landscape w-100 flex-row";
+          }
+        },
+
+        /* 长图滚动 */
+        MarQuee() {
+          if (imgDetailClone.offsetHeight) {
+            if (imgDetailClone.offsetHeight - rightDetail.scrollTop < 4) {
+              rightDetail.scrollTop -= imgDetail.offsetHeight;
+            } else {
+              rightDetail.scrollTop++;
+            }
+          }
+        },
+
+        /* 生成DOM元素 */
+        // showElement(msg) {
+        //  var div = document.getElementById("div_box"); //获取div
+        //  var ele = document.createElement("h6"); //创建h2元素节点
+        //  ele.innerHTML = msg; //设置h2节点的内容
+        //  div.appendChild(ele); //添加子节点ele
+        // },
+
+        /* 获取商品信息 */
+        getProductDetail(id) {
+          const that = this;
+          axios({
+            method: "get",
+            url: "https://product.api.troncell.com/api/services/app/SensingDevice/GetProducts",
+            params: {
+              Subkey: that.subkey,
+              MaxResultCount: 999,
+              SkipCount: 0,
+              a: new Date().getTime(),
+            },
+          })
+            .then(function (result) {
+              console.log(result);
+              if (result.status == 200) {
+                console.log(
+                  "result.data.result.items",
+                  result.data.result.items
+                );
+                setValueByKey(yinjiang-productJsonData);
+                // that.products = result.data.result.items;
+                result.data.result.items.map((product) => {
+                  if (product.skus[0].rfidCode == id) {
+                    that.information = product;
+                    console.log("that.information", that.information);
+                    // that.imageSrc = that.information.description
+                    //   .replace("<p>", "")
+                    //   .replace("</p>", "");
+                    // this.isshowVideo = false;
+                  }
+                });
+                console.log("that.information", that.information);
+                that.imageSrc = that.information.description
+                  .replace("<p>", "")
+                  .replace("</p>", "");
+                that.isshowVideo = false;
+                // console.log('that.imageSrc',that.imageSrc)
+              }
+              // console.log("that.products", that.products);
+            })
+            .catch(function (error) {
+              alert("Error: " + error.message);
+            });
+        },
+
+        /* 获取广告信息 */
+        getAds() {
+          const that = this;
+          axios({
+            methods: "get",
+            url: "https://ads.api.troncell.com/api/services/app/SensingDevice/GetAds",
+            params: {
+              Subkey: that.subkey,
+              MaxResultCount: 10,
+            },
+          }).then(function (result) {
+            if (result.status == 200) {
+              that.videoUrl = result.data.result.items[0].fileUrl;
+              this.isshowVideo = true;
+            }
+          });
+        },
+      },
+    });
+
+    function jsCallbackByAndroid(action, jsonData) {
+      // alert(
+      //   "Js收到消息：" +
+      //     "action=" +
+      //     action +
+      //     ",success:" +
+      //     jsonData.success +
+      //     " result:" +
+      //     jsonData.result +
+      //     " error:" +
+      //     jsonData.error
+      // );
+      // if (!this.products) return;
+
+      if (action === "pickUp") {
+        actionMap.set(jsonData.result, {
+          id: jsonData.result,
+          state: action,
+          time: new Date().getTime(),
+        });
+
+        app.showDetail(actionMap.get(jsonData.result).id);
+      } else if (action === "pickMove") {
+        actionMap.set(jsonData.result, {
+          ...actionMap.get(jsonData.result),
+          time: new Date().getTime(),
+        });
+      } else if (action === "pickDown") {
+        const latestElement = {
+          id: "",
+          time: 0,
+        };
+
+        actionMap.set(jsonData.result, {
+          ...actionMap.get(jsonData.result),
+          state: action,
+          time: -1,
+        });
+
+        actionMap.forEach((ele) => {
+          if (ele.time > latestElement.time) {
+            latestElement.id = ele.id;
+            latestElement.time = ele.time;
+          }
+        });
+
+        if (latestElement.time === 0) {
+          app.timers = setTimeout(() => {
+            app.information = null;
+            app.imageSrc = null;
+            app.isshowVideo = true;
+            alert(latestElement.time);
+          }, 8000);
+        } else if (latestElement.time > 0) {
+          app.showDetail(latestElement.id);
+        }
+      }
+    }
+  </script>
+</html>

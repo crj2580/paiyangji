@@ -27,7 +27,7 @@ let securityKey = ref("");
 let keyList = reactive([1, 2, 3, 4, 5, 6, 7, 8, 9, "首页", 0, "清除"]);
 let qrcode = ref("");
 let wrongCode = ref(false);
-const MaxWordLength = ref(8);
+const MaxWordLength = ref(7);
 let actionId = ref(null);
 let openId = ref("");
 
@@ -448,6 +448,7 @@ onMounted(() => {
             return answer.content.length <= MaxWordLength.value;
           });
         });
+        console.log('totalQuestionList.value',totalQuestionList.value)
     });
 });
 </script>
