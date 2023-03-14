@@ -220,7 +220,9 @@ const checkCode = (code) => {
           console.log('result.data.result', result.data.result.outerId)
           // playAudio("surprise");
           // doDropCargo(result.data.result.outerId);
+          // alert(result.data.result.outerId)
           mSensingDevice.doDropCargo(result.data.result.outerId)
+          
           // showMsg.value = result.data.result.outerId;
         } else {
           wrongCode.value = true;
@@ -468,9 +470,14 @@ onMounted(() => {
       console.log('resultxxxxxxxxx', result)
       totalQuestionList.value = result.data.result.items[0].questions.filter(
         (question) => {
-          return question.questionItems.every((answer) => {
-            return answer.content.length <= MaxWordLength.value;
-          });
+          // return question.questionItems.every((answer) => {
+          //   return answer.content.length <= MaxWordLength.value;
+          // });
+          if (question.title.length < 44) {
+            return question.questionItems.every((answer) => {
+              return answer.content.length <= MaxWordLength.value;
+            });
+          }
         });
     });
 });
@@ -553,11 +560,10 @@ onMounted(() => {
         <!-- 选项 -->
         <div class="questionAnswer">
           <div v-for="(answer, answerindex) of realQuestionList[realQuestionIndex]
-          .questionItems" :key="answerindex" class="questionOption" @click="selectAnswer(answer)">
+            .questionItems" :key="answerindex" class="questionOption" @click="selectAnswer(answer)">
 
             <!-- 选项内容 -->
-            <OptionBoxView :answerListData="{ answer, realQuestionList, realQuestionIndex }"
-              :answerindex="answerindex" />
+            <OptionBoxView :answerListData="{ answer, realQuestionList, realQuestionIndex }" :answerindex="answerindex" />
           </div>
         </div>
       </template>
@@ -565,7 +571,7 @@ onMounted(() => {
 
     <!-- 继续答题&重新答题按钮 -->
     <RestartAnswerButtonView
-      :restartAnswerData="{ logicType, realQuestionList, realQuestionIndex, qrCodeImage, hasWrong, questionNeedLength,errorAnswer }"
+      :restartAnswerData="{ logicType, realQuestionList, realQuestionIndex, qrCodeImage, hasWrong, questionNeedLength, errorAnswer }"
       :continuer="continuer" :goAnswerQuestion="goAnswerQuestion" :chooseRight="chooseRight" />
   </div>
 </template>

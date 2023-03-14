@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>补货</title>
+  <script src="/js/jquery.min.js" type="text/javascript"></script>
+  <script src="/js/vue.min.js" type="text/javascript"></script>
+</head>
+<style>
+  body {
+    font-size: 5vw;
+    background: #fff;
+  }
+
+  table {
+    margin: 0 auto;
+    border: 1px solid red;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    text-align: center;
+    border: 1px solid green;
+    padding: 2vw;
+  }
+
+  .action {
+    position: relative;
+  }
+
+  .action div {
+    display: inline-block;
+  }
+
+  .action .minus {
+    border: 0.5vw solid #000;
+    padding: 0.8vw 2.5vw;
+    border-radius: 50%;
+  }
+
+  .action .add {
+    border: 0.5vw solid #000;
+    padding: 0.8vw 1.8vw;
+    border-radius: 50%;
+  }
+
+  .action2 {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .action2 span {
+    display: block;
+    border: 0.5vw solid #000;
+    border-radius: 25%;
+    padding: 0.5vw 1vw;
+    margin: 2vw 0;
+  }
+</style>
+
+<body>
+  <div id="app">
+    <div class="action2">
+      <span v-on:click="reset()">
+        重置
+      </span>
+      <span v-on:click="addAll()">
+        全部补满
+      </span>
+      <span v-on:click="submit()">
+        提交
+      </span>
+    </div>
+
+
+    <table>
+      <tr>
+        <th>货道</th>
+        <th>货物</th>
+        <th>状态</th>
+        <th>补货</th>
+      </tr>
+      <tr v-for="(item,index) of cargoList" v-if="cargoList.length>0">
+        <td>{{item.name}}({{item.outerId}})</td>
+        <td>{{item.cargoThings[0].thingName}}</td>
+        <td>{{item.cargoThings[0].stock}}/{{item.stockCapacity}}</td>
+        <td class="action" style="position:relative;">
+          <div class="minus" v-on:click="minus(index)">
+            -
+          </div>
+          <div>
+            {{newStockList[index]}}
+          </div>
+          <div class="add" v-on:click="add(index)">
+            +
+          </div>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+</body>
+<script>
+
+
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      subkey: '',
+      cargoList: [],
+      newStockList: [],
+      newThingIdList: []
+    },
+    methods: {
+      kindId: function (name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return decodeURI(r[2]);
+        } else {
+          return false;
+        };
+      },
+      minus: function (i) {
+        if (app.newStockList[i] > 0) {
+          Vue.set(app.newStockList, i, app.newStockList[i] - 1)
+        }
+      },
+      add: function (i) {
+        if (app.newStockList[i] < app.cargoList[i].stockCapacity) {
+          Vue.set(app.newStockList, i, app.newStockList[i] + 1)
+        }
+      },
+      reset: function () {
+        window.location.reload();
+      },
+      addAll: function () {
+        app.newStockList = [];
+        for (var i = 0; i < app.cargoList.length; i++) {
+          app.newStockList.push(app.cargoList[i].stockCapacity)
+        }
+      },
+      submit: function () {
+        var cargoStocks = [];
+        for (var i = 0; i < app.cargoList.length; i++) {
+          cargoStocks.push({
+            cargoRoadId: app.cargoList[i].id,
+            replenishCargoThing: [{
+              thingId: app.newThingIdList[i],
+              stock: app.newStockList[i]
+            }]
+          })
+        }
+        console.log(cargoStocks)
+        $.ajax({
+          type: "PUT",
+          url: "https://e.api.troncell.com/api/services/app/SensingDevice/UpdateCargoStock",
+          contentType: "application/json; charset=utf-8",
+          data: JSON.stringify({
+            'subkey': app.subkey,
+            "cargoStocks": cargoStocks
+          }),
+          success: function (message) {
+            if (message.success) {
+              console.log(message);
+              alert('数据更新成功');
+              window.location.reload();
+            }
+          }
+        })
+      }
+    },
+    mounted: function () {
+      this.subkey = this.$options.methods.kindId('subkey') || '34a9febc3ad04beb8083c807e67b068c';
+      //获取货道列表
+      $.get('https://e.api.troncell.com/api/services/app/SensingDevice/GetCargoRoads', {
+        'Subkey': this.subkey,
+        'MaxResultCount': 999,
+        'SkipCount': 0,
+        'Sorting': 'name'
+      }, function (result, status) {
+        if (result.success) {
+          console.log(result.result.items);
+          app.cargoList = result.result.items;
+          for (var i = 0; i < app.cargoList.length; i++) {
+            app.newStockList.push(app.cargoList[i]['cargoThings'][0].stock)
+            app.newThingIdList.push(app.cargoList[i]['cargoThings'][0].thingId)
+          }
+          console.log(app.newStockList, app.newThingIdList)
+        }
+      })
+
+
+    }
+  });
+
+
+</script>
+
+</html>

@@ -382,9 +382,14 @@
 
               _this.realQuestionList = result.result.items[0].questions
                 .filter(function (question) {
-                  return question.questionItems.every(function (answer) {
-                    return answer.content.length <= _this.MaxWordLength;
-                  });
+                  // return question.questionItems.every(function (answer) {
+                  //   return answer.content.length <= _this.MaxWordLength;
+                  // });
+                  if (question.title.length < 36) {
+                    return question.questionItems.every(function (answer) {
+                      return answer.content.length <= _this.MaxWordLength;
+                    });
+                  }
                 })
                 .sort(function () {
                   return Math.random() - 0.5;

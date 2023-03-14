@@ -1,0 +1,220 @@
+{
+    "securityKey": "a4227aa2122a4221bbf2dfaf800ad4b4",
+    "subKey": "706cf23205a94ca992b59c9ebdfea529",
+    "title": "大屏答题",
+    "tags": "题目",
+    "debug": true,
+    "homeBgImg": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/bg.png",
+        "w": "100",
+        "h": "100",
+        "x": "0",
+        "y": "0"
+    },
+    "homeQrCode": {
+        "w": "30",
+        "h": "17",
+        "x": "34.5",
+        "y": "40.8"
+    },
+    "answerBgImg": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/bg-above4.png",
+        "w": "100",
+        "h": "100",
+        "x": "0",
+        "y": "0"
+    },
+    "verificationCodeBgImg": {
+        "src": "",
+        "w": "100",
+        "h": "100",
+        "x": "0",
+        "y": "0"
+    },
+    "returnHomeBtn": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/returnHome.png",
+        "w": "12",
+        "h": "12",
+        "x": "44.5",
+        "y": "68",
+        "onClick": "returnHome"
+    },
+    "goAnswerBtn": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/startAnswer.png",
+        "w": "34",
+        "h": "5",
+        "x": "34",
+        "y": "55"
+    },
+    "goVerificationCodeBgImgBtn": {
+        "src": "",
+        "w": "28",
+        "h": "11",
+        "x": "55",
+        "y": "28"
+    },
+    "inputBox": {
+        "w": "90",
+        "h": "47",
+        "x": "4",
+        "y": "12.6"
+    },
+    "inputContainer": {
+        "w": "46",
+        "h": "10.19",
+        "x": "25",
+        "y": ""
+    },
+    "inputContainerBgImg": {
+        "src": "https://sensingstore.oss-cn-shanghai.aliyuncs.com/paiyangji/input.png",
+        "w": "50",
+        "h": "3.0",
+        "x": "",
+        "y": ""
+    },
+    "inputCodeList": {
+        "w": "16",
+        "h": "",
+        "x": "0",
+        "y": "0"
+    },
+    "inputCodeItem": {
+        "fontSize": "6",
+        "x": "",
+        "y": "-0.8",
+        "color": "#2a6ab8"
+    },
+    "keyboardContainer": {
+        "w": "",
+        "h": "",
+        "x": "5",
+        "y": "16",
+        "padding": {
+            "top": "0",
+            "right": "8",
+            "bottom": "0",
+            "left": "8"
+        }
+    },
+    "keyboardItemWrapper": {
+        "w": "20",
+        "h": "11",
+        "x": "",
+        "y": ""
+    },
+    "keyboardItem": {
+        "src": "https://sensingstore.oss-cn-shanghai.aliyuncs.com/paiyangji/code.png",
+        "w": "18",
+        "h": "9",
+        "fontSize": {
+            "str": "4",
+            "num": "8"
+        },
+        "color": "#2a6ab8"
+    },
+    "keyBoardTitle": {
+        "w": "100",
+        "h": "100",
+        "x": "",
+        "y": "8",
+        "lineHeight": "13"
+    },
+    "questionClass": {
+        "w": "70",
+        "h": "",
+        "x": "",
+        "y": "",
+        "fontSize": "5",
+        "lineHeight": "3",
+        "letterSpace": "0.5",
+        "color": "#fff",
+        "margin": {
+            "top": "16",
+            "right": "0",
+            "bottom": "0",
+            "left": "16"
+        }
+    },
+    "questionAnswer": {
+        "w": "70",
+        "h": "",
+        "x": "13",
+        "y": "33"
+    },
+    "questionOption": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/answer_white.png",
+        "wrongRedImg": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/paiyangjiTest/wrong-red.gif",
+        "rightRedImg": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/paiyangjiTest/right-red.gif",
+        "w": "69.46",
+        "h": "4.0",
+        "x": "",
+        "y": "",
+        "margin": {
+            "top": "",
+            "right": "",
+            "bottom": "5.1",
+            "left": ""
+        }
+    },
+    "answer": {
+        "w": "100",
+        "h": "100",
+        "x": "",
+        "y": "1.8",
+        "letterSpace": "0.6",
+        "color": "#fff",
+        "fontSize": "4"
+    },
+    "footerBtn": {
+        "w": "100",
+        "h": "",
+        "x": "0.4",
+        "y": "10"
+    },
+    "continuerBtn": {
+        "src": "https://sensingstore.oss-cn-shanghai.aliyuncs.com/paiyangji/continue.png",
+        "w": "30",
+        "h": "",
+        "x": "",
+        "y": "-21",
+        "margin": {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": "6"
+        }
+    },
+    "restartBtn": {
+        "src": "https://sensingstore.oss-cn-shanghai.aliyuncs.com/paiyangji/restart.png",
+        "w": "30",
+        "h": "",
+        "x": "6.8",
+        "y": "-21"
+    },
+    "logicCount": {
+        "w": "7",
+        "h": "7",
+        "x": "48",
+        "y": "14",
+        "fontSize": "5.6",
+        "color": "#1e72c6",
+        "letterSpacing": "0.8",
+        "time": "3000000"
+    },
+    "successBg": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/successAnswer.png"
+    },
+    "qrCodeImg_2": {
+        "w": "44",
+        "h": "44",
+        "x": "50",
+        "y": "39"
+    },
+    "returnHome": {
+        "src": "https://troncell-static.oss-cn-shanghai.aliyuncs.com/longyan/returnHome.png",
+        "w": "",
+        "h": "",
+        "x": "29",
+        "y": "89"
+    }
+}
