@@ -13,7 +13,7 @@ const props = defineProps(['restartAnswerData', 'chooseRight', 'continuer', 'goA
             !chooseRight &&
             restartAnswerData.realQuestionIndex != 4 &&
             !restartAnswerData.qrCodeImage &&
-            restartAnswerData.realQuestionIndex != restartAnswerData.questionNeedLength - 1
+            restartAnswerData.realQuestionIndex != restartAnswerData.questionNeedLength
         " class="continuerBtn" @click="continuer()">
             <img src="../assets/imgs/continue.png" style="width: 100%" />
         </div>
@@ -25,7 +25,7 @@ const props = defineProps(['restartAnswerData', 'chooseRight', 'continuer', 'goA
             !restartAnswerData.qrCodeImage &&
             restartAnswerData.realQuestionIndex != 4 &&
             (!chooseRight ||
-                (restartAnswerData.hasWrong && restartAnswerData.realQuestionIndex == restartAnswerData.questionNeedLength - 1))
+                (restartAnswerData.errorAnswer && restartAnswerData.realQuestionIndex == restartAnswerData.questionNeedLength))
         " class="restartBtn" @click="goAnswerQuestion()">
             <img src="../assets/imgs/restart.png" style="width: 100%" />
         </div>

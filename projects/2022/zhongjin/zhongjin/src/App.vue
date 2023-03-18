@@ -30,6 +30,7 @@ let wrongCode = ref(false);
 const MaxWordLength = ref(7);
 let actionId = ref(null);
 let openId = ref("");
+const errorAnswer = ref(0);
 
 const mSensingDevice = SensingDevice.getInstance()
 
@@ -73,6 +74,7 @@ const clickButton2 = () => {
 
 // 返回首页
 const returnHome = () => {
+  errorAnswer.value = 0
   clearAndStartTimer();
   returnToLogicType1();
 }
@@ -86,6 +88,7 @@ const continuer = () => {
 // 随机选取题目
 const goAnswerQuestion = () => {
   hasWrong.value = false;
+  errorAnswer.value = 0
   realQuestionIndex.value = 0;
   qrCodeImage.value = "";
   realQuestionList.value = JSON.parse(JSON.stringify(totalQuestionList.value))
@@ -265,18 +268,44 @@ const selectAnswer = (answer) => {
       }, 1000);
     } else {
       // console.log("全部答对");
-      if (!hasWrong.value) {
+      if (errorAnswer.value <= 2) {
         clearInterval(timer.value);
         setTimeout(() => {
           allRightShowQrcode();
         }, 1000)
       }
+      else if (errorAnswer.value >= 1 && realQuestionIndex.value == questionNeedLength.value) {
+        showMsg.value = "您已经答错" + errorAnswer.value + "道题了，请重新答题";
+        setTimeout(function () {
+          showMsg.value = "";
+        }, 2000)
+      }
     }
   } else {
     // console.log("答错了");
+    errorAnswer.value++;
     hasWrong.value = true;
-    if (realQuestionIndex.value != questionNeedLength.value - 1) {
-      showMsg.value = "您已经答错了，继续答题将不会获得奖品，是否继续?";
+    if (realQuestionIndex.value == 4) {//是最后一个
+      if (errorAnswer.value >= 2) {
+        showMsg.value = "您已经答错" + errorAnswer.value + "道题了，请重新答题";
+        setTimeout(function () {
+          showMsg.value = "";
+        }, 2000)
+      } else {
+        clearInterval(timer.value);
+        setTimeout(function () {
+          allRightShowQrcode();
+        }, 1000)
+      }
+    } else {
+      if (errorAnswer.value >= 3) {
+        showMsg.value = "您已经答错" + errorAnswer.value + "道题了，继续答题将不会获得奖品，是否继续?";
+        setTimeout(function () {
+          showMsg.value = "";
+        }, 2000)
+      } else {
+        return
+      }
     }
   }
 };
@@ -448,7 +477,7 @@ onMounted(() => {
             return answer.content.length <= MaxWordLength.value;
           });
         });
-        console.log('totalQuestionList.value',totalQuestionList.value)
+      console.log('totalQuestionList.value', totalQuestionList.value)
     });
 });
 </script>
@@ -481,7 +510,7 @@ onMounted(() => {
     <img v-show="logicType == 3" src="./assets/imgs/bg-above.png" alt="">
 
     <!-- 返回按钮 -->
-    <div v-show="logicType == 2 && !qrCodeImage && !hasWrong || logicType == 3" @click="returnHome" class="gohome">
+    <div v-show="logicType == 2 && !qrCodeImage || logicType == 3" @click="returnHome" class="gohome">
       <img src="./assets/imgs/returnHome.png" alt="">
     </div>
 
@@ -511,7 +540,7 @@ onMounted(() => {
           <img src="./assets/imgs/returnHome.png" alt="">
         </div>
       </template>
-      
+
       <!-- 题目信息 -->
       <template v-else>
         <!-- 题号&题目 -->
@@ -522,11 +551,10 @@ onMounted(() => {
         <!-- 选项 -->
         <div class="questionAnswer">
           <div v-for="(answer, answerindex) of realQuestionList[realQuestionIndex]
-          .questionItems" :key="answerindex" class="questionOption" @click="selectAnswer(answer)">
+            .questionItems" :key="answerindex" class="questionOption" @click="selectAnswer(answer)">
 
             <!-- 选项内容 -->
-            <OptionBoxView :answerListData="{ answer, realQuestionList, realQuestionIndex }"
-              :answerindex="answerindex" />
+            <OptionBoxView :answerListData="{ answer, realQuestionList, realQuestionIndex }" :answerindex="answerindex" />
           </div>
         </div>
       </template>
@@ -534,7 +562,7 @@ onMounted(() => {
 
     <!-- 继续答题&重新答题按钮 -->
     <RestartAnswerButtonView
-      :restartAnswerData="{ logicType, realQuestionList, realQuestionIndex, qrCodeImage, hasWrong, questionNeedLength, }"
+      :restartAnswerData="{ logicType, realQuestionList, realQuestionIndex, qrCodeImage, hasWrong, questionNeedLength, errorAnswer }"
       :continuer="continuer" :goAnswerQuestion="goAnswerQuestion" :chooseRight="chooseRight" />
   </div>
 </template>

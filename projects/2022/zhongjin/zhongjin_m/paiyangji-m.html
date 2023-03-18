@@ -26,8 +26,8 @@
     <script src="/js/troncell_wx2.js"></script>
     <script src="/js/TweenMax.min.js"></script>
 
-    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
-  <script>eruda.init();</script> -->
+     <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+  <script>eruda.init();</script>
   </head>
   <style>
     body {
@@ -257,7 +257,7 @@
 
         <!-- 重新答题 -->
         <div
-          v-show="realQuestionList.length&&(realQuestionList[realQuestionIndex].hasSelected&&(!chooseRight&&realQuestionIndex!=4||errorAnswer>=2&&realQuestionIndex==4))"
+          v-show="realQuestionList.length&&(realQuestionList[realQuestionIndex].hasSelected&&(!chooseRight&&realQuestionIndex!=4||errorAnswer>=3&&realQuestionIndex==4))"
           class="continuerBtn"
           @click="restart"
         >
@@ -287,11 +287,12 @@
       computed: {
         chooseRight: function () {
           if (this.realQuestionList[this.realQuestionIndex]) {
-            return this.realQuestionList[
-              this.realQuestionIndex
-            ].questionItems.find(function (item) {
-              return item.isAnswer;
-            }).hasSelected;
+            const answer = this.realQuestionList[this.realQuestionIndex].questionItems.find(item => item.isAnswer);
+            console.log('answer',answer);
+            if(!answer){
+              console.log(this.realQuestionList[this.realQuestionIndex].questionItems)
+            }
+            return answer.hasSelected;
           }
         },
       },
@@ -366,6 +367,8 @@
                     }),
                   };
                 });
+
+              console.log("_this.realQuestionList", _this.realQuestionList);
 
               _this.realQuestionList.push({
                 id: 99,
@@ -470,7 +473,7 @@
                 _this.realQuestionIndex++;
               }, 1000);
             } else {
-              if (_this.errorAnswer < 2) {
+              if (_this.errorAnswer <= 2) {
                 setTimeout(function () {
                   _this.GetAwardsByUserAndAction();
                 }, 1000);
@@ -481,7 +484,7 @@
             _this.errorAnswer++;
 
             if (_this.realQuestionIndex == 4) {
-              if (_this.errorAnswer >= 2) {
+              if (_this.errorAnswer > 2) {
                 return;
               } else {
                 setTimeout(function () {
@@ -489,7 +492,7 @@
                 }, 1000);
               }
             } else {
-              if (_this.errorAnswer >= 2) {
+              if (_this.errorAnswer > 2) {
                 _this.showMsg =
                   "您已经答错" +
                   _this.errorAnswer +

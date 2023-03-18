@@ -393,6 +393,7 @@ const allRightShowQrcode = () => {
     loading.value = false;
     console.log('outerId', response.data.result.outerId)
     outerId.value = debug.value ? 110 : response.data.result.outerId;
+    console.log('outerId.value',outerId.value)
     mSensingDevice.doDropCargo(outerId.value)
   })
 
@@ -543,7 +544,7 @@ const jsCallbackByAndroid = (action, jsonData) => {
   if (action && action == "dropCargoDone") {
     isShowReturnBtn.value = true;
   } else {
-    alert(action);
+    // alert(action);
     setTimeout(() => {
       mSensingDevice.navigateTo('WelcomePage');
     }, 15000)
