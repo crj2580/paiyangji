@@ -26,8 +26,10 @@
     <script src="/js/troncell_wx2.js"></script>
     <script src="/js/TweenMax.min.js"></script>
 
-     <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
-  <script>eruda.init();</script>
+    <!-- <script src="//cdn.bootcss.com/eruda/1.5.2/eruda.min.js"></script>
+    <script>
+      eruda.init();
+    </script> -->
   </head>
   <style>
     body {
@@ -287,10 +289,14 @@
       computed: {
         chooseRight: function () {
           if (this.realQuestionList[this.realQuestionIndex]) {
-            const answer = this.realQuestionList[this.realQuestionIndex].questionItems.find(item => item.isAnswer);
-            console.log('answer',answer);
-            if(!answer){
-              console.log(this.realQuestionList[this.realQuestionIndex].questionItems)
+            const answer = this.realQuestionList[
+              this.realQuestionIndex
+            ].questionItems.find((item) => item.isAnswer);
+            console.log("answer", answer);
+            if (!answer) {
+              console.log(
+                this.realQuestionList[this.realQuestionIndex].questionItems
+              );
             }
             return answer.hasSelected;
           }
